@@ -5,9 +5,22 @@ import VacinaModal from "../Vacinas/VacinaModal";
 import PdfGeneratorModal from "../Documentos/PdfGeneratorModal";
 import HistoryModal from "./HistoryModal";
 import {
-  FaPaw, FaVenusMars, FaBirthdayCake, FaTag, FaBookMedical, FaStethoscope,
-  FaEdit, FaCheck, FaTimes, FaSave, FaFilePrescription, FaVial, FaSyringe
-} from 'react-icons/fa';
+  FaPaw,
+  FaVenusMars,
+  FaBirthdayCake,
+  FaTag,
+  FaBookMedical,
+  FaStethoscope,
+  FaEdit,
+  FaCheck,
+  FaTimes,
+  FaSave,
+  FaFilePrescription,
+  FaVial,
+  FaSyringe,
+  FaNotesMedical,
+  FaPlus,
+} from "react-icons/fa";
 
 // --- COMPONENTE INTERNO MOVido PARA FORA ---
 // Isso melhora a performance, pois o componente não é recriado a cada renderização.
@@ -17,7 +30,7 @@ function AutoResizeTextarea(props) {
   const adjustHeight = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
+      textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
@@ -149,7 +162,7 @@ function NovaConsultaModal({
     let finalValue;
 
     if (name === "castrado") {
-      finalValue = value === 'true';
+      finalValue = value === "true";
     } else if (type === "checkbox") {
       finalValue = checked;
     } else {
@@ -323,7 +336,6 @@ function NovaConsultaModal({
           initialData={initialVacinaData}
         />
       )}
-
       <HistoryModal
         isOpen={historyModalState.isOpen}
         onClose={() => setHistoryModalState({ isOpen: false, type: null })}
@@ -332,7 +344,6 @@ function NovaConsultaModal({
         onAddNew={handleAddNewFromHistory}
         onAddDose={handleAddDose}
       />
-
       <PdfGeneratorModal
         isOpen={pdfModalState.isOpen}
         onClose={() => setPdfModalState({ isOpen: false, type: null })}
@@ -349,37 +360,48 @@ function NovaConsultaModal({
         }
         initialText={formData[pdfModalState.type]}
       />
-
       <div className={styles.modalOverlay}>
         <div className={styles.modalContent}>
           <header className={styles.header}>
             <div className={styles.headerTopRow}>
-              <h2><FaStethoscope /> Nova Consulta</h2>
-              <button className={styles.closeButton} onClick={onClose}><FaTimes /></button>
+              <h2>
+                <FaStethoscope /> Nova Consulta
+              </h2>
+              <button className={styles.closeButton} onClick={onClose}>
+                <FaTimes />
+              </button>
             </div>
-
             {!loading && animal && (
               <div className={styles.headerAnimalInfo}>
-                <div className={styles.animalAvatar}><FaPaw /></div>
+                <div className={styles.animalAvatar}>
+                  <FaPaw />
+                </div>
                 <div className={styles.animalBrief}>
                   <h3 className={styles.animalName}>{animal.nome}</h3>
                   <p className={styles.tutorName}>Tutor: {animal.tutor.nome}</p>
                 </div>
                 <div className={styles.animalDetails}>
-                  <span><FaTag /> {animal.raca.especie.nome} / {animal.raca.nome}</span>
-                  <span><FaVenusMars /> {animal.sexo === "F" ? "Fêmea" : "Macho"}</span>
-                  <span><FaBirthdayCake /> {calculateAge(animal.data_nasc)}</span>
+                  <span>
+                    <FaTag /> {animal.raca.especie.nome} / {animal.raca.nome}
+                  </span>
+                  <span>
+                    <FaVenusMars /> {animal.sexo === "F" ? "Fêmea" : "Macho"}
+                  </span>
+                  <span>
+                    <FaBirthdayCake /> {calculateAge(animal.data_nasc)}
+                  </span>
                 </div>
-                <button className={styles.prontuarioButton} onClick={() => window.open(`/animais/${animalId}`, '_blank')}>
+                <button
+                  className={styles.actionButtonNeutral}
+                  onClick={() => window.open(`/animais/${animalId}`, "_blank")}
+                >
                   Ver Prontuário
                 </button>
               </div>
             )}
           </header>
-
           {loading && <p className={styles.loadingText}>Carregando...</p>}
           {error && <p className={styles.errorText}>{error}</p>}
-
           {!loading && !error && animal && (
             <>
               <main className={styles.mainBody}>
@@ -387,12 +409,26 @@ function NovaConsultaModal({
                 <aside className={styles.leftColumn}>
                   <div className={styles.anamnesisCard}>
                     <div className={styles.cardHeader}>
-                      <h3><FaBookMedical /> Anamnese</h3>
-                      <button className={styles.editToggle} onClick={() => setIsAnamnesisEditing(!isAnamnesisEditing)}>
-                        {isAnamnesisEditing ? <><FaCheck /> Concluir</> : <><FaEdit /> Editar</>}
+                      <h3>
+                        <FaBookMedical /> Anamnese
+                      </h3>
+                      <button
+                        className={styles.editToggle}
+                        onClick={() =>
+                          setIsAnamnesisEditing(!isAnamnesisEditing)
+                        }
+                      >
+                        {isAnamnesisEditing ? (
+                          <>
+                            <FaCheck /> Concluir
+                          </>
+                        ) : (
+                          <>
+                            <FaEdit /> Editar
+                          </>
+                        )}
                       </button>
                     </div>
-
                     <div className={styles.formGroupInline}>
                       <label htmlFor="castrado">Castrado?</label>
                       <select
@@ -407,59 +443,169 @@ function NovaConsultaModal({
                         <option value={false}>Não</option>
                       </select>
                     </div>
-
                     <div className={styles.formGroup}>
                       <label>Alergias</label>
                       {isAnamnesisEditing ? (
-                        <AutoResizeTextarea name="alergias" value={anamnesisData.alergias} onChange={handleAnamnesisChange} />
+                        <AutoResizeTextarea
+                          name="alergias"
+                          value={anamnesisData.alergias}
+                          onChange={handleAnamnesisChange}
+                        />
                       ) : (
-                        <p className={styles.displayData}>{anamnesisData.alergias || "Nenhuma informação"}</p>
+                        <p className={styles.displayData}>
+                          {anamnesisData.alergias || "Nenhuma informação"}
+                        </p>
                       )}
                     </div>
                     <div className={styles.formGroup}>
                       <label>Observações</label>
                       {isAnamnesisEditing ? (
-                        <AutoResizeTextarea name="obs" value={anamnesisData.obs} onChange={handleAnamnesisChange} />
+                        <AutoResizeTextarea
+                          name="obs"
+                          value={anamnesisData.obs}
+                          onChange={handleAnamnesisChange}
+                        />
                       ) : (
-                        <p className={styles.displayData}>{anamnesisData.obs || "Nenhuma informação"}</p>
+                        <p className={styles.displayData}>
+                          {anamnesisData.obs || "Nenhuma informação"}
+                        </p>
                       )}
                     </div>
                   </div>
                 </aside>
-
                 {/* --- COLUNA DIREITA (CONSULTA) --- */}
                 <section className={styles.rightColumn}>
                   <div className={styles.sectionCard}>
                     <h4 className={styles.cardTitle}>Sinais Vitais</h4>
                     <div className={styles.vitalsGrid}>
-                      <div className={styles.formGroup}><label>Peso (Kg)</label><input type="text" name="peso" value={formData.peso} onChange={handleChange} /></div>
-                      <div className={styles.formGroup}><label>Temperatura (°C)</label><input type="text" name="temperatura" value={formData.temperatura} onChange={handleChange} /></div>
-                      <div className={styles.formGroup}><label>TPC (seg)</label><input type="text" name="tpc" value={formData.tpc} onChange={handleChange} /></div>
-                      <div className={styles.formGroup}><label>Mucosas</label><input type="text" name="mucosas" value={formData.mucosas} onChange={handleChange} /></div>
-                      <div className={styles.formGroup}><label>Freq. Cardíaca</label><input type="text" name="freqCardiaca" value={formData.freqCardiaca} onChange={handleChange} /></div>
-                      <div className={styles.formGroup}><label>Freq. Resp.</label><input type="text" name="freqResp" value={formData.freqResp} onChange={handleChange} /></div>
+                      <div className={styles.formGroup}>
+                        <label>Peso (Kg)</label>
+                        <input
+                          type="text"
+                          name="peso"
+                          value={formData.peso}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Temperatura (°C)</label>
+                        <input
+                          type="text"
+                          name="temperatura"
+                          value={formData.temperatura}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>TPC (seg)</label>
+                        <input
+                          type="text"
+                          name="tpc"
+                          value={formData.tpc}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Mucosas</label>
+                        <input
+                          type="text"
+                          name="mucosas"
+                          value={formData.mucosas}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Freq. Cardíaca</label>
+                        <input
+                          type="text"
+                          name="freqCardiaca"
+                          value={formData.freqCardiaca}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Freq. Resp.</label>
+                        <input
+                          type="text"
+                          name="freqResp"
+                          value={formData.freqResp}
+                          onChange={handleChange}
+                        />
+                      </div>
                     </div>
                   </div>
-                  
                   <div className={styles.sectionCard}>
                     <h4 className={styles.cardTitle}>Avaliação Clínica</h4>
-                    <div className={styles.formGroup}><label>Queixa Principal</label><AutoResizeTextarea name="queixaPrincipal" value={formData.queixaPrincipal} onChange={handleChange} /></div>
-                    <div className={styles.formGroup}><label>Suspeita Clínica</label><AutoResizeTextarea name="suspeitaClinica" value={formData.suspeitaClinica} onChange={handleChange} /></div>
-                    <div className={styles.formGroup}><label>Diagnóstico</label><AutoResizeTextarea name="diagnostico" value={formData.diagnostico} onChange={handleChange} /></div>
-                    <div className={styles.formGroup}><label>Tratamento</label><AutoResizeTextarea name="tratamento" value={formData.tratamento} onChange={handleChange} /></div>
+                    <div className={styles.formGroup}>
+                      <label>Queixa Principal</label>
+                      <AutoResizeTextarea
+                        name="queixaPrincipal"
+                        value={formData.queixaPrincipal}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Suspeita Clínica</label>
+                      <AutoResizeTextarea
+                        name="suspeitaClinica"
+                        value={formData.suspeitaClinica}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Diagnóstico</label>
+                      <AutoResizeTextarea
+                        name="diagnostico"
+                        value={formData.diagnostico}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Tratamento</label>
+                      <AutoResizeTextarea
+                        name="tratamento"
+                        value={formData.tratamento}
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
                 </section>
               </main>
-
               <footer className={styles.footer}>
                 <div className={styles.footerActions}>
-                  <button className={styles.actionButton} onClick={() => handleOpenHistory("prescricoes")}><FaFilePrescription /> Prescrição</button>
-                  <button className={styles.actionButton} onClick={() => handleOpenHistory("exames")}><FaVial /> Exames</button>
-                  <button className={styles.actionButton} onClick={() => handleOpenHistory("vacinas")}><FaSyringe /> Vacinas</button>
+                  <button
+                    className={styles.actionButtonNeutral}
+                    onClick={() => handleOpenHistory("prescricoes")}
+                  >
+                    <FaFilePrescription /> Prescrições
+                  </button>
+                  <button
+                    className={styles.actionButtonNeutral}
+                    onClick={() => handleOpenHistory("exames")}
+                  >
+                    <FaVial /> Exames
+                  </button>
+                  <button
+                    className={styles.actionButtonNeutral}
+                    onClick={() => handleOpenHistory("vacinas")}
+                  >
+                    <FaSyringe /> Vacinas
+                  </button>
                 </div>
                 <div className={styles.footerControls}>
-                  <button className={styles.cancelButton} onClick={onClose}>Cancelar</button>
-                  <button className={styles.saveButton} onClick={handleSaveConsulta} disabled={isSaving}><FaSave /> {isSaving ? "Salvando..." : "Salvar Consulta"}</button>
+                  <button
+                    className={styles.actionButtonNeutral}
+                    onClick={onClose}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className={styles.actionButtonPrimary}
+                    onClick={handleSaveConsulta}
+                    disabled={isSaving}
+                  >
+                    <FaSave /> {isSaving ? "Salvando..." : "Salvar Consulta"}
+                  </button>
                 </div>
               </footer>
             </>

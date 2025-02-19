@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import styles from './SelecaoAnimalModal.module.css'; // Usaremos o novo CSS
+import styles from './SelecaoAnimalModal.module.css';
+import { FaPlus, FaUserPlus } from 'react-icons/fa';
 
 function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTutor, onAddNewAnimal, newlyCreatedTutor, newlyCreatedAnimal }) {
   const [tutor, setTutor] = useState(null);
   const [animais, setAnimais] = useState([]);
   const [idAnimal, setIdAnimal] = useState('');
   
-  // Estados para a busca de tutor
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -18,17 +18,15 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
     const cpfLimpo = String(selectedTutor.cpf).replace(/\D/g, "");
     const cpfDisplay = cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     setSearchTerm(`${selectedTutor.nome} - ${cpfDisplay}`);
-    setShowSuggestions(false); // Garante que as sugestões fechem ao selecionar
+    setShowSuggestions(false);
     setIdAnimal('');
   };
 
-  // Efeito para lidar com um tutor/animal recém-criado
   useEffect(() => {
     if (isOpen) {
       if (newlyCreatedTutor) {
         handleTutorSelect(newlyCreatedTutor);
       } else {
-        // Reseta completamente o estado ao abrir
         setTutor(null);
         setIdAnimal('');
         setAnimais([]);
@@ -38,7 +36,6 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
     }
   }, [isOpen, newlyCreatedTutor]);
   
-  // Efeito para adicionar e selecionar um animal recém-criado
   useEffect(() => {
     if (isOpen && newlyCreatedAnimal) {
       setAnimais(prevAnimais => [...prevAnimais, newlyCreatedAnimal]);
@@ -46,9 +43,7 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
     }
   }, [isOpen, newlyCreatedAnimal]);
 
-  // Efeito de busca com debounce (atraso para pesquisar)
   useEffect(() => {
-    // Não busca se o campo estiver vazio ou se um tutor já foi selecionado
     if (searchTerm.length < 2 || tutor) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -63,7 +58,6 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
     return () => clearTimeout(timer);
   }, [searchTerm, tutor]);
 
-  // Efeito para buscar animais quando um tutor é selecionado
   useEffect(() => {
     if (tutor) {
       api.getAnimaisByTutor(tutor.id_tutor).then(response => {
@@ -90,8 +84,8 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
               value={searchTerm}
               onChange={e => {
                 setSearchTerm(e.target.value);
-                setTutor(null); // Limpa a seleção ao digitar
-                setShowSuggestions(true); // Permite que a busca recomece
+                setTutor(null);
+                setShowSuggestions(true);
               }}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder="Digite para buscar..."
@@ -111,8 +105,8 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
                 ) : (
                   <div className={styles.noResults}>
                     <p>Nenhum tutor encontrado.</p>
-                    <button className={styles.newTutorButton} onMouseDown={onAddNewTutor}>
-                      <i className="fas fa-plus"></i> Cadastrar este tutor
+                    <button className={styles.actionButtonSecondary} onMouseDown={onAddNewTutor}>
+                      <FaPlus /> Cadastrar este tutor
                     </button>
                   </div>
                 )}
@@ -131,10 +125,10 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
                   ))
                 ) : (
                   <div className={styles.noAnimalMessage}>
-                     <p>Este tutor não possui animais cadastrados.</p>
-                     <button className={styles.newAnimalButton} onClick={() => onAddNewAnimal(tutor)}>
-                       <i className="fas fa-plus"></i> Cadastrar Animal
-                     </button>
+                    <p>Este tutor não possui animais cadastrados.</p>
+                    <button className={styles.actionButtonSecondary} onClick={() => onAddNewAnimal(tutor)}>
+                      <FaPlus /> Cadastrar Animal
+                    </button>
                   </div>
                 )}
               </div>
@@ -142,11 +136,11 @@ function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTuto
           )}
         </div>
         <div className={styles.modalFooter}>
-        <button className={styles.newTutorButton} onClick={onAddNewTutor}>
-            <i className="fas fa-user-plus"></i> Cadastrar Novo Tutor
-   </button>
-          <button className={styles.buttonSecondary} onClick={onClose}>Cancelar</button>
-          <button className={styles.buttonPrimary} onClick={() => onAnimalSelecionado(idAnimal)} disabled={!idAnimal}>
+          <button className={styles.actionButtonSecondary} onClick={onAddNewTutor}>
+            <FaUserPlus /> Cadastrar Novo Tutor
+          </button>
+          <button className={styles.actionButtonNeutral} onClick={onClose}>Cancelar</button>
+          <button className={styles.actionButtonPrimary} onClick={() => onAnimalSelecionado(idAnimal)} disabled={!idAnimal}>
             Iniciar Consulta
           </button>
         </div>

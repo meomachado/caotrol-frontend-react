@@ -28,48 +28,71 @@
     gap: 10px;
   }
   
-  .backButton, .editButton, .deleteButton {
-    padding: 8px 18px;
-    font-size: 0.9em;
-    gap: 8px;
+  /* ESTILOS PADRONIZADOS PARA BOTÕES
+   * Baseados na classe .actionButtonPrimary
+   */
+  .actionButtonPrimary,
+  .actionButtonDanger,
+  .actionButtonNeutral,
+  .actionButtonSecondary {
+    background-color: #27ae60;
+    color: white;
+    padding: 12px 20px;
     border-radius: 8px;
-    font-weight: 600;
-    border-style: solid;
-    border-width: 1px;
+    font-size: 0.95em;
+    border: none;
     cursor: pointer;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    transition: all 0.2s ease;
+    gap: 8px;
+    transition: all 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    white-space: nowrap; /* Impede que o texto quebre a linha */
   }
   
-  .backButton {
-    background-color: #ffffff;
+  /* Variação para botões primários (cor verde) */
+  .actionButtonPrimary {
+    background-color: #27ae60;
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+  }
+  .actionButtonPrimary:hover {
+    background-color: #219d55;
+    transform: translateY(-2px);
+  }
+  
+  /* Variação para botões de perigo (cor vermelha) */
+  .actionButtonDanger {
+    background-color: #e74c3c;
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+  }
+  .actionButtonDanger:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+  }
+  
+  /* Variação para botões neutros (Voltar) */
+  .actionButtonNeutral {
+    background-color: #bdc3c7;
     color: #34495e;
-    border-color: #dfe6e9;
+    box-shadow: 0 2px 6px rgba(189, 195, 199, 0.3);
+  }
+  .actionButtonNeutral:hover {
+    background-color: #95a5a6;
+    transform: translateY(-2px);
   }
   
-  .backButton:hover {
-    background-color: #ecf0f1;
-  }
-  
-  .editButton {
+  /* Variação para botões secundários (cor azul) */
+  .actionButtonSecondary {
     background-color: #3498db;
     color: white;
-    border-color: #2980b9;
+    padding: 8px 16px; /* Ajuste para caber em espaços menores */
+    font-size: 0.9em;
+    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
   }
-  
-  .editButton:hover {
+  .actionButtonSecondary:hover {
     background-color: #2980b9;
-  }
-  
-  .deleteButton {
-    background-color: #e74c3c;
-    color: white;
-    border-color: #c0392b;
-  }
-  
-  .deleteButton:hover {
-    background-color: #c0392b;
+    transform: translateY(-2px);
   }
   
   /* Resto dos estilos para a página de detalhes */
@@ -133,25 +156,6 @@
     align-items: center;
   }
   
-  .addAnimalButton {
-    background-color: #27ae60;
-    color: white;
-    padding: 7px 14px;
-    font-size: 0.85em;
-    gap: 6px;
-    border-radius: 8px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
-  }
-  
-  .addAnimalButton:hover {
-    background-color: #2ecc71;
-  }
-  
   .animalList {
     display: flex;
     flex-direction: column;
@@ -199,21 +203,6 @@
     color: #7f8c8d;
   }
   
-  .detailsButton {
-    padding: 6px 14px;
-    font-size: 0.85em;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .detailsButton:hover {
-    background-color: #2980b9;
-  }
-  
   .statusMessage, .noData {
     text-align: center;
     color: #7f8c8d;
@@ -227,5 +216,10 @@
   @media (max-width: 900px) {
     .layout {
       grid-template-columns: 1fr;
+    }
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
     }
   }

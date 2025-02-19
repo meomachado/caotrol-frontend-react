@@ -28,65 +28,13 @@
   align-items: center;
 }
 
-.secondaryButton {
-  padding: 8px 18px;
-  font-size: 0.9em;
-  gap: 8px;
-  background-color: #ecf0f1;
-  color: #34495e;
-  border-radius: 8px;
-  font-weight: 600;
-  border: 1px solid #dcdcdc;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
-}
-
-.secondaryButton:hover {
-  background-color: #e0e6e8;
-  border-color: #c0c0c0;
-}
-
-.dangerButton {
-  padding: 8px 18px;
-  font-size: 0.9em;
-  gap: 8px;
-  background-color: #e74c3c;
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  border: 1px solid #c0392b;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
-}
-
-.dangerButton:hover {
-  background-color: #c0392b;
-}
-
-.editButton {
-  padding: 8px 18px;
-  font-size: 0.9em;
-  gap: 8px;
-  background-color: #3498db;
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  border: 1px solid #2980b9;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
-}
-
-.editButton:hover {
-  background-color: #2980b9;
-}
-
-.actionButtonPrimary {
+/* * ESTILOS PADRONIZADOS PARA BOTÕES
+ * Baseados na classe .actionButtonPrimary
+ */
+.actionButtonPrimary,
+.actionButtonDanger,
+.actionButtonNeutral,
+.actionButtonSecondary {
   background-color: #27ae60;
   color: white;
   padding: 12px 20px;
@@ -98,12 +46,52 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+  transition: all 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Impede que o texto quebre a linha */
 }
 
+/* Variação para botões primários (cor verde) */
+.actionButtonPrimary {
+  background-color: #27ae60;
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
 .actionButtonPrimary:hover {
   background-color: #219d55;
+  transform: translateY(-2px);
+}
+
+/* Variação para botões de perigo (cor vermelha) */
+.actionButtonDanger {
+  background-color: #e74c3c;
+  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+}
+.actionButtonDanger:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Variação para botões neutros (Voltar) */
+.actionButtonNeutral {
+  background-color: #bdc3c7;
+  color: #34495e;
+  box-shadow: 0 2px 6px rgba(189, 195, 199, 0.3);
+}
+.actionButtonNeutral:hover {
+  background-color: #95a5a6;
+  transform: translateY(-2px);
+}
+
+/* Variação para botões secundários (cor azul) */
+.actionButtonSecondary {
+  background-color: #3498db;
+  color: white;
+  padding: 8px 16px; /* Ajuste para caber em espaços menores */
+  font-size: 0.9em;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+}
+.actionButtonSecondary:hover {
+  background-color: #2980b9;
   transform: translateY(-2px);
 }
 
@@ -209,27 +197,6 @@
   display: flex;
   justify-content: flex-end;
   margin-bottom: 15px;
-}
-
-.addResultButton {
-  padding: 6px 12px;
-  font-size: 0.85em;
-  background-color: #3498db;
-  color: white;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.addResultButton:hover {
-  background-color: #2980b9;
 }
 
 .historyList {

@@ -1,4 +1,3 @@
-// src/pages/Usuarios/UsuarioModal.jsx
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import styles from "./SharedModal.module.css";
@@ -84,6 +83,8 @@ function UsuarioModal({ isOpen, onClose, onSave, initialData }) {
           payload.id_veterinario = parseInt(idVeterinario);
         }
         await api.registrarUsuario(payload);
+        // Alerta adicionado para novos usuários
+        alert("Usuário criado com sucesso! Um e-mail de confirmação foi enviado.");
       }
       onSave();
     } catch (err) {

@@ -3,7 +3,7 @@ import api from '../../services/api';
 import styles from './Usuarios.module.css';
 import UsuarioModal from './UsuarioModal';
 import VeterinarioModal from '../Veterinarios/VeterinarioModal';
-import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt } from "react-icons/fa";
+import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt, FaTrash } from "react-icons/fa";
 
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -97,6 +97,32 @@ function Usuarios() {
     }
   };
 
+  // Funções de exclusão/desativação
+  const handleDeleteUser = async (id, login) => {
+    if (window.confirm(`Tem certeza que deseja desativar o usuário "${login}"?`)) {
+      try {
+        await api.deleteUsuario(id);
+        alert('Usuário desativado com sucesso!');
+        fetchUsuarios(userCurrentPage);
+      } catch (err) {
+        alert(err.response?.data?.message || 'Erro ao desativar usuário.');
+      }
+    }
+  };
+
+  const handleDeleteVet = async (id, nome) => {
+    if (window.confirm(`Tem certeza que deseja excluir o perfil do veterinário(a) "${nome}"? Esta ação é irreversível e só é possível se não houver vínculos.`)) {
+      try {
+        await api.deleteVeterinario(id);
+        alert('Perfil de veterinário excluído com sucesso!');
+        fetchVeterinarios(vetCurrentPage);
+      } catch (err) {
+        alert(err.response?.data?.message || 'Erro ao excluir perfil de veterinário.');
+      }
+    }
+  };
+
+
   const renderContent = () => {
     if (loading) return <p className={styles.loadingState}>Carregando...</p>;
     if (error) return <p className={styles.errorState}>{error}</p>;
@@ -120,6 +146,9 @@ function Usuarios() {
             <button onClick={() => handleEditUser(user)} className={styles.iconButton} title="Editar">
               <FaPencilAlt />
             </button>
+            <button onClick={() => handleDeleteUser(user.id_usuario, user.login)} className={`${styles.iconButton} ${styles.deleteButton}`} title="Desativar Usuário">
+              <FaTrash />
+            </button>
           </div>
         </div>
       ));
@@ -139,6 +168,9 @@ function Usuarios() {
           <div className={styles.actions}>
             <button onClick={() => handleEditVet(vet)} className={styles.iconButton} title="Editar">
               <FaPencilAlt />
+            </button>
+            <button onClick={() => handleDeleteVet(vet.id_veterinario, vet.nome)} className={`${styles.iconButton} ${styles.deleteButton}`} title="Excluir Veterinário">
+              <FaTrash />
             </button>
           </div>
         </div>

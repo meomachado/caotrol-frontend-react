@@ -1,4 +1,3 @@
-// pages/Tutores/TutorDetailPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -6,6 +5,7 @@ import styles from './TutorDetailPage.module.css';
 import EspecieIcon from '../Animais/EspecieIcon';
 import AnimalModal from '../Animais/AnimalModal';
 import TutorModal from './TutorModal';
+import { FaPlus, FaPencilAlt, FaTrashAlt, FaArrowLeft } from 'react-icons/fa';
 
 function TutorDetailPage() {
   const { id } = useParams();
@@ -23,10 +23,9 @@ function TutorDetailPage() {
       setLoading(true);
       setError('');
 
-      // Usamos Promise.all porque agora temos certeza que as duas chamadas são válidas
       const [tutorRes, animaisRes] = await Promise.all([
         api.getTutorById(id),
-        api.getAnimaisByTutor(id) // Esta função agora chama a URL correta
+        api.getAnimaisByTutor(id)
       ]);
       
       setTutor(tutorRes);
@@ -95,14 +94,14 @@ function TutorDetailPage() {
       <div className={styles.header}>
         <h1>Ficha de <strong>{tutor.nome}</strong></h1>
         <div className={styles.headerActions}>
-          <button onClick={() => navigate("/tutores")} className={styles.backButton}>
-            <i className="fas fa-arrow-left"></i> Voltar
+          <button onClick={() => navigate("/tutores")} className={styles.actionButtonNeutral}>
+            <FaArrowLeft /> Voltar
           </button>
-          <button onClick={() => setIsEditModalOpen(true)} className={styles.editButton}>
-            <i className="fas fa-pencil-alt"></i> Editar Tutor
+          <button onClick={() => setIsEditModalOpen(true)} className={styles.actionButtonPrimary}>
+            <FaPencilAlt /> Editar Tutor
           </button>
-          <button onClick={handleDelete} className={styles.deleteButton}>
-            <i className="fas fa-trash-alt"></i> Excluir Tutor
+          <button onClick={handleDelete} className={styles.actionButtonDanger}>
+            <FaTrashAlt /> Excluir Tutor
           </button>
         </div>
       </div>
@@ -115,20 +114,20 @@ function TutorDetailPage() {
             <div className={styles.detailItem}><label>Telefone</label><p>{formatTelefone(tutor.telefone)}</p></div>
             <div className={styles.detailItem}><label>Nascimento</label><p>{formatDate(tutor.data_nasc)}</p></div>
           </div>
-           <h3 className={styles.sectionTitle}>Endereço</h3>
-           <div className={styles.detailGrid}>
+          <h3 className={styles.sectionTitle}>Endereço</h3>
+          <div className={styles.detailGrid}>
             <div className={styles.detailItem}><label>CEP</label><p>{tutor.cep || '—'}</p></div>
             <div className={styles.detailItem}><label>Cidade/UF</label><p>{tutor.cidade ? `${tutor.cidade.nome} - ${tutor.cidade.estado.uf}` : '—'}</p></div>
             <div className={`${styles.detailItem} ${styles.fullWidth}`}><label>Logradouro</label><p>{`${tutor.logradouro || ''}, ${tutor.num || 'S/N'}`}</p></div>
             <div className={`${styles.detailItem} ${styles.fullWidth}`}><label>Bairro</label><p>{tutor.bairro || '—'}</p></div>
-           </div>
+          </div>
         </div>
 
         <div className={styles.animaisCard}>
           <div className={styles.cardHeader}>
             <h3 className={styles.sectionTitle}>Animais</h3>
-            <button onClick={() => setIsAnimalModalOpen(true)} className={styles.addAnimalButton}>
-              <i className="fas fa-plus"></i> Adicionar Animal
+            <button onClick={() => setIsAnimalModalOpen(true)} className={styles.actionButtonPrimary}>
+              <FaPlus /> Adicionar Animal
             </button>
           </div>
           <div className={styles.animalList}>
@@ -142,7 +141,7 @@ function TutorDetailPage() {
                       <p>{animal.raca.nome}</p>
                     </div>
                   </div>
-                  <button onClick={() => navigate(`/animais/${animal.id_animal}`)} className={styles.detailsButton}>
+                  <button onClick={() => navigate(`/animais/${animal.id_animal}`)} className={styles.actionButtonSecondary}>
                     Ver Prontuário
                   </button>
                 </div>

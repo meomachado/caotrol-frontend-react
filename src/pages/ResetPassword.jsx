@@ -25,6 +25,7 @@ function ResetPassword() {
       // Esta é a chamada para a sua API no backend
       await api.resetPassword(token, senha);
       setMessage('Sua senha foi redefinida com sucesso!');
+      setMessage('Você sera redirecionado para a página de login.');
       setTimeout(() => navigate('/login'), 3000); // Redireciona para o login após 3s
     } catch (err) {
       setError(err.message || 'Token inválido ou expirado. Tente novamente.');

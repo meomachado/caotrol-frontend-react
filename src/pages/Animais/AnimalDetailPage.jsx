@@ -178,16 +178,16 @@ function AnimalDetailPage() {
         <div className={styles.headerActions}>
           <button
             onClick={() => navigate("/animais")}
-            className={styles.secondaryButton}
+            className={styles.actionButtonNeutral}
           >
             <FaArrowLeft /> Voltar
           </button>
-          <button onClick={handleDelete} className={styles.dangerButton}>
+          <button onClick={handleDelete} className={styles.actionButtonDanger}>
             <FaTrashAlt /> Excluir Animal
           </button>
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className={styles.editButton}
+            className={styles.actionButtonPrimary}
           >
             <FaPencilAlt /> Editar Animal
           </button>
@@ -369,7 +369,7 @@ function AnimalDetailPage() {
                             )}
                           </div>
                           <button
-                            className={styles.addResultButton}
+                            className={styles.actionButtonSecondary}
                             onClick={() => handleOpenExameModal(e)}
                           >
                             <FaPlus />{" "}

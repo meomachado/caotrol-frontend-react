@@ -1,4 +1,4 @@
-/* pages/Tutores/TutorModal.module.css */
+/* src/pages/Tutores/TutorModal.module.css */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -15,7 +15,7 @@
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   width: 95%;
-  max-width: 1000px; /* ✅ Aumentado para dar mais espaço */
+  max-width: 1000px;
   max-height: 95vh;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@
 }
 
 .modalHeader {
-  padding: 18px 25px; /* Reduzido */
+  padding: 18px 25px;
   background-color: #ffffff;
   border-bottom: 1px solid #e9ecef;
   flex-shrink: 0;
@@ -31,52 +31,54 @@
 
 .modalHeader h2 {
   margin: 0;
-  font-size: 1.5em; /* Reduzido */
+  font-size: 1.5em;
   color: #2c3e50;
 }
 
 /* ✅ PRINCIPAL MUDANÇA: CORPO DO FORMULÁRIO MAIS COMPACTO */
 .formBody {
-  padding: 20px 25px; /* Padding vertical reduzido */
-  overflow-y: hidden; /* Força a remoção do scroll */
+  padding: 20px 25px;
+  overflow-y: hidden;
   display: flex;
   gap: 25px;
+  align-items: flex-start; /* ✅ Nova linha para alinhar os painéis ao topo */
 }
 
-.leftPanel,
-.rightPanel {
+/* A classe .leftPanel foi removida e agora o .panel é usado diretamente */
+.panel {
   flex: 1;
-  min-width: 0; /* Ajuda na responsividade do flexbox */
+  min-width: 0;
 }
 
 .card {
   background-color: #ffffff;
   border-radius: 12px;
-  padding: 20px; /* Padding do card reduzido */
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espaçamento entre os grupos de formulário reduzido */
+  gap: 15px;
+  height: 100%; /* ✅ Adicionada para fazer os cards preencherem o espaço */
 }
 
 .sectionTitle {
-  font-size: 1.1em; /* Reduzido */
+  font-size: 1.1em;
   font-weight: 600;
   color: #27ae60;
   margin: 0;
-  padding-bottom: 8px; /* Reduzido */
+  padding-bottom: 8px;
   border-bottom: 1px solid #e9ecef;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 5px; /* Espaçamento entre label e input reduzido */
+  gap: 5px;
 }
 
 .formGroup label {
   font-weight: 500;
-  font-size: 0.85em; /* Reduzido */
+  font-size: 0.85em;
   color: #34495e;
 }
 
@@ -96,11 +98,11 @@
 .formGroup input,
 .formGroup select {
   width: 100%;
-  padding: 10px 10px 10px 40px; /* Padding do input reduzido */
+  padding: 10px 10px 10px 40px;
   border: 1px solid #bdc3c7;
-  border-radius: 8px; /* Reduzido */
+  border-radius: 8px;
   box-sizing: border-box;
-  font-size: 0.95em; /* Reduzido */
+  font-size: 0.95em;
   background-color: #fdfdfd;
   transition: all 0.3s ease;
 }
@@ -135,24 +137,24 @@
   position: absolute;
   right: 15px;
   width: 18px;
-  height: 18px; /* Reduzido */
-  border: 2px solid rgba(0, 0, 0, 0.1); /* Reduzido */
-  border-top: 2px solid #27ae60; /* Reduzido */
+  height: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top: 2px solid #27ae60;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
   0% {
-    transform: rotate(0deg);
+      transform: rotate(0deg);
   }
   100% {
-    transform: rotate(360deg);
+      transform: rotate(360deg);
   }
 }
 
 .skeleton {
   width: 100%;
-  height: 43px; /* Altura ajustada */
+  height: 43px;
   border-radius: 8px;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -160,21 +162,29 @@
 }
 @keyframes shimmer {
   0% {
-    background-position: 200% 0;
+      background-position: 200% 0;
   }
   100% {
-    background-position: -200% 0;
+      background-position: -200% 0;
   }
+}
+
+/* ✅ MUDANÇA AQUI: Layout de grid para CEP e Estado */
+.locationGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  align-items: start;
 }
 
 .addressGrid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 15px; /* Reduzido */
+  gap: 15px;
 }
 
 .modalFooter {
-  padding: 15px 25px; /* Reduzido */
+  padding: 15px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -200,7 +210,7 @@
 }
 
 .btn {
-  padding: 9px 22px; /* Reduzido */
+  padding: 9px 22px;
   border-radius: 8px;
   font-weight: 600;
   border: none;
@@ -209,11 +219,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.95em; /* Reduzido */
+  font-size: 0.95em;
 }
 
 .btn i {
-  font-size: 1em; /* Reduzido */
+  font-size: 1em;
 }
 
 .btnCancel {
@@ -268,45 +278,4 @@
 .sugestoesItem.highlighted,
 .sugestoesItem:hover {
   background-color: #f0f2f5;
-}
-
-/* pages/Tutores/TutorModal.module.css */
-
-/* ... (todo o CSS até a classe .skeleton) */
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* ✅ ADICIONE ESTA NOVA CLASSE */
-/* pages/Tutores/TutorModal.module.css */
-
-/* ... (todo o CSS até a classe .skeleton) */
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* ✅ MUDANÇA AQUI: Grid para CEP e Estado */
-.locationGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Colunas de tamanhos iguais */
-  gap: 15px;
-  align-items: start;
-}
-
-.addressGrid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 15px;
 }

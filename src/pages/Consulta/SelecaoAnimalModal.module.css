@@ -5,26 +5,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000; /* Z-index alto para garantir que fique por cima de tudo */
+  z-index: 2000;
   backdrop-filter: blur(4px);
 }
 
 .modalContent {
-  background: #f8f9fa; /* Fundo levemente cinza para um visual suave */
+  background: #f8f9fa;
   border-radius: 12px;
   width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
+  max-width: 800px;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  overflow: hidden; /* Garante que o conteúdo respeite as bordas arredondadas */
 }
 
 .modalHeader {
   padding: 20px 25px;
   border-bottom: 1px solid #dee2e6;
   background-color: #fff;
+  border-top-left-radius: 12px; /* Novo */
+  border-top-right-radius: 12px; /* Novo */
 }
 
 .modalHeader h2 {
@@ -38,11 +39,11 @@
   display: flex;
   flex-direction: column;
   gap: 25px;
-  /* A linha 'overflow-y: auto;' foi REMOVIDA daqui para corrigir o bug */
+  /* Removido o overflow e max-height para permitir que o modal cresça */
 }
 
 .formGroup {
-  position: relative; /* Essencial para o posicionamento da lista de sugestões */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -86,10 +87,27 @@
   background-color: #fff;
   border: 1px solid #ced4da;
   border-radius: 8px;
-  max-height: 180px;
-  overflow-y: auto;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  max-height: 250px; /* Altura fixa para a lista de sugestões */
+  overflow-y: auto; /* Rolagem apenas para a lista */
 }
+
+/* Estilo para a barra de rolagem (WebKit - Chrome, Safari) */
+.autocompleteList::-webkit-scrollbar {
+  width: 8px;
+}
+.autocompleteList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.autocompleteList::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+.autocompleteList::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 
 .autocompleteList li {
   padding: 12px 15px;
@@ -109,16 +127,15 @@
   background-color: #fff;
   border: 1px solid #dee2e6;
   border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   color: #6c757d;
 }
 
 .animalList {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  max-height: 220px;
-  overflow-y: auto;
   background-color: #fff;
+  /* Removido o overflow, pois a lista agora se expande */
 }
 
 .animalItem {
@@ -152,20 +169,80 @@
   margin: 0 0 15px 0;
 }
 
-.newAnimalButton, .newTutorButton {
-  background-color: #3498db;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 5px;
-  font-size: 0.9em;
+/* --- ESTILOS PADRONIZADOS PARA BOTÕES --- */
+.actionButtonPrimary,
+.actionButtonDanger,
+.actionButtonNeutral,
+.actionButtonSecondary {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95em;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  justify-content: center;
 }
 
-.newAnimalButton:hover, .newTutorButton:hover {
-  background-color: #2980b9;
+.actionButtonPrimary {
+  background-color: #27ae60;
+  color: white;
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
 }
+.actionButtonPrimary:hover {
+  background-color: #219d55;
+  transform: translateY(-2px);
+}
+
+.actionButtonDanger {
+  background-color: #e74c3c;
+  color: white;
+  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+}
+.actionButtonDanger:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+.actionButtonNeutral {
+  background-color: #ecf0f1;
+  color: #34495e;
+  border: 1px solid #bdc3c7;
+  box-shadow: 0 2px 6px rgba(189, 195, 199, 0.3);
+}
+.actionButtonNeutral:hover {
+  background-color: #dde3e4;
+  transform: translateY(-2px);
+}
+
+.actionButtonSecondary {
+  background-color: #3498db;
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.9em;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+}
+.actionButtonSecondary:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.actionButtonPrimary:disabled,
+.actionButtonDanger:disabled,
+.actionButtonNeutral:disabled,
+.actionButtonSecondary:disabled {
+  background-color: #bdc3c7;
+  color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+/* --- FIM DOS ESTILOS PADRONIZADOS --- */
 
 .modalFooter {
   padding: 18px 25px;
@@ -174,38 +251,6 @@
   justify-content: flex-end;
   gap: 15px;
   background-color: #fff;
+  border-bottom-left-radius: 12px; /* Novo */
+  border-bottom-right-radius: 12px; /* Novo */
 }
-
-.buttonPrimary, .buttonSecondary{
-  padding: 10px 25px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1em;
-}
-
-.newTutorButton {
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 1em;
-  border: none;
-  cursor: pointer;
-  white-space: 1em;
-}
-
-.buttonPrimary {
-  background-color: #27ae60;
-  color: white;
-}
-.buttonPrimary:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-
-.buttonSecondary {
-  background-color: #ecf0f1;
-  color: #34495e;
-  border: 1px solid #bdc3c7;
-}
-
