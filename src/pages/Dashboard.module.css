@@ -1,0 +1,28 @@
+/* src/pages/Dashboard.module.css */
+
+.dashboardPage {
+    width: 100%;
+  }
+  
+  .pageHeader {
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #555;
+    font-size: 1.1em;
+    font-weight: 500;
+  }
+  
+  .pageHeader i {
+    font-size: 1.5em;
+    color: #21584b; /* Verde escuro */
+  }
+  
+  .sectionTitle {
+    font-size: 1.8em;
+    color: #343a40;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+  }

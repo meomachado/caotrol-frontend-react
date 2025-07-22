@@ -1,0 +1,67 @@
+/* src/components/Sidebar.module.css */
+
+/* Container principal da sidebar */
+.sidebarContainer {
+    width: 250px;
+    background-color: #cdcdcd; /* Seu cinza claro */
+    height: 100vh; /* Altura total da tela */
+    position: fixed; /* Fixa a sidebar na lateral */
+    top: 0;
+    left: 0;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebarLogo img {
+    display: block; /* Garante que a imagem seja um bloco para centralizar */
+    margin: 0 auto 30px auto; /* Centraliza a imagem e adiciona espaço embaixo */
+    max-width: 100%; /* Um tamanho bom para o logo */
+  }
+  
+  .sidebarNav {
+    width: 100%;
+  }
+  .sidebarNav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebarNav li {
+    margin-bottom: 8px; /* Pequeno espaço entre os itens */
+  }
+  
+  /* --- ESTILOS DOS LINKS --- */
+  
+  /* Estilo padrão para cada link */
+  .sidebarNav a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: black; /* Cor padrão do texto (preto/cinza escuro) */
+    text-decoration: none;
+    border-radius: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: 500; /* Peso da fonte normal */
+  }
+  
+  /* Efeito ao passar o mouse */
+  .sidebarNav a:hover {
+    background-color: #e9ecef; /* Um cinza bem claro no hover */
+  }
+  
+  /* Estilo do link ATIVO (quando a página está selecionada) */
+  .sidebarNav a:global(.active) {
+    background-color: #21584b; /* O !important não é mais necessário */
+    color: white;
+    font-weight: bold;
+  }
+  /* Estilo para os ÍCONES dentro dos links */
+  .sidebarNav i {
+    margin-right: 12px; /* Espaço entre o ícone e o texto */
+    font-size: 1.2em;
+    width: 20px; /* Alinha os ícones */
+    text-align: center;
+    color: inherit; /* Herda a cor do link (fica branco quando ativo) */
+  }
