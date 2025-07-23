@@ -19,13 +19,25 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 500px;
+  height: 500px; 
+
+  
+  flex-direction: column;
+  overflow-y: auto; 
 }
 
 .modalContent h2 {
   margin-top: 0;
   margin-bottom: 25px;
   color: #343a40;
+  flex-shrink: 0; /* Impede que o título encolha */
 }
+
+.formBody {
+  padding: 20px 30px;
+   overflow-y: auto; /* Adiciona rolagem APENAS no formulário */
+   flex-grow: 1; /* Faz o formulário ocupar todo o espaço vertical disponível */
+  }
 
 .formGroup {
   margin-bottom: 20px;
@@ -51,12 +63,14 @@
   display: flex;
   justify-content: flex-end;
   gap: 15px;
+  
 }
 
 .modalActions button {
   padding: 10px 20px;
   border-radius: 5px;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .cancelButton {

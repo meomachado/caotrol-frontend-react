@@ -14,11 +14,16 @@
   
   .modalContent {
     background: white;
-    padding: 30px 40px;
+    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     width: 100%;
     max-width: 500px;
+    height: 500px; 
+  
+    
+    flex-direction: column;
+    overflow-y: auto; 
   }
   
   .modalContent h2 {
@@ -27,7 +32,15 @@
     color: #343a40;
     border-bottom: 1px solid #eee;
     padding-bottom: 15px;
+    
   }
+
+  /* ✅ NOVA CLASSE PARA O FORMULÁRIO 👇 */
+.formBody {
+  padding: 20px 30px; /* Padding para os campos */
+  overflow-y: auto;   /* Adiciona a rolagem APENAS no formulário */
+  flex-grow: 1;       /* Faz o formulário ocupar o espaço disponível */
+}
   
   .detailGroup {
     margin-bottom: 20px;

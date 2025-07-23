@@ -3,10 +3,16 @@ import React from 'react';
 import styles from './TutorDetailModal.module.css';
 
 function TutorDetailModal({ isOpen, onClose, tutor }) {
-  // Se o modal não estiver aberto ou não houver um tutor, não renderiza nada
   if (!isOpen || !tutor) {
     return null;
   }
+
+  // Função para formatar a data para o padrão brasileiro (DD/MM/YYYY)
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Não informado';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(date);
+  };
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -15,26 +21,38 @@ function TutorDetailModal({ isOpen, onClose, tutor }) {
         
         <div className={styles.detailGroup}>
           <label>Nome Completo</label>
-          <p>{tutor.nome}</p>
+          <p>{tutor.nome || 'Não informado'}</p>
         </div>
 
         <div className={styles.detailGroup}>
           <label>CPF</label>
-          <p>{tutor.cpf}</p>
+          <p>{tutor.cpf || 'Não informado'}</p>
         </div>
 
         <div className={styles.detailGroup}>
           <label>Telefone</label>
-          <p>{tutor.telefone}</p>
+          <p>{tutor.telefone || 'Não informado'}</p>
         </div>
 
-        {/* Adicione outros campos que queira exibir aqui */}
-        {/* Exemplo:
+        <div className={styles.detailGroup}>
+          <label>Data de Nascimento</label>
+          <p>{formatDate(tutor.data_nasc)}</p>
+        </div>
+
         <div className={styles.detailGroup}>
           <label>Endereço</label>
-          <p>{`${tutor.rua || ''}, ${tutor.num || ''} - ${tutor.bairro || ''}`}</p>
-        </div> 
-        */}
+          <p>{`${tutor.rua || 'Rua não informada'}, ${tutor.num || 'S/N'} - ${tutor.bairro || 'Bairro não informado'}`}</p>
+        </div>
+
+        <div className={styles.detailGroup}>
+          <label>CEP</label>
+          <p>{tutor.cep || 'Não informado'}</p>
+        </div>
+        
+        <div className={styles.detailGroup}>
+          <label>Cidade </label>
+          <p>{tutor.cidade || 'Não informado'}</p>
+        </div>
 
         <div className={styles.modalActions}>
           <button onClick={onClose} className={styles.closeButton}>
