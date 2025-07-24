@@ -1,4 +1,5 @@
-/* src/pages/Tutores/TutorModal.module.css */
+/* src/pages/Animais/AnimalModal.module.css */
+
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -14,30 +15,28 @@
 
 .modalContent {
   background: white;
-  padding: 30px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 500px;
-  height: 500px; 
-
-  
+  height: 650px;
+  display: flex;
   flex-direction: column;
-  overflow-y: auto; 
 }
 
 .modalContent h2 {
-  margin-top: 0;
-  margin-bottom: 25px;
+  padding: 20px 30px;
+  margin: 0;
+  border-bottom: 1px solid #eee;
   color: #343a40;
-  flex-shrink: 0; /* Impede que o título encolha */
+  flex-shrink: 0;
 }
 
 .formBody {
   padding: 20px 30px;
-   overflow-y: auto; /* Adiciona rolagem APENAS no formulário */
-   flex-grow: 1; /* Faz o formulário ocupar todo o espaço vertical disponível */
-  }
+  overflow-y: auto;
+  flex-grow: 1;
+}
 
 .formGroup {
   margin-bottom: 20px;
@@ -50,27 +49,32 @@
   color: #495057;
 }
 
-.formGroup input {
+.formGroup input,
+.formGroup select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ced4da;
   border-radius: 5px;
-  box-sizing: border-box; /* Garante que o padding não aumente a largura */
+  box-sizing: border-box;
+  font-size: 1em;
+  background-color: white;
 }
 
 .modalActions {
-  margin-top: 30px;
+  padding: 20px 30px;
+  border-top: 1px solid #eee;
   display: flex;
   justify-content: flex-end;
   gap: 15px;
-  
+  flex-shrink: 0;
 }
 
-.modalActions button {
+.cancelButton,
+.saveButton {
   padding: 10px 20px;
   border-radius: 5px;
   font-weight: bold;
-  flex-shrink: 0;
+  border: none;
 }
 
 .cancelButton {
@@ -86,6 +90,5 @@
 .errorMessage {
   color: #dc3545;
   font-size: 0.9em;
-  margin-top: 15px;
   text-align: center;
 }

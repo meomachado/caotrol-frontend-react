@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import MainLayout from './components/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Tutores from './pages/Tutores/Tutores'; // <-- Import que você já tem
+import Animais from './pages/Animais/Animais'; 
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
@@ -32,9 +33,9 @@ function App() {
           {/* Rotas aninhadas dentro do MainLayout */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
-          
-          {/* ✅ ROTA ADICIONADA AQUI 👇 */}
+            <Route path="animais" element={<Animais />} />
           <Route path="tutores" element={<Tutores />} />
+          
 
           {/* Adicione outras rotas aqui no futuro */}
         </Route>

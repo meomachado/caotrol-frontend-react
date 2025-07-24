@@ -32,12 +32,12 @@
   border-radius: 8px;
   font-size: 1em;
   flex-grow: 1; /* Faz a barra de busca ocupar o espaço disponível */
-  margin-right: 15px; /* Espaço antes do botão */
+  margin-right: 50px; /* Espaço antes do botão */
 }
 .searchButton {
   background-color: #6c757d;
   color: white;
-  padding: 10px 15px;
+ 
   border-radius: 8px;
   font-size: 1em;
   border: none;
@@ -51,7 +51,7 @@
 .newTutorButton {
   background-color: #28a745;
   color: white;
-  padding: 10px 20px;
+  padding: 10px 40px;
   border-radius: 5px;
   font-size: 1em;
   border: none;

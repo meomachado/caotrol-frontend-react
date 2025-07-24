@@ -142,7 +142,11 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
             <input
               type="text"
               value={cep}
-              onChange={(e) => setCep(e.target.value)}
+              onChange={(e) =>
+                setCep(e.target.value.replace(/\D/g, "").slice(0, 8))
+              }
+              placeholder="Apenas números"
+              maxLength={8}
             />{" "}
           </div>{" "}
           <div className={styles.formGroup}>

@@ -86,7 +86,7 @@ function Tutores() {
             className={styles.detailsButton}
             onClick={() => handleOpenDetailModal(tutor)}
           >
-            Ver cadastro completo
+            Ver detalhes
           </button>
           <button
             className={styles.iconButton}
