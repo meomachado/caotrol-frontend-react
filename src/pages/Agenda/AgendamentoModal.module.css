@@ -1,0 +1,94 @@
+/* src/pages/Animais/AnimalModal.module.css */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  
+  .modalContent {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 500px;
+    height: 650px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modalContent h2 {
+    padding: 20px 30px;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+    color: #343a40;
+    flex-shrink: 0;
+  }
+  
+  .formBody {
+    padding: 20px 30px;
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+  
+  .formGroup {
+    margin-bottom: 20px;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  .formGroup input,
+  .formGroup select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1em;
+    background-color: white;
+  }
+  
+  .modalActions {
+    padding: 20px 30px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-shrink: 0;
+  }
+  
+  .cancelButton,
+  .saveButton {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    border: none;
+  }
+  
+  .cancelButton {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .saveButton {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .errorMessage {
+    color: #dc3545;
+    font-size: 0.9em;
+    text-align: center;
+  }

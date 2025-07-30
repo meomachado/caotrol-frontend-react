@@ -1,40 +1,64 @@
 // src/pages/Agenda/Agenda.jsx
 
-import React, { useState } from "react"; // Adicione useState
+import React, { useState, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction"; // 1. IMPORTE O NOVO PLUGIN
-import styles from "./Agenda.module.css";
+import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import styles from "./Agenda.module.css";
+import api from "../../services/api"; // Importa nosso 'api.js'
+import AgendamentoModal from "./AgendamentoModal";
 
 function Agenda() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const calendarRef = useRef(null);
 
-  const handleDateClick = (arg) => {
-    // alert('Você clicou no dia: ' + arg.dateStr);
-    setSelectedDate(arg.dateStr);
-    setIsModalOpen(true);
-    console.log("Abrindo modal para novo agendamento no dia:", arg.dateStr);
+  // ✅ FUNÇÃO MÁGICA QUE USA NOSSO 'api.js' PARA BUSCAR EVENTOS
+  const fetchEvents = (fetchInfo, successCallback, failureCallback) => {
+    const url = `/agendamentos?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`;
+    
+    api.get(url) // Usa o nosso método 'get' que já envia o token
+      .then(response => {
+        successCallback(response || []); // Garante que sempre passamos um array
+      })
+      .catch(error => {
+        console.error("Erro ao buscar agendamentos:", error);
+        failureCallback(error);
+      });
   };
 
-  // Esta função será chamada quando o usuário clicar em um agendamento existente
-  const handleEventClick = (arg) => {
-    // alert('Evento clicado: ' + arg.event.title + '\nID do agendamento: ' + arg.event.id);
+  const handleDateClick = (arg) => {
+    setSelectedDate(arg.dateStr);
+    setIsModalOpen(true);
+  };
 
+  const handleEventClick = (arg) => {
     console.log("Mostrando detalhes do agendamento:", arg.event);
+    // Futuramente, abrir modal de detalhes aqui
   };
 
   const handleOpenCreateModal = () => {
-    setSelectedDate(null); // Abre o modal sem uma data pré-selecionada
+    setSelectedDate(null);
     setIsModalOpen(true);
-    console.log(
-      "Abrindo modal para novo agendamento (sem data pré-selecionada)"
-    );
+  };
+
+  const handleSave = () => {
+    setIsModalOpen(false);
+    if (calendarRef.current) {
+      calendarRef.current.getApi().refetchEvents(); // Recarrega os eventos
+    }
   };
 
   return (
     <div className={styles.agendaContainer}>
+      <AgendamentoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        selectedDate={selectedDate}
+      />
+
       <div className={styles.actionsBar}>
         <h1>Agenda de Consultas</h1>
         <button className={styles.newButton} onClick={handleOpenCreateModal}>
@@ -44,19 +68,21 @@ function Agenda() {
 
       <div className={styles.calendarWrapper}>
         <FullCalendar
+          ref={calendarRef}
           plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+          initialView="timeGridWeek"
           headerToolbar={{
             left: "prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
-          events="/api/agendamentos"
+          
+          // ✅ AQUI USAMOS A NOSSA FUNÇÃO DE BUSCA
+          events={fetchEvents}
+
           locale="pt-br"
           buttonText={{
-            today: "Hoje",
-            month: "Mês",
-            week: "Semana",
-            day: "Dia",
+            today: "Hoje", month: "Mês", week: "Semana", day: "Dia",
           }}
           height={800}
           expandRows={true}
@@ -67,9 +93,7 @@ function Agenda() {
           slotMaxTime={"19:00:00"}
           allDaySlot={false}
           slotLabelFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
+            hour: "2-digit", minute: "2-digit", hour12: false,
           }}
         />
       </div>
