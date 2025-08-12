@@ -1,78 +1,82 @@
-/* src/pages/Animais/AnimalDetailModal.module.css */
+/* Para AnimalDetailModal.module.css e TutorDetailModal.module.css */
 
 .modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-  }
-  
-  .modalContent {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    max-width: 500px;
-    height: 500px;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  
-  .modalContent h2 {
-    margin-top: 0;
-    margin-bottom: 25px;
-    color: #343a40;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-  }
-  
-  .formBody {
-    padding: 20px 30px; /* Padding para os campos */
-    overflow-y: auto;   /* Adiciona a rolagem APENAS no formulário */
-    flex-grow: 1;       /* Faz o formulário ocupar o espaço disponível */
-  }
-  
-  .detailGroup {
-    margin-bottom: 20px;
-  }
-  
-  .detailGroup label {
-    display: block;
-    font-weight: bold;
-    font-size: 0.8em;
-    color: #6c757d;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-  
-  .detailGroup p {
-    margin: 0;
-    font-size: 1.1em;
-    color: #212529;
-    padding: 8px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    border: 1px solid #e9ecef;
-  }
-  
-  .modalActions {
-    margin-top: 30px;
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  .closeButton {
-    padding: 10px 25px;
-    border-radius: 5px;
-    font-weight: bold;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modalContent {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  /* ✅ Aumenta a largura para acomodar as colunas */
+  max-width: 700px; 
+  /* ✅ Remove altura fixa e rolagem */
+  /* height: 500px; */
+  /* overflow-y: auto; */
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #343a40;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+/* ✅ ESTA É A CLASSE QUE CRIA AS COLUNAS */
+.detailGrid {
+  display: grid;
+  /* Cria duas colunas de tamanho igual */
+  grid-template-columns: 1fr 1fr; 
+  /* Espaçamento entre as linhas e colunas */
+  gap: 20px 30px;
+}
+
+.detailGroup {
+  margin-bottom: 0; /* O 'gap' do grid agora cuida do espaçamento */
+}
+
+.detailGroup label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.8em;
+  color: #6c757d;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.detailGroup p {
+  margin: 0;
+  font-size: 1.1em;
+  color: #212529;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border: 1px solid #e9ecef;
+}
+
+.modalActions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.closeButton {
+  padding: 10px 25px;
+  border-radius: 5px;
+  font-weight: bold;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}

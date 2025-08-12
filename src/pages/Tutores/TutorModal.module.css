@@ -1,46 +1,51 @@
-/* src/pages/Animais/AnimalModal.module.css */
-
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 100; 
 }
 
 .modalContent {
   background: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  max-width: 500px;
-  height: 650px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  padding: 0; /* Removemos padding geral para dividir entre seções */
 }
 
+
 .modalContent h2 {
-  padding: 20px 30px;
   margin: 0;
-  border-bottom: 1px solid #eee;
+  padding: 20px 30px;
   color: #343a40;
+  border-bottom: 1px solid #eee;
   flex-shrink: 0;
 }
 
+
 .formBody {
   padding: 20px 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  flex: 1; /* Isso força o conteúdo a crescer dentro do modal sem empurrar o botão */
   overflow-y: auto;
-  flex-grow: 1;
 }
 
+  
 .formGroup {
-  margin-bottom: 20px;
+  width: 100%;
 }
+
 
 .formGroup label {
   display: block;
@@ -67,7 +72,9 @@
   justify-content: flex-end;
   gap: 15px;
   flex-shrink: 0;
+  background-color: #fff; /* Garante que esteja visível mesmo com scroll */
 }
+
 
 .cancelButton,
 .saveButton {

@@ -14,60 +14,57 @@ function AnimalDetailModal({ isOpen, onClose, animal }) {
     return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(date);
   };
 
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h2>Detalhes do Animal</h2>
-        
+// Em AnimalDetailModal.jsx
+
+return (
+  <div className={styles.modalOverlay} onClick={onClose}>
+    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <h2>Detalhes do Animal</h2>
+      
+      {/* 👇 Envelopa os detalhes com a div do grid 👇 */}
+      <div className={styles.detailGrid}>
         <div className={styles.detailGroup}>
           <label>Nome do Animal</label>
           <p>{animal.nome || 'Não informado'}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Tutor</label>
-          {/* Usamos '?' para acessar com segurança, caso tutor seja nulo */}
           <p>{animal.tutor?.nome || 'Não informado'}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Espécie</label>
           <p>{animal.raca?.especie?.nome || 'Não informado'}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Raça</label>
           <p>{animal.raca?.nome || 'Não informado'}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Sexo</label>
           <p>{animal.sexo === 'M' ? 'Macho' : 'Fêmea'}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Data de Nascimento</label>
           <p>{formatDate(animal.data_nasc)}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Porte</label>
           <p>{animal.porte || 'Não informado'}</p>
         </div>
-
         <div className={styles.detailGroup}>
           <label>Temperamento</label>
           <p>{animal.temperamento || 'Não informado'}</p>
         </div>
+      </div>
 
-        <div className={styles.modalActions}>
-          <button onClick={onClose} className={styles.closeButton}>
-            Fechar
-          </button>
-        </div>
+      <div className={styles.modalActions}>
+        <button onClick={onClose} className={styles.closeButton}>
+          Fechar
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default AnimalDetailModal;

@@ -18,7 +18,7 @@ function TutorDetailModal({ isOpen, onClose, tutor }) {
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <h2>Detalhes do Tutor</h2>
-        
+        <div className={styles.detailGrid}>
         <div className={styles.detailGroup}>
           <label>Nome Completo</label>
           <p>{tutor.nome || 'Não informado'}</p>
@@ -54,10 +54,13 @@ function TutorDetailModal({ isOpen, onClose, tutor }) {
           <p>{tutor.cidade || 'Não informado'}</p>
         </div>
 
+        
+
         <div className={styles.modalActions}>
           <button onClick={onClose} className={styles.closeButton}>
             Fechar
           </button>
+        </div>
         </div>
       </div>
     </div>
