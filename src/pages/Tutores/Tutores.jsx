@@ -20,7 +20,9 @@ function Tutores() {
       setLoading(true);
       setError(null);
       const response = await api.get("/tutores");
-      setTutores(response || []);
+      console.log(response);
+      setTutores(response.data  || []);
+    
     } catch (err) {
       setError("Não foi possível carregar os tutores.");
       console.error(err);
