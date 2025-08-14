@@ -21,7 +21,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit }) {
 
   useEffect(() => {
     if (isOpen) {
-      api.get("/tutores").then((response) => setTutores(response || []));
+      api.get("/tutores").then((response) => setTutores(response.data || []));
       api.get("/racas").then((response) => setRacas(response || []));
       api.get("/especies").then((response) => setEspecies(response || []));
     }

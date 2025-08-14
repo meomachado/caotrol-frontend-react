@@ -20,7 +20,7 @@ function Animais() {
       setLoading(true);
       setError(null);
       const response = await api.get("/animais");
-      setAnimais(response || []);
+      setAnimais(response.data || []);
     } catch (err) {
       setError("Não foi possível carregar os animais.");
       console.error(err);

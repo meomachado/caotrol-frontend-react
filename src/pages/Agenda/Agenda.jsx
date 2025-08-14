@@ -24,7 +24,7 @@ function Agenda() {
     api
       .get(url) // Usa o nosso método 'get' que já envia o token
       .then((response) => {
-        successCallback(response || []); // Garante que sempre passamos um array
+        successCallback(response.data || []); // Garante que sempre passamos um array
       })
       .catch((error) => {
         console.error("Erro ao buscar agendamentos:", error);

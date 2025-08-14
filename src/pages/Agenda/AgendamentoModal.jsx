@@ -31,8 +31,8 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
       setDia(selectedDate || ""); // Preenche a data se o usuário clicou em um dia
 
       // Busca listas
-      api.get("/tutores").then((res) => setTutores(res || []));
-      api.get("/veterinarios").then((res) => setVeterinarios(res || []));
+      api.get("/tutores").then((res) => setTutores(res.data || []));
+      api.get("/veterinarios").then((res) => setVeterinarios(res.data || []));
       setDia(selectedDate ? selectedDate.split('T')[0] : '');
 
     }
@@ -44,7 +44,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
       // ATENÇÃO: Precisamos de uma rota no backend para isso! (ver nota no final)
       api
         .get(`/tutores/${idTutor}/animais`)
-        .then((res) => setAnimais(res || []));
+        .then((res) => setAnimais(res.data || []));
     } else {
       setAnimais([]); // Limpa a lista de animais se nenhum tutor for selecionado
     }
@@ -57,7 +57,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
         .get(
           `/agendamentos/horarios-disponiveis?id_veterinario=${idVeterinario}&dia=${dia}`
         )
-        .then((res) => setHorarios(res || []));
+        .then((res) => setHorarios(res.data || []));
     } else {
       setHorarios([]);
     }
