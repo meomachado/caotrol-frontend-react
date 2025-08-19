@@ -72,15 +72,15 @@ function Consultas() {
 
   const handleOpenDetailModal = async (idConsulta) => {
     try {
-      // Busca os dados completos da consulta, incluindo prescrição, etc.
       const response = await api.get(`/consultas/${idConsulta}`);
-      setSelectedConsulta(response); // O seu 'api.js' já retorna o dado
+      setSelectedConsulta(response.data); // <<-- era response
       setIsDetailModalOpen(true);
     } catch (err) {
       setError("Erro ao carregar detalhes da consulta.");
       console.error(err);
     }
   };
+
   return (
     <div className={styles.consultasContainer}>
       <ConsultaDetailModal
