@@ -38,26 +38,23 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
     }
   }, [isOpen, selectedDate]);
 
-  // Efeito para buscar os animais do tutor selecionado
   useEffect(() => {
     if (idTutor) {
-      // ATENÇÃO: Precisamos de uma rota no backend para isso! (ver nota no final)
       api
         .get(`/tutores/${idTutor}/animais`)
-        .then((res) => setAnimais(res.data || []));
+        .then((res) => setAnimais(res || [])); 
     } else {
-      setAnimais([]); // Limpa a lista de animais se nenhum tutor for selecionado
+      setAnimais([]);
     }
   }, [idTutor]);
 
-  // Efeito para buscar horários disponíveis
   useEffect(() => {
     if (idVeterinario && dia) {
       api
         .get(
           `/agendamentos/horarios-disponiveis?id_veterinario=${idVeterinario}&dia=${dia}`
         )
-        .then((res) => setHorarios(res.data || []));
+        .then((res) => setHorarios(res || [])); // <-- CORRIGIDO PARA 'res'
     } else {
       setHorarios([]);
     }

@@ -17,14 +17,14 @@ function Agenda() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // ✅ FUNÇÃO MÁGICA QUE USA NOSSO 'api.js' PARA BUSCAR EVENTOS
-  const fetchEvents = (fetchInfo, successCallback, failureCallback) => {
+const fetchEvents = (fetchInfo, successCallback, failureCallback) => {
     const url = `/agendamentos?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`;
 
     api
       .get(url) // Usa o nosso método 'get' que já envia o token
       .then((response) => {
-        successCallback(response.data || []); // Garante que sempre passamos um array
+        // CORREÇÃO: A variável 'response' já contém o array de eventos.
+        successCallback(response || []); 
       })
       .catch((error) => {
         console.error("Erro ao buscar agendamentos:", error);

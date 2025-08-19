@@ -11,7 +11,7 @@ function Sidebar() {
       </div>
       <nav className={styles.sidebarNav}>
         <ul>
-          {/* Adicionamos a propriedade 'end' aqui 👇 */}
+          
           <li>
             <NavLink to="/dashboard" end>
               <i className="fas fa-home"></i> Início
