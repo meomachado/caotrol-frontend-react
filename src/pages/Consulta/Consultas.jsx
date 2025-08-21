@@ -4,7 +4,8 @@
   import api from "../../services/api";
   import styles from "./Consultas.module.css";
   import ConsultaDetailModal from "./ConsultaDetailModal";
-  // import ConsultaModal from './ConsultaModal';
+  import ConsultaModal from './ConsultaModal';
+
 
   function Consultas() {
     const [consultas, setConsultas] = useState([]);
@@ -18,6 +19,8 @@
     const [ordenacao, setOrdenacao] = useState("desc");
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedConsulta, setSelectedConsulta] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingConsulta, setEditingConsulta] = useState(null);
 
     const fetchConsultas = async () => {
       try {
@@ -58,6 +61,18 @@
           console.error(err);
         }
       }
+    };
+
+    const handleOpenEditModal = (consulta) => {
+      setEditingConsulta(consulta); // Guarda a consulta que será editada
+      setIsEditModalOpen(true);     // Abre o modal
+    };
+    
+    // ✅ 4. CRIE A FUNÇÃO DE 'SAVE' QUE FECHA O MODAL E RECARREGA A LISTA
+    const handleSave = () => {
+      setIsEditModalOpen(false);
+      setEditingConsulta(null);
+      fetchConsultas();
     };
 
     const formatDate = (dateString) => {
@@ -107,6 +122,13 @@
             <i className={`fas fa-search ${styles.searchIcon}`}></i>
           </div>
         </div>
+
+        <ConsultaModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSave}
+        consultaToEdit={editingConsulta}
+      />
 
         <div className={styles.filtersBar}>
           <div className={styles.filterGroup}>
@@ -176,9 +198,9 @@
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button title="Editar">
-                        <i className="fas fa-pencil-alt"></i>
-                      </button>
+                      <button onClick={() => handleOpenEditModal(c)} title="Editar">
+                    <i className="fas fa-pencil-alt"></i>
+                  </button>
                       <button
                         onClick={() => handleDelete(c.id_consulta)}
                         title="Excluir"
