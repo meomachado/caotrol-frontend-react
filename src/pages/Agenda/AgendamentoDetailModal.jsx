@@ -4,15 +4,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import styles from './AgendamentoModal.module.css'; // Reutilizando o mesmo estilo
 
-function AgendamentoDetailModal({ isOpen, onClose, onSave, eventInfo }) {
-  // Estado para guardar o status selecionado
+// ✅ Adicione a nova prop `onStartConsulta`
+function AgendamentoDetailModal({ isOpen, onClose, onSave, eventInfo, onStartConsulta }) {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
-  // Efeito para preencher o status inicial quando o modal abre
   useEffect(() => {
     if (eventInfo) {
-      // O 'extendedProps' contém os dados extras que enviamos do backend
       setStatus(eventInfo.extendedProps.status || 'pendente');
     }
   }, [eventInfo]);
@@ -20,37 +18,41 @@ function AgendamentoDetailModal({ isOpen, onClose, onSave, eventInfo }) {
   if (!isOpen || !eventInfo) {
     return null;
   }
-
   const handleStatusChange = async () => {
     setError('');
     const eventId = eventInfo.id;
-
+  
     try {
-      // ATENÇÃO: A lógica aqui depende das rotas do seu backend.
-      // Este exemplo usa rotas PATCH específicas para confirmar e cancelar.
       if (status === 'confirmada') {
         await api.patch(`/agendamentos/${eventId}/confirmar`);
       } else if (status === 'cancelada') {
         await api.patch(`/agendamentos/${eventId}/cancelar`);
-      } else {
-        // Se seu backend tiver uma rota PUT/PATCH genérica para atualizar o status:
-        // await api.put(`/agendamentos/${eventId}`, { status: status });
       }
-      onSave(); // Avisa a página principal para recarregar o calendário
+      
+      onSave();
     } catch (err) {
-      setError('Erro ao atualizar o status do agendamento.');
+      setError(err.message || 'Erro ao atualizar o status do agendamento.');
       console.error(err);
     }
   };
-
+  
   // Formata a hora para exibição (ex: 09:00)
   const formatTime = (date) => {
     return new Intl.DateTimeFormat('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'America/Sao_Paulo' // Use o fuso horário relevante
+      timeZone: 'America/Sao_Paulo'
     }).format(new Date(date));
   };
+  
+  // ✅ Handler para o novo botão
+  const handleStartConsultationClick = () => {
+    // Chama a função passada pelo componente pai (Agenda.jsx)
+    const idAnimal = eventInfo.extendedProps.id_animal; 
+    onStartConsulta(idAnimal);
+  };
+  
+  const isConsultationStarted = eventInfo.extendedProps.realizada;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -59,7 +61,6 @@ function AgendamentoDetailModal({ isOpen, onClose, onSave, eventInfo }) {
         <div className={styles.formBody}>
           <div className={styles.detailGroup}>
             <label>Animal</label>
-            {/* O 'title' já contém o nome do animal e do tutor */}
             <p>{eventInfo.title}</p>
           </div>
           <div className={styles.detailGroup}>
@@ -82,6 +83,15 @@ function AgendamentoDetailModal({ isOpen, onClose, onSave, eventInfo }) {
         </div>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <div className={styles.modalActions}>
+          <button 
+            type="button" 
+            onClick={handleStartConsultationClick} 
+            className={styles.saveButton}
+            disabled={isConsultationStarted} // ✅ Desabilita se a consulta já foi iniciada
+            >
+              Iniciar Consulta
+          </button>
+          
           <button type="button" onClick={onClose} className={styles.cancelButton}>
             Fechar
           </button>

@@ -20,7 +20,7 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
   };
 
   const c = consulta;
-  console.log("DADOS DA CONSULTA RECEBIDOS:", consulta);
+
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>

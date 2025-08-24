@@ -1,0 +1,98 @@
+/* src/pages/Consultas/SelecaoAnimalModal.module.css */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modalContent {
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.modalHeader {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+.modalHeader h2 {
+  margin: 0;
+}
+.modalBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.formGroup label {
+  font-weight: 600;
+}
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.animalList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.animalItem {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+.animalItem:last-child {
+  border-bottom: none;
+}
+.animalItem:hover {
+  background-color: #f0f0f0;
+}
+.animalItem.selected {
+  background-color: #21584b;
+  color: white;
+}
+.modalFooter {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+.buttonPrimary {
+  background-color: #28a745;
+  color: white;
+}
+.buttonSecondary {
+  background-color: #6c757d;
+  color: white;
+}
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

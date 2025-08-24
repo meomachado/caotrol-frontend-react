@@ -1,40 +1,36 @@
-// src/components/Header.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // Importa a biblioteca
-import styles from './Header.module.css'; // Nosso novo arquivo de estilos
+import styles from './Header.module.css'; // Crie um CSS para o seu header se necessário
 
 function Header() {
+  const [userName, setUserName] = useState('');
   const navigate = useNavigate();
-  const [userName, setUserName] = useState('Dr. Usuário'); // Valor padrão
 
+  // Este efeito busca o nome do usuário no localStorage quando o componente carrega
   useEffect(() => {
-    const token = localStorage.getItem('jwt_token');
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        // Assumindo que o nome do usuário está no campo 'nome' do payload do token
-        setUserName(decodedToken.nome || 'Dr. Usuário'); 
-      } catch (error) {
-        console.error("Erro ao decodificar o token:", error);
-      }
+    const storedName = localStorage.getItem('user_name');
+    if (storedName) {
+      // Adiciona o "Dr." antes do nome para exibição
+      setUserName(` ${storedName}`);
     }
-  }, []);
+  }, []); // O array vazio [] faz com que este código rode apenas uma vez
 
   const handleLogout = () => {
-    localStorage.removeItem('jwt_token');
-    navigate('/login');
+    // Limpa o localStorage e redireciona para a página de login
+    localStorage.clear();
+    window.location.href = '/'; 
   };
 
   return (
-    <div className={styles.headerContainer}>
+    <header className={styles.headerContainer}>
+      {/* Aqui pode ir o seu logo ou outros links */}
       <div className={styles.userInfo}>
         <span>{userName}</span>
         <button onClick={handleLogout} className={styles.logoutButton}>
           Sair
         </button>
       </div>
-    </div>
+    </header>
   );
 }
 

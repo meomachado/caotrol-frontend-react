@@ -4,13 +4,26 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import styles from './ConsultaModal.module.css';
 
+const initialState = {
+  queixa: '',
+  diagnostico: '',
+  tratamento: '',
+  peso: '',
+  temperatura: '',
+  tpc: '',
+  mucosas: '',
+  freq: '',
+  resp: '',
+};
+
 function ConsultaModal({ isOpen, onClose, onSave, consultaToEdit }) {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(initialState);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (consultaToEdit) {
+      // ✅ 3. ATUALIZE O ESTADO GARANTINDO QUE TODOS OS CAMPOS EXISTAM
       setFormData({
         queixa: consultaToEdit.queixa || '',
         diagnostico: consultaToEdit.diagnostico || '',
@@ -22,8 +35,6 @@ function ConsultaModal({ isOpen, onClose, onSave, consultaToEdit }) {
         freq: consultaToEdit.freq || '',
         resp: consultaToEdit.resp || '',
       });
-    } else {
-      setFormData({});
     }
   }, [consultaToEdit]);
 
