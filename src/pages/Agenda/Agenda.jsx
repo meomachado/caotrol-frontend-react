@@ -126,7 +126,7 @@ function Agenda() {
           dateClick={handleDateClick}
           eventClick={handleEventClick}
           slotDuration={"01:00:00"}
-          slotMinTime={"06:00:00"}
+          slotMinTime={"08:00:00"}
           slotMaxTime={"19:00:00"}
           allDaySlot={false}
           slotLabelFormat={{
