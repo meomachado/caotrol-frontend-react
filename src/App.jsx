@@ -17,27 +17,38 @@ import Consulta from "./pages/Consulta/Consultas";
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("jwt_token");
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+  const isAuthenticated = localStorage.getItem("jwt_token"); 
+  //ele verifica se o token de seguranca existe quando um usuario realizou o login
+  return isAuthenticated ? children : <Navigate to="/login" replace />; //aqui funciona como um if/else 
+  //Se isAuthenticated for verdadeiro (ou seja, o token existe), então mostre os componentes filhos (children). 
+  //Se for falso (token não existe), redirecione o usuário para a página /login
+}; 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />  
+        {/*path é o caminho que ele vai colocar na URL*/}
+        {/* é o componente que ele vai exibir - Login.jsx nesse caso */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          //basicamente http://localhost:3000/ te manda pra dashboard sem necessariamente ter a   
+          //palavra dashboar depois da barra 
+        
 
         {/* Rotas Protegidas */}
         <Route
-          path="/"
-          element={
-            <PrivateRoute>
+          path="/" // essa é a rota principal que esta envolvida no privateRoute
+          //ela so sera acessada se o usuario estiver logado
+          element={  
+            <PrivateRoute> 
               <MainLayout />
             </PrivateRoute>
           }
         >
           {/* Rotas aninhadas dentro do MainLayout */}
+          {/*essas rotas estao aninhadas, ou seja, todas elas serao renderizadas dentro
+             do main layout */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="animais" element={<Animais />} />
