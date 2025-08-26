@@ -17,7 +17,6 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit }) {
   const [especies, setEspecies] = useState([]);
   const [error, setError] = useState("");
 
-  // Estados para o autocomplete do tutor
   const [tutorSearchTerm, setTutorSearchTerm] = useState("");
   const [searchedTutores, setSearchedTutores] = useState([]);
   const [showTutorResults, setShowTutorResults] = useState(false);
@@ -26,7 +25,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit }) {
   // Efeito para buscar raças e espécies
   useEffect(() => {
     if (isOpen) {
-      // ✅ CORREÇÃO: Acessa a propriedade .data da resposta da API
+      // ✅ CORREÇÃO: Usamos a resposta direta da API, sem .data
       api.get("/racas").then((response) => setRacas(response || []));
       api.get("/especies").then((response) => setEspecies(response || []));
     }
@@ -47,7 +46,6 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit }) {
         setTemperamento(animalToEdit.temperamento || "");
         setPorte(animalToEdit.porte || "");
       } else {
-        // Limpa todos os campos
         setNome(""); setDataNasc(""); setSexo("M"); setIdTutor("");
         setIdEspecie(""); setIdRaca(""); setTemperamento(""); setPorte("");
         setSelectedTutorName("");
@@ -68,8 +66,8 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit }) {
     const delayDebounceFn = setTimeout(() => {
       api.get(`/tutores/search?termo=${tutorSearchTerm}`)
         .then(response => {
-          // ✅ CORREÇÃO: Acessa a propriedade .data da resposta da API
-          setSearchedTutores(response|| []);
+          // ✅ CORREÇÃO: Usamos a resposta direta da API, sem .data
+          setSearchedTutores(response || []);
           setShowTutorResults(true);
         })
         .catch(err => {
@@ -100,7 +98,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit }) {
       }
       onSave();
     } catch (err) {
-      setError("Erro ao salvar o animal.");
+      setError(err.response?.data?.message || "Erro ao salvar o animal.");
       console.error(err);
     }
   };
