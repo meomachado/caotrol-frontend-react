@@ -1,82 +1,109 @@
-/* Para AnimalDetailModal.module.css e TutorDetailModal.module.css */
+/* src/pages/Animais/AnimalDetailModal.module.css */
 
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
+  backdrop-filter: blur(4px);
 }
 
 .modalContent {
-  background: white;
-  padding: 30px 40px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  /* ✅ Aumenta a largura para acomodar as colunas */
-  max-width: 700px; 
-  /* ✅ Remove altura fixa e rolagem */
-  /* height: 500px; */
-  /* overflow-y: auto; */
+  background-color: #ffffff;
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 750px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.modalContent h2 {
+/* --- Cabeçalho do Modal --- */
+.modalHeader {
+  padding: 20px 30px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* --- Corpo do Modal --- */
+.modalBody {
+  padding: 30px;
+  background-color: #f9fafb;
+}
+
+.sectionTitle {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #34495e;
   margin-top: 0;
-  margin-bottom: 25px;
-  color: #343a40;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
 }
 
-/* ✅ ESTA É A CLASSE QUE CRIA AS COLUNAS */
 .detailGrid {
   display: grid;
-  /* Cria duas colunas de tamanho igual */
-  grid-template-columns: 1fr 1fr; 
-  /* Espaçamento entre as linhas e colunas */
-  gap: 20px 30px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px 30px;
 }
 
 .detailGroup {
-  margin-bottom: 0; /* O 'gap' do grid agora cuida do espaçamento */
+  margin-bottom: 0;
 }
 
 .detailGroup label {
   display: block;
-  font-weight: bold;
   font-size: 0.8em;
-  color: #6c757d;
+  font-weight: 600;
+  color: #7f8c8d;
   text-transform: uppercase;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .detailGroup p {
   margin: 0;
   font-size: 1.1em;
-  color: #212529;
-  padding: 8px;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  border: 1px solid #e9ecef;
+  color: #34495e;
+  padding: 0;
+  background-color: transparent;
+  border: none;
 }
 
-.modalActions {
-  margin-top: 30px;
+/* --- Rodapé e Ações --- */
+.modalFooter {
+  padding: 20px 30px;
   display: flex;
   justify-content: flex-end;
+  background-color: #f0f2f5;
+  border-top: 1px solid #e9ecef;
 }
 
 .closeButton {
   padding: 10px 25px;
-  border-radius: 5px;
-  font-weight: bold;
-  background-color: #6c757d;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1em;
+  background-color: #7f8c8d;
   color: white;
   border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: #95a5a6;
 }
