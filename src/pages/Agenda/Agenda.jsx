@@ -23,16 +23,9 @@ function Agenda() {
   const fetchEvents = async (fetchInfo) => {
     try {
       const url = `/agendamentos?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`;
-      console.log("URL da requisição para a API:", url);
-
       const response = await api.get(url);
-      
-      // Acessa a propriedade 'data' da resposta da API.
       const events = Array.isArray(response) ? response : [];
       
-      console.log("Eventos sendo retornados para o FullCalendar:", events);
-      
-      // Com async/await, retornamos o array de eventos diretamente.
       return events;
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);

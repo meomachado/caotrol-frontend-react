@@ -18,7 +18,7 @@ function Tutores() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  const [ordenarPor, setOrdenarPor] = useState("nome_asc");
+  const [ordenarPor, setOrdenarPor] = useState("id_desc");
 
   const fetchTutores = useCallback(async (page) => {
     try {
@@ -122,6 +122,7 @@ function Tutores() {
         <div className={styles.sortGroup}>
             <label htmlFor="sort">Ordenar por:</label>
             <select id="sort" value={ordenarPor} onChange={(e) => setOrdenarPor(e.target.value)}>
+            <option value="id_desc">Mais Recentes</option>
                 <option value="nome_asc">Nome (A-Z)</option>
                 <option value="nome_desc">Nome (Z-A)</option>
             </select>
