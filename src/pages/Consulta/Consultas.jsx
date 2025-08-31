@@ -23,8 +23,7 @@ function Consultas() {
   // Modais de detalhe e edição
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedConsulta, setSelectedConsulta] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingConsulta, setEditingConsulta] = useState(null);
+
 
   // ✅ 1. Estados para controle da paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,16 +75,7 @@ function Consultas() {
     }
   };
 
-  const handleOpenEditModal = (consulta) => {
-    setEditingConsulta(consulta);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSave = () => {
-    setIsEditModalOpen(false);
-    setEditingConsulta(null);
-    fetchConsultas(currentPage);
-  };
+ 
 
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat("pt-BR", {
@@ -120,7 +110,6 @@ function Consultas() {
     <div className={styles.consultasContainer}>
       {/* --- MODAIS --- */}
       <ConsultaDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} consulta={selectedConsulta} />
-      <ConsultaModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} onSave={handleSave} consultaToEdit={editingConsulta} />
       <SelecaoAnimalModal isOpen={isSelecaoOpen} onClose={() => setIsSelecaoOpen(false)} onAnimalSelecionado={handleAnimalSelecionado} />
       <NovaConsultaModal isOpen={isNovaConsultaOpen} onClose={handleCloseNovaConsulta} onSave={handleCloseNovaConsulta} animalId={animalIdParaConsulta} />
 
@@ -177,7 +166,6 @@ function Consultas() {
                 <td>{c.veterinario?.nome || "N/A"}</td>
                 <td className={styles.actionButtons}>
                   <button onClick={() => handleOpenDetailModal(c.id_consulta)} title="Ver Detalhes"><i className="fas fa-eye"></i></button>
-                  <button onClick={() => handleOpenEditModal(c)} title="Editar"><i className="fas fa-pencil-alt"></i></button>
                   <button onClick={() => handleDelete(c.id_consulta)} title="Excluir"><i className="fas fa-trash-alt"></i></button>
                 </td>
               </tr>

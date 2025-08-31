@@ -1,43 +1,41 @@
 // src/pages/Login.jsx
+
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Garanta que esta linha está presente
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import logoImage from "../assets/logo_login.png"; // Importe a imagem do logo
+import logoImage from "../assets/logo_login.png";
+import { jwtDecode } from "jwt-decode"; // Importe o decodificador
 
 function Login() {
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate(); // <--- ESTA LINHA É CRÍTICA! GARANTA QUE ELA ESTÁ AQUI
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    console.log("SUBMIT ACIONADO! Tentando fazer login..."); // <-- ADICIONE ESTA LINHA
+    setErrorMessage("");
 
     try {
       const data = await api.login(login, senha);
 
       if (data && data.token) {
-        // Decodificar o token e armazenar no localStorage (código já existente)
-        const base64Url = data.token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const payload = JSON.parse(window.atob(base64));
+        // Usa a biblioteca jwt-decode para decodificar o token
+        const payload = jwtDecode(data.token);
 
         localStorage.setItem("jwt_token", data.token);
         localStorage.setItem("user_id", payload.id);
         localStorage.setItem("user_type", payload.tipo);
-        localStorage.setItem(
-          "user_name",
-          payload.nome_veterinario || payload.login
-        );
 
+        // --- MUDANÇA PRINCIPAL AQUI ---
+        // Agora, simplesmente pegamos o campo 'nome_exibicao'
+        localStorage.setItem("user_name", payload.nome_exibicao);
+        
         if (payload.id_veterinario) {
           localStorage.setItem("vet_id", payload.id_veterinario);
         }
 
-        //   alert('Login bem-sucedido!');
-        navigate("/dashboard"); // Esta linha agora deverá funcionar
+        navigate("/dashboard");
       } else {
         setErrorMessage("Resposta de token inválida do servidor.");
       }
@@ -45,19 +43,16 @@ function Login() {
       console.error("Erro no login:", error);
       setErrorMessage(
         error.message ||
-          "Não foi possível conectar ao servidor. Tente novamente mais tarde."
+          "Não foi possível conectar ao servidor. Tente novamente."
       );
     }
   };
-
+  
+  // ... resto do seu componente JSX ...
   return (
-    // 👇 Adicione este container em volta do seu formulário
     <div className="loginPageContainer">
       <div className="login-container">
-        {" "}
-        {/* Seu formulário de login existente */}
         <form className="login-form" onSubmit={handleSubmit}>
-          {/* <h2>Bem-vindo à PetCare</h2> */}
           <img src={logoImage} alt="Lauro Vet Logo" />
           <p>Faça login para acessar o sistema.</p>
           <div className="input-group">

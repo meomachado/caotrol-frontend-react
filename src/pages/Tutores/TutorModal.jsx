@@ -105,7 +105,55 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     }
   }, [estados]);
 
-  const handleSubmit = async (e) => { e.preventDefault(); /* ...sua lógica de salvar... */ onSave(); };
+// src/pages/Tutores/TutorModal.jsx
+
+// ... (resto do seu código, imports e estados)
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(""); // Limpa erros anteriores
+
+  // 1. Validação básica no frontend
+  if (!nome || !cpf || !telefone) {
+    setError("Os campos Nome, CPF e Telefone são obrigatórios.");
+    return;
+  }
+
+  // 2. Coleta e formata os dados do formulário para enviar ao backend
+  const tutorData = {
+    nome,
+    cpf,
+    telefone,
+    // Garante que a data seja enviada no formato ISO ou como null se estiver vazia
+    data_nasc: dataNasc ? new Date(dataNasc).toISOString() : null,
+    cep,
+    // CORREÇÃO: O backend espera 'logradouro', mas o estado se chama 'rua'
+    logradouro: rua, 
+    num,
+    bairro,
+    // Garante que o id_cidade seja um número ou undefined
+    id_cidade: idCidade ? parseInt(idCidade, 10) : undefined,
+  };
+
+  try {
+    if (tutorToEdit) {
+      // Se estiver editando, usa o método PUT
+      await api.put(`/tutores/${tutorToEdit.id_tutor}`, tutorData);
+    } else {
+      // Se for um novo tutor, usa o método POST
+      await api.post("/tutores", tutorData);
+    }
+    onSave(); // Fecha o modal e atualiza a lista de tutores
+  } catch (err) {
+    // Exibe a mensagem de erro vinda do backend, se houver
+    setError(err.response?.data?.message || "Ocorreu um erro ao salvar o tutor.");
+    console.error("Erro ao salvar tutor:", err);
+  }
+};
+
+if (!isOpen) return null;
+
+// ... (resto da renderização do seu componente)
 
   if (!isOpen) return null;
 
