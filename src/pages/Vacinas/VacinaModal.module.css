@@ -1,0 +1,74 @@
+/* pages/Vacinas/VacinaModal.module.css */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000; /* Z-index maior para ficar sobre o modal da consulta */
+  }
+  .modalContent {
+    background-color: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+  .modalContent h2 {
+    padding: 20px 25px;
+    margin: 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+  .formBody {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .formGroup label {
+    font-weight: 500;
+    font-size: 0.9em;
+    color: #34495e;
+  }
+  .formGroup input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  .modalFooter {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+  }
+  .cancelButton,
+  .saveButton {
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .cancelButton {
+    background-color: #7f8c8d;
+    color: white;
+  }
+  .saveButton {
+    background-color: #27ae60;
+    color: white;
+  }
+  .errorMessage {
+    text-align: center;
+    color: #e74c3c;
+    padding: 0 25px 10px;
+  }
