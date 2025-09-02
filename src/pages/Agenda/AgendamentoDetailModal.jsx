@@ -17,7 +17,7 @@ function AgendamentoDetailModal({
 
   useEffect(() => {
     if (eventInfo) {
-      setStatus(eventInfo.extendedProps.status || "pendente" );
+      setStatus(eventInfo.extendedProps.status || "pendente");
     }
   }, [eventInfo]);
 
@@ -33,6 +33,8 @@ function AgendamentoDetailModal({
         await api.patch(`/agendamentos/${eventId}/confirmar`);
       } else if (status === "cancelada") {
         await api.patch(`/agendamentos/${eventId}/cancelar`);
+      } else if (status === "marcar-falta") {
+        await api.patch(`/agendamentos/${eventId}/marcar-falta`);
       }
 
       onSave();
@@ -82,17 +84,21 @@ function AgendamentoDetailModal({
             <label>Status</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               {/* Mostra a opção "Pendente" desabilitada se o status inicial for esse */}
-              {initialStatus === 'pendente' && (
-                <option value="pendente" disabled>Pendente</option>
+              {initialStatus === "pendente" && (
+                <option value="pendente" disabled>
+                  Pendente
+                </option>
               )}
               {/* Mostra a opção "Agendada" desabilitada se o status inicial for esse */}
-              {initialStatus === 'agendada' && (
-                <option value="agendada" disabled>Agendada</option>
+              {initialStatus === "agendada" && (
+                <option value="agendada" disabled>
+                  Agendada
+                </option>
               )}
 
-             
               <option value="confirmada">Confirmada</option>
               <option value="cancelada">Cancelada</option>
+              <option value="marcar-falta">Não Compareceu</option>
             </select>
           </div>
         </div>
