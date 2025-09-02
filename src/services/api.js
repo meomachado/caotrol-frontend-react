@@ -33,6 +33,7 @@ const api = {
     }
 
     try {
+      console.log("a")
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
       if (response.status === 401 && requiresAuth) {
