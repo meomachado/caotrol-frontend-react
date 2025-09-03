@@ -14,6 +14,7 @@ import Tutores from "./pages/Tutores/Tutores";
 import Animais from "./pages/Animais/Animais";
 import Agenda from "./pages/Agenda/Agenda";
 import Consulta from "./pages/Consulta/Consultas";
+import AnimalDetailPage from './pages/Animais/AnimalDetailPage'; 
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
@@ -55,6 +56,7 @@ function App() {
           <Route path="tutores" element={<Tutores />} />
           <Route path="agenda" element={<Agenda />} />
           <Route path="consultas" element={<Consulta />} />
+          <Route path="animais/:id" element={<AnimalDetailPage />} />
 
           {/* Adicione outras rotas aqui no futuro */}
         </Route>

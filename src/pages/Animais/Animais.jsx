@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import styles from "./Animais.module.css";
 import AnimalModal from "./AnimalModal";
-import AnimalDetailModal from "./AnimalDetailModal.jsx";
+import { useNavigate } from 'react-router-dom'; // 
 
 function Animais() {
   const [animais, setAnimais] = useState([]);
@@ -11,10 +11,8 @@ function Animais() {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnimal, setEditingAnimal] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedAnimal, setSelectedAnimal] = useState(null);
   const [busca, setBusca] = useState("");
-
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -47,10 +45,11 @@ function Animais() {
     return () => clearTimeout(timer);
   }, [busca, currentPage, fetchAnimais, ordenarPor]);
 
-  const handleOpenDetailModal = (animal) => {
-    setSelectedAnimal(animal);
-    setIsDetailModalOpen(true);
+
+  const handleNavigateToDetail = (animalId) => {
+    navigate(`/animais/${animalId}`);
   };
+  
 
   const handleOpenCreateModal = () => {
     setEditingAnimal(null);
@@ -94,8 +93,10 @@ function Animais() {
           </p>
         </div>
         <div className={styles.animalActions}>
-          <button className={styles.detailsButton} onClick={() => handleOpenDetailModal(animal)}>Ver Detalhes</button>
           <button className={styles.iconButton} title="Editar" onClick={() => handleOpenEditModal(animal)}><i className="fas fa-pencil-alt"></i></button>
+          <button className={styles.detailsButton} onClick={() => handleNavigateToDetail(animal.id_animal)}>
+            Ver Detalhes
+          </button>
           <button className={`${styles.iconButton} ${styles.deleteButton}`} title="Excluir" onClick={() => handleDelete(animal.id_animal)}><i className="fas fa-trash-alt"></i></button>
         </div>
       </div>
@@ -105,7 +106,7 @@ function Animais() {
   return (
     <div className={styles.animaisContainer}>
       {isModalOpen && <AnimalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} animalToEdit={editingAnimal} />}
-      <AnimalDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} animal={selectedAnimal} />
+    
 
       <div className={styles.pageHeader}>
         <h1>Animais</h1>

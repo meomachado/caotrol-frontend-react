@@ -173,3 +173,56 @@
     .leftPanel, .rightPanel { min-width: 100%; }
     .detailGrid, .vitalsGrid { grid-template-columns: 1fr; }
   }
+  .divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 20px 0;
+  }
+  
+  .documentSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .documentHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .documentHeader h4 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #333;
+  }
+  
+  .printButton {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  
+  .printButton i {
+    color: #555;
+  }
+
+  /* Adicione no final de NovaConsultaModal.module.css */
+.rightPanel input[readOnly],
+.rightPanel textarea[readOnly] {
+  background-color: #e9ecef; /* Um cinza claro para indicar que não é editável */
+  cursor: default; /* Remove o cursor de texto */
+  color: #495057;
+  border-color: #ced4da;
+}
+
+.rightPanel textarea[readOnly] {
+    resize: none; /* Impede que o usuário redimensione a textarea */
+}

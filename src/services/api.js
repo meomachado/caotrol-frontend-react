@@ -3,9 +3,12 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const api = {
-  // ✅ 1. FUNÇÃO DE REQUISIÇÃO MELHORADA: Agora aceita um 'responseType'
+  /**
+   * Função principal que realiza todas as requisições.
+   * Aceita um 'responseType' para lidar com JSON (padrão) ou Blobs (para arquivos/PDFs).
+   */
   request: async (endpoint, method = 'GET', body = null, requiresAuth = true, responseType = 'json') => {
-    const headers = {}; // Content-Type será definido dinamicamente
+    const headers = {};
 
     if (requiresAuth) {
       const token = localStorage.getItem('jwt_token');
@@ -17,80 +20,128 @@ const api = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const config = {
-      method,
-      headers,
-    };
+    const config = { method, headers };
 
     if (body) {
-      // Apenas define Content-Type se o corpo não for um FormData (upload de arquivo)
       if (!(body instanceof FormData)) {
-          headers['Content-Type'] = 'application/json';
-          config.body = JSON.stringify(body);
+        headers['Content-Type'] = 'application/json';
+        config.body = JSON.stringify(body);
       } else {
-          config.body = body; // Para uploads, o browser define o Content-Type
+        config.body = body; // Para uploads, o browser define o Content-Type
       }
     }
 
     try {
-      console.log("a")
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
       if (response.status === 401 && requiresAuth) {
-        // ... (seu código de logout)
         localStorage.clear();
         alert('Sessão expirada. Faça login novamente.');
         window.location.href = '/';
         return;
       }
 
-      if (response.status === 204) {
-        return null;
-      }
+      if (response.status === 204) return null; // Resposta "No Content"
 
-      // ✅ 2. LÓGICA PRINCIPAL DA CORREÇÃO
-      // Se a resposta esperada for um arquivo (blob), retorna o blob
       if (responseType === 'blob') {
-          if (!response.ok) {
-              // Tenta ler o erro como JSON mesmo em caso de falha de blob
-              const errorData = await response.json();
-              throw new Error(errorData.message || `Erro na requisição do arquivo: ${response.status}`);
-          }
-          return response.blob(); // Retorna o arquivo diretamente
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Erro ao ler a resposta de erro como JSON.' }));
+          throw new Error(errorData.message || `Erro na requisição do arquivo: ${response.status}`);
+        }
+        return response.blob();
       }
 
-      // Se não for blob, continua tratando como JSON
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || `Erro na requisição: ${response.status}`);
       }
-      
       return data;
-
     } catch (error) {
       console.error('Erro na requisição da API:', error);
       throw error;
     }
   },
 
-  // Métodos wrapper (sem alterações visíveis, mas agora usam a função melhorada)
-  get: (endpoint, requiresAuth = true) => api.request(endpoint, 'GET', null, requiresAuth),
-  post: (endpoint, body, requiresAuth = true) => api.request(endpoint, 'POST', body, requiresAuth),
-  put: (endpoint, body, requiresAuth = true) => api.request(endpoint, 'PUT', body, requiresAuth),
-  delete: (endpoint, requiresAuth = true) => api.request(endpoint, 'DELETE', null, requiresAuth),
-  patch: (endpoint, body, requiresAuth = true) => api.request(endpoint, 'PATCH', body, requiresAuth),
+  // --- MÉTODOS GENÉRICOS (Wrappers) ---
+  get: (endpoint, requiresAuth = true, responseType = 'json') => 
+    api.request(endpoint, 'GET', null, requiresAuth, responseType),
 
-  // ✅ 3. NOVO MÉTODO ESPECIALIZADO PARA PDFs/BLOBS
-  // Usaremos este método no NovaConsultaModal
-  postAndGetBlob: (endpoint, body, requiresAuth = true) => {
-    return api.request(endpoint, 'POST', body, requiresAuth, 'blob'); // Passa 'blob' como responseType
-  },
+  post: (endpoint, body, requiresAuth = true, responseType = 'json') => 
+    api.request(endpoint, 'POST', body, requiresAuth, responseType),
 
-  // --- Seus Endpoints Específicos ---
-  login: (login, senha) => api.request('/auth/login', 'POST', { login, senha }, false),
+  put: (endpoint, body, requiresAuth = true, responseType = 'json') => 
+    api.request(endpoint, 'PUT', body, requiresAuth, responseType),
+
+  delete: (endpoint, requiresAuth = true, responseType = 'json') => 
+    api.request(endpoint, 'DELETE', null, requiresAuth, responseType),
+
+  patch: (endpoint, body, requiresAuth = true, responseType = 'json') => 
+    api.request(endpoint, 'PATCH', body, requiresAuth, responseType),
+
+  // --- SEUS ENDPOINTS ESPECÍFICOS ---
+  
+  // Auth
+  login: (login, senha) => api.post('/auth/login', { login, senha }, false),
+
+  // Tutores
+  getTutores: (params) => api.get(`/tutores?${params}`),
+  getTutorById: (id) => api.get(`/tutores/${id}`),
+  searchTutores: (termo) => api.get(`/tutores/search?termo=${termo}`),
+  createTutor: (tutorData) => api.post('/tutores', tutorData),
+  updateTutor: (id, tutorData) => api.put(`/tutores/${id}`, tutorData),
+  deleteTutor: (id) => api.delete(`/tutores/${id}`),
+  getAnimaisByTutor: (idTutor) => api.get(`/tutores/${idTutor}/animais`),
+
+  // Animais
+  getAnimais: (params) => api.get(`/animais?${params}`),
+  getAnimalById: (id) => api.get(`/animais/${id}`),
+  createAnimal: (animalData) => api.post('/animais', animalData),
+  updateAnimal: (id, animalData) => api.put(`/animais/${id}`, animalData),
+  deleteAnimal: (id) => api.delete(`/animais/${id}`),
+  getConsultasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/consultas`), // ✅ Adicione esta linha
+  getPrescricoesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/prescricoes`),
+  getExamesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/exames`),
+  getVacinasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/vacinas`),
+
+  // Consultas
+  getConsultas: (params) => api.get(`/consultas?${params}`),
+  getConsultaById: (id) => api.get(`/consultas/${id}`),
+  createConsulta: (consultaData) => api.post('/consultas', consultaData),
+  
+  // Veterinários
+  getVeterinarios: (params) => api.get(`/veterinarios?${params}`),
   getVeterinarioById: (id) => api.get(`/veterinarios/${id}`),
-  // ... (seus outros endpoints específicos)
+  
+  // Raças e Espécies
+  getEspecies: () => api.get('/especies'),
+  getRacas: () => api.get('/racas'),
+  
+  // Endereço (ViaCEP)
+  getEnderecoByCep: (cep) => api.get(`/enderecos/cep/${cep}`),
+  
+  // Estados e Cidades
+  getEstados: () => api.get('/estados'),
+  getCidadesByEstado: (idEstado) => api.get(`/estados/${idEstado}/cidades`),
+
+  // Agendamentos
+  getAgendamentos: (params) => api.get(`/agendamentos?${params}`),
+  getHorariosDisponiveis: (params) => api.get(`/agendamentos/horarios-disponiveis?${params}`),
+  createAgendamento: (agendamentoData) => api.post('/agendamentos', agendamentoData),
+  confirmarAgendamento: (id) => api.patch(`/agendamentos/${id}/confirmar`),
+  cancelarAgendamento: (id) => api.patch(`/agendamentos/${id}/cancelar`),
+  marcarFaltaAgendamento: (id) => api.patch(`/agendamentos/${id}/marcar-falta`),
+
+  // Dashboard
+  getDashboardData: () => api.get('/dashboard'),
+  
+  // Documentos (PDFs)
+  gerarPrescricaoPreview: (data) => api.post('/documentos/prescricao/visualizar', data, true, 'blob'),
+  gerarExamePreview: (data) => api.post('/documentos/exame/visualizar', data, true, 'blob'),
+  imprimirPrescricao: (id) => api.get(`/prescricoes/${id}/imprimir`, true, 'blob'),
+  imprimirExame: (id) => api.get(`/exames/${id}/imprimir`, true, 'blob'),
+
+  // Vacinas
+  registrarVacina: (idAnimal, vacinaData) => api.post(`/animais/${idAnimal}/vacinas`, vacinaData),
 };
 
 export default api;

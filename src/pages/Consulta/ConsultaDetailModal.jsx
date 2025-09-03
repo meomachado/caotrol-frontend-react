@@ -1,136 +1,235 @@
-// src/pages/Consultas/ConsultaDetailModal.jsx
-
-import React from 'react';
-import styles from './ConsultaDetailModal.module.css';
+import React from "react";
+// ✅ PASSO 1: Alterado para usar o CSS do NovaConsultaModal
+import styles from "./NovaConsultaModal.module.css";
+import api from "../../services/api";
 
 function ConsultaDetailModal({ isOpen, onClose, consulta }) {
   if (!isOpen || !consulta) return null;
 
-  // Formato de data/hora
+  // ✅ MANTIDO: Funções de formatação e impressão
   const formatDate = (dateString) => {
-    if (!dateString) return '—';
+    if (!dateString) return "—";
     try {
-      return new Intl.DateTimeFormat('pt-BR', {
-        dateStyle: 'short',
-        timeStyle: 'short',
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
       }).format(new Date(dateString));
     } catch {
-      return '—';
+      return "—";
+    }
+  };
+
+  const formatDateOnly = (dateString) => {
+    if (!dateString) return "—";
+    return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
+      new Date(dateString)
+    );
+  };
+
+  const calculateAge = (dateString) => {
+    if (!dateString) return "—";
+    const ageInMilliseconds = new Date() - new Date(dateString);
+    const ageInYears = ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
+    const years = Math.floor(ageInYears);
+    const months = Math.floor((ageInYears - years) * 12);
+    if (years > 0) {
+      return `${years} ano(s)${months > 0 ? ` e ${months} mes(es)` : ""}`;
+    }
+    return `${months} mes(es)`;
+  };
+
+  const handleImprimir = async (tipo, id) => {
+    const endpoint =
+      tipo === "prescricao"
+        ? `/prescricoes/${id}/imprimir`
+        : `/exames/${id}/imprimir`;
+
+    try {
+      const response = await api.get(endpoint, true, "blob");
+      const file = new Blob([response], { type: "application/pdf" });
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL, "_blank");
+    } catch (error) {
+      console.error(`Erro ao imprimir ${tipo}:`, error);
+      alert(`Não foi possível gerar o PDF da ${tipo}.`);
     }
   };
 
   const c = consulta;
 
-
   return (
+    // ✅ PASSO 2: Reestruturação completa do JSX
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        
-        {/* Cabeçalho */}
-        <div className={styles.modalHeader}>
-          <div>
-            <h2>{c.animal?.nome ? c.animal.nome : "Detalhes da Consulta"}</h2>
-            <div className={styles.headerMeta}>
-              <span><strong>Tutor:</strong> {c.animal?.tutor?.nome || "—"}</span>
-              <span><strong>Data/Hora:</strong> {formatDate(c.data)}</span>
-            </div>
-          </div>
-          <button className={`${styles.button} ${styles.buttonSecondary}`} onClick={onClose}>
-            Fechar
+        {/* Cabeçalho Principal */}
+        <div className={styles.header}>
+          <h2>Detalhes da Consulta</h2>
+          <button className={styles.closeButton} onClick={onClose}>
+            &times;
           </button>
         </div>
 
-        {/* Corpo em duas colunas */}
-        <div className={styles.modalBody}>
-        
-          {/* ESQUERDA - Card com informações do animal */}
+        {/* Header do Animal */}
+        <div className={styles.animalHeader}>
+          <div className={styles.animalInfo}>
+            <i className="fas fa-paw"></i>
+            <h3>{c.animal?.nome || "Animal"}</h3>
+          </div>
+          <div className={styles.tutorInfo}>
+            <p>
+              <strong>Tutor:</strong> {c.animal?.tutor?.nome || "—"}
+            </p>
+            <p>
+              <strong>CPF:</strong> {c.animal?.tutor?.cpf || "—"}
+            </p>
+            <p>
+              <strong>Telefone:</strong> {c.animal?.tutor?.telefone || "—"}
+            </p>
+          </div>
+          <div className={styles.animalActions}>
+            {/* Pode adicionar botões aqui se quiser, como um de "Ver Histórico" */}
+          </div>
+        </div>
+
+        {/* Corpo Principal (2 colunas) */}
+        <div className={styles.mainBody}>
+          {/* Painel Esquerdo - Anamnese */}
           <div className={styles.leftPanel}>
             <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h3>🩺 Última anamnese</h3>
-              </div>
-              <div className={styles.detailGrid}>
-                <div className={styles.detailItem}>
+              <h4>🩺 Anamnese do Animal</h4>
+              <div className={styles.anamneseGrid}>
+                <div>
                   <label>Espécie</label>
-                  <div className={styles.roInput}>{c.animal?.raca?.especie?.nome || '—'}</div>
+                  <p>{c.animal?.raca?.especie?.nome || "—"}</p>
                 </div>
-                <div className={styles.detailItem}>
+                <div>
                   <label>Raça</label>
-                  <div className={styles.roInput}>{c.animal?.raca?.nome || '—'}</div>
+                  <p>{c.animal?.raca?.nome || "—"}</p>
                 </div>
-                <div className={styles.detailItem}>
+                <div>
                   <label>Sexo</label>
-                  <div className={styles.roInput}>{c.animal?.sexo === 'F' ? 'Fêmea' : 'Macho'}</div>
+                  <p>{c.animal?.sexo === "F" ? "Fêmea" : "Macho"}</p>
                 </div>
-                <div className={styles.detailItem}>
+                <div>
                   <label>Porte</label>
-                  <div className={styles.roInput}>{c.animal?.porte || '—'}</div>
+                  <p>{c.animal?.porte || "—"}</p>
                 </div>
-                <div className={styles.detailItem}>
+                <div>
                   <label>Temperamento</label>
-                  <div className={styles.roInput}>{c.animal?.temperamento || '—'}</div>
+                  <p>{c.animal?.temperamento || "—"}</p>
                 </div>
-                <div className={styles.detailItem}>
-                  <label>Data Nascimento</label>
-                  <div className={styles.roInput}>
-                    {c.animal?.data_nasc 
-                      ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(c.animal.data_nasc))
-                      : '—'}
-                  </div>
-                </div>
-                <div className={styles.detailItem}>
+                <div>
                   <label>Idade</label>
-                  <div className={styles.roInput}>
-                    {c.animal?.data_nasc 
-                      ? `${Math.floor((new Date() - new Date(c.animal.data_nasc)) / (1000 * 60 * 60 * 24 * 365.25))} anos`
-                      : '—'}
-                  </div>
+                  <p>{calculateAge(c.animal?.data_nasc)}</p>
                 </div>
-                <div className={styles.detailItem}>
+                <div>
+                  <label>Nascimento</label>
+                  <p>{formatDateOnly(c.animal?.data_nasc)}</p>
+                </div>
+                <div>
                   <label>Castrado</label>
-                  <div className={styles.roInput}>{c.animal?.castrado ? 'Sim' : 'Não'}</div>
+                  <p>{c.animal?.castrado ? "Sim" : "Não"}</p>
                 </div>
-              </div> 
-              
-              {/* Campos de texto longos */}
-              <div className={styles.detailItem}>
-                <label>Alergias</label>
-                <div className={styles.roBlock}>{c.animal?.alergias || 'Nenhuma alergia registrada.'}</div>
               </div>
-              <div className={styles.detailItem}>
+              <div className={styles.fullWidth}>
+                <label>Alergias</label>
+                <p>{c.animal?.alergias || "Nenhuma"}</p>
+              </div>
+              <div className={styles.fullWidth}>
                 <label>Observações</label>
-                <div className={styles.roBlock}>{c.animal?.observacoes || 'Nenhuma observação registrada.'}</div>
+                <p>{c.animal?.observacoes || "Nenhuma"}</p>
               </div>
             </div>
           </div>
 
-          {/* DIREITA - Dados da consulta */}
+          {/* Painel Direito - Dados da Consulta */}
           <div className={styles.rightPanel}>
+            {/* ✅ PASSO 3: Campos de exibição com 'readOnly' */}
             <div className={styles.vitalsGrid}>
-              <div className={styles.vitalItem}><label>Peso</label><div className={styles.roInput}>{c.peso ?? '—'}</div></div>
-              <div className={styles.vitalItem}><label>Temperatura</label><div className={styles.roInput}>{c.temperatura ?? '—'}</div></div>
-              <div className={styles.vitalItem}><label>TPC</label><div className={styles.roInput}>{c.tpc ?? '—'}</div></div>
-              <div className={styles.vitalItem}><label>Mucosas</label><div className={styles.roInput}>{c.mucosas ?? '—'}</div></div>
-              <div className={styles.vitalItem}><label>Frequência Cardíaca</label><div className={styles.roInput}>{c.freq ?? '—'}</div></div>
-              <div className={styles.vitalItem}><label>Frequência Respiratória</label><div className={styles.roInput}>{c.resp ?? '—'}</div></div>
+              <div>
+                <label>Peso</label>
+                <input type="text" readOnly value={c.peso ?? "—"} />
+              </div>
+              <div>
+                <label>Temperatura</label>
+                <input type="text" readOnly value={c.temperatura ?? "—"} />
+              </div>
+              <div>
+                <label>TPC</label>
+                <input type="text" readOnly value={c.tpc ?? "—"} />
+              </div>
+              <div>
+                <label>Mucosas</label>
+                <input type="text" readOnly value={c.mucosas ?? "—"} />
+              </div>
+              <div>
+                <label>Frequência Cardíaca</label>
+                <input type="text" readOnly value={c.freq ?? "—"} />
+              </div>
+              <div>
+                <label>Frequência Respiratória</label>
+                <input type="text" readOnly value={c.resp ?? "—"} />
+              </div>
             </div>
+            <div className={styles.formGroup}>
+              <label>Queixa principal</label>
+              <textarea
+                readOnly
+                value={c.queixa || "Nenhuma queixa registrada."}
+              ></textarea>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Suspeita Clínica</label>
+              <textarea
+                readOnly
+                value={c.suspeita || "Nenhuma suspeita registrada."}
+              ></textarea>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Diagnóstico</label>
+              <textarea
+                readOnly
+                value={c.diagnostico || "Nenhum diagnóstico registrado."}
+              ></textarea>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Tratamento</label>
+              <textarea
+                readOnly
+                value={c.tratamento || "Nenhum tratamento registrado."}
+              ></textarea>
+            </div>
+          </div>
+        </div>
 
-            <div className={styles.detailItem}><label>Queixa principal</label><div className={styles.roBlock}>{c.queixa || 'Nenhuma queixa registrada.'}</div></div>
-            <div className={styles.detailItem}><label>Diagnóstico</label><div className={styles.roBlock}>{c.diagnostico || 'Nenhum diagnóstico registrado.'}</div></div>
-            <div className={styles.detailItem}><label>Tratamento</label><div className={styles.roBlock}>{c.tratamento || 'Nenhum tratamento registrado.'}</div></div>
-            
-            {Array.isArray(c.prescricao) && c.prescricao.length > 0 && (
-              <div className={styles.detailItem}><label>Prescrição</label><div className={styles.roBlock}>{c.prescricao[0].descricao || '—'}</div></div>
+        {/* Rodapé com Ações */}
+        <div className={styles.footer}>
+          <div className={styles.footerActions}>
+            {c.prescricao && c.prescricao.length > 0 && (
+              <button
+                className={styles.actionButton}
+                onClick={() =>
+                  handleImprimir("prescricao", c.prescricao[0].id_prescricao)
+                }
+              >
+                <i className="fas fa-file-prescription"></i> Imprimir Prescrição
+              </button>
+            )}
+            {c.exame && c.exame.length > 0 && (
+              <button
+                className={styles.actionButton}
+                onClick={() => handleImprimir("exame", c.exame[0].id_exame)}
+              >
+                <i className="fas fa-vial"></i> Imprimir Exames
+              </button>
             )}
           </div>
+          <div className={styles.footerControls}>
+            <button className={styles.saveButton} onClick={onClose}>
+              Fechar
+            </button>
+          </div>
         </div>
-
-        {/* Rodapé */}
-        <div className={styles.modalFooter}>
-          <button className={`${styles.button} ${styles.buttonSecondary}`} onClick={onClose}>Cancelar</button>
-          <button className={`${styles.button} ${styles.buttonPrimary}`} onClick={onClose}>OK</button>
-        </div>
-        
       </div>
     </div>
   );

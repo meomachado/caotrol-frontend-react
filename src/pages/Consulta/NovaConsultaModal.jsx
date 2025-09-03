@@ -109,11 +109,15 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
             ? [{ descricao: formData.prescricao }]
             : [],
           exame: formData.exame ? [{ solicitacao: formData.exame }] : [],
+
+          anamnese: {
+            castrado: animal.castrado,
+            alergias: animal.alergias,
+            obs: animal.observacoes,
+        }
         },
       };
-
-      // 4. Envio da Requisição
-      await api.post("/consultas", payload);
+      await api.createConsulta(payload);
 
       // 5. Sucesso
       alert("Consulta salva com sucesso!");
@@ -187,11 +191,16 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
     };
 
     try {
-      const response = await api.postAndGetBlob(endpoint, payload);
+      // ✅ A CORREÇÃO ESTÁ AQUI
+      // Trocamos a chamada genérica pela função específica correta
+      const response = isPrescricao 
+        ? await api.gerarPrescricaoPreview(payload)
+        : await api.gerarExamePreview(payload);
+        
       const file = new Blob([response], { type: "application/pdf" });
       const fileURL = URL.createObjectURL(file);
       window.open(fileURL, "_blank");
-      setPdfModalState({ isOpen: false, type: null }); // Fecha o modal
+      setPdfModalState({ isOpen: false, type: null });
     } catch (error) {
       console.error(`Erro ao gerar PDF de ${type}:`, error);
       alert(`Não foi possível gerar o PDF de ${type}.`);
