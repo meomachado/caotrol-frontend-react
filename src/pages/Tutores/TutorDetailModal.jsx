@@ -18,7 +18,7 @@ function TutorDetailModal({ isOpen, onClose, tutor }) {
   // Formata o endereço de forma mais robusta, lidando com campos vazios
   const formatAddress = () => {
     const parts = [];
-    if (tutor.rua) parts.push(tutor.rua);
+    if (tutor.logradouro) parts.push(tutor.logradouro);
     if (tutor.num) parts.push(tutor.num);
     if (tutor.bairro) parts.push(tutor.bairro);
     
@@ -27,9 +27,10 @@ function TutorDetailModal({ isOpen, onClose, tutor }) {
   
   // O backend precisa incluir a relação `cidade` com `estado` no findById do tutor
   const formatCityState = () => {
-    const city = tutor.cidade?.nome || tutor.cidade || 'Não informado';
-    const state = tutor.cidade?.estado?.uf || '';
-    return state ? `${city} - ${state}` : city;
+    if (tutor.cidade && tutor.cidade.nome && tutor.cidade.estado && tutor.cidade.estado.uf) {
+      return `${tutor.cidade.nome} - ${tutor.cidade.estado.uf}`;
+    }
+    return 'Não informado';
   }
 
   return (

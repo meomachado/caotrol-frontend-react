@@ -99,3 +99,34 @@
   font-size: 0.9em;
   text-align: center;
 }
+/* Adicione estas novas classes ao final do seu arquivo TutorModal.module.css */
+
+.cidadeInputContainer {
+  position: relative; /* Essencial para posicionar a lista de sugestões */
+}
+
+.sugestoesLista {
+  position: absolute;
+  top: 100%; /* Posiciona a lista logo abaixo do campo de input */
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  z-index: 10; /* Garante que a lista apareça sobre outros elementos */
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.sugestoesItem {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.sugestoesItem:hover {
+  background-color: #f0f0f0;
+}

@@ -20,23 +20,26 @@ function Tutores() {
 
   const [ordenarPor, setOrdenarPor] = useState("id_desc");
 
-  const fetchTutores = useCallback(async (page) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const url = `/tutores?busca=${busca}&page=${page}&limit=10&ordenarPor=${ordenarPor}`;
-      const response = await api.get(url);
-      
-      setTutores(response.data || []);
-      setTotalPages(response.totalPages || 0);
-      setCurrentPage(response.currentPage || 1);
-    } catch (err) {
-      setError("Não foi possível carregar os tutores.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [busca, ordenarPor]);
+  const fetchTutores = useCallback(
+    async (page) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const url = `/tutores?busca=${busca}&page=${page}&limit=10&ordenarPor=${ordenarPor}`;
+        const response = await api.get(url);
+
+        setTutores(response.data || []);
+        setTotalPages(response.totalPages || 0);
+        setCurrentPage(response.currentPage || 1);
+      } catch (err) {
+        setError("Não foi possível carregar os tutores.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [busca, ordenarPor]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,20 +53,41 @@ function Tutores() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (tutor) => {
-    setEditingTutor(tutor);
-    setIsModalOpen(true);
+  // --- ALTERAÇÃO AQUI (handleOpenEditModal) ---
+  const handleOpenEditModal = async (tutor) => {
+    try {
+      // Busca os dados completos do tutor antes de abrir o modal de edição
+      const response = await api.get(`/tutores/${tutor.id_tutor}`);
+      setEditingTutor(response); // Agora com cidade e estado
+      setIsModalOpen(true);
+    } catch (err) {
+      setError(
+        "Não foi possível carregar os dados completos do tutor para edição."
+      );
+    }
   };
 
-  const handleOpenDetailModal = (tutor) => {
-    setSelectedTutor(tutor);
-    setIsDetailModalOpen(true);
+  // --- ALTERAÇÃO PRINCIPAL AQUI (handleOpenDetailModal) ---
+  const handleOpenDetailModal = async (tutor) => {
+    try {
+      // 1. Busca os dados completos do tutor na API
+      const response = await api.get(`/tutores/${tutor.id_tutor}`);
+
+      // 2. Passa os dados completos para o estado
+      setSelectedTutor(response);
+
+      // 3. Abre o modal
+      setIsDetailModalOpen(true);
+    } catch (err) {
+      setError("Não foi possível carregar os detalhes do tutor.");
+      console.error(err);
+    }
   };
 
   const handleSave = () => {
     setIsModalOpen(false);
     setEditingTutor(null);
-    fetchTutores(1);
+    fetchTutores(currentPage);
   };
 
   const handleDelete = async (tutorId) => {
@@ -82,7 +106,8 @@ function Tutores() {
   const renderTutorList = () => {
     if (loading) return <p>Carregando tutores...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (tutores.length === 0 && !loading) return <p>Nenhum tutor encontrado.</p>;
+    if (tutores.length === 0 && !loading)
+      return <p>Nenhum tutor encontrado.</p>;
 
     return tutores.map((tutor) => (
       <div key={tutor.id_tutor} className={styles.tutorItem}>
@@ -91,9 +116,26 @@ function Tutores() {
           <p>CPF: {tutor.cpf}</p>
         </div>
         <div className={styles.tutorActions}>
-          <button className={styles.detailsButton} onClick={() => handleOpenDetailModal(tutor)}>Ver detalhes</button>
-          <button className={styles.iconButton} title="Editar" onClick={() => handleOpenEditModal(tutor)}><i className="fas fa-pencil-alt"></i></button>
-          <button className={`${styles.iconButton} ${styles.deleteButton}`} title="Excluir" onClick={() => handleDelete(tutor.id_tutor)}><i className="fas fa-trash-alt"></i></button>
+          <button
+            className={styles.detailsButton}
+            onClick={() => handleOpenDetailModal(tutor)}
+          >
+            Ver detalhes
+          </button>
+          <button
+            className={styles.iconButton}
+            title="Editar"
+            onClick={() => handleOpenEditModal(tutor)}
+          >
+            <i className="fas fa-pencil-alt"></i>
+          </button>
+          <button
+            className={`${styles.iconButton} ${styles.deleteButton}`}
+            title="Excluir"
+            onClick={() => handleDelete(tutor.id_tutor)}
+          >
+            <i className="fas fa-trash-alt"></i>
+          </button>
         </div>
       </div>
     ));
@@ -101,46 +143,76 @@ function Tutores() {
 
   return (
     <div className={styles.tutoresContainer}>
-      {isModalOpen && <TutorModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} tutorToEdit={editingTutor} />}
-      <TutorDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} tutor={selectedTutor} />
+      {isModalOpen && (
+        <TutorModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave}
+          tutorToEdit={editingTutor}
+        />
+      )}
+      <TutorDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        tutor={selectedTutor}
+      />
 
       <div className={styles.pageHeader}>
         <h1>Tutores</h1>
       </div>
-      
+
       <div className={styles.actionsBar}>
         <div className={styles.searchInputContainer}>
-            <i className={`fas fa-search ${styles.searchIcon}`}></i>
-            <input 
-                type="text" 
-                placeholder="Buscar por nome ou CPF..." 
-                className={styles.searchInput} 
-                value={busca} 
-                onChange={(e) => setBusca(e.target.value)} 
-            />
+          <i className={`fas fa-search ${styles.searchIcon}`}></i>
+          <input
+            type="text"
+            placeholder="Buscar por nome ou CPF..."
+            className={styles.searchInput}
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
         </div>
         <div className={styles.sortGroup}>
-            <label htmlFor="sort">Ordenar por:</label>
-            <select id="sort" value={ordenarPor} onChange={(e) => setOrdenarPor(e.target.value)}>
+          <label htmlFor="sort">Ordenar por:</label>
+          <select
+            id="sort"
+            value={ordenarPor}
+            onChange={(e) => setOrdenarPor(e.target.value)}
+          >
             <option value="id_desc">Mais Recentes</option>
-                <option value="nome_asc">Nome (A-Z)</option>
-                <option value="nome_desc">Nome (Z-A)</option>
-            </select>
+            <option value="nome_asc">Nome (A-Z)</option>
+            <option value="nome_desc">Nome (Z-A)</option>
+          </select>
         </div>
-        <button className={styles.newTutorButton} onClick={handleOpenCreateModal}>
-            <i className="fas fa-plus"></i> Novo Tutor
+        <button
+          className={styles.newTutorButton}
+          onClick={handleOpenCreateModal}
+        >
+          <i className="fas fa-plus"></i> Novo Tutor
         </button>
       </div>
 
-      <div className={styles.tutorList}>
-        {renderTutorList()}
-      </div>
+      <div className={styles.tutorList}>{renderTutorList()}</div>
 
       {/* ✅ CORREÇÃO: Bloco de paginação agora está sempre visível */}
       <div className={styles.paginationControls}>
-        <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1 || totalPages === 0}>Anterior</button>
-        <span>Página {currentPage} de {totalPages || 1}</span>
-        <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>Próxima</button>
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1 || totalPages === 0}
+        >
+          Anterior
+        </button>
+        <span>
+          Página {currentPage} de {totalPages || 1}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages || totalPages === 0}
+        >
+          Próxima
+        </button>
       </div>
     </div>
   );
