@@ -1,36 +1,47 @@
 // src/pages/Tutores/TutorDetailModal.jsx
 import React from 'react';
-import styles from './TutorDetailModal.module.css';
+import styles from './TutorDetailModal.module.css'; // Usaremos um novo CSS
 
 function TutorDetailModal({ isOpen, onClose, tutor }) {
   if (!isOpen || !tutor) {
     return null;
   }
 
-  // Função para formatar a data para o padrão brasileiro (DD/MM/YYYY)
+  // --- Funções de Formatação ---
   const formatDate = (dateString) => {
-    if (!dateString) return 'Não informado';
+    if (!dateString) return '—';
     const date = new Date(dateString);
-    // Adiciona timeZone: 'UTC' para evitar problemas de fuso horário
     return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(date);
   };
 
-  // Formata o endereço de forma mais robusta, lidando com campos vazios
-  const formatAddress = () => {
-    const parts = [];
-    if (tutor.logradouro) parts.push(tutor.logradouro);
-    if (tutor.num) parts.push(tutor.num);
-    if (tutor.bairro) parts.push(tutor.bairro);
-    
-    return parts.length > 0 ? parts.join(', ') : 'Não informado';
+  const formatCPF = (value) => {
+    if (!value) return '—';
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  };
+
+  const formatTelefone = (value) => {
+    if (!value) return '—';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 11) {
+        return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
   };
   
-  // O backend precisa incluir a relação `cidade` com `estado` no findById do tutor
+  const formatAddress = () => {
+    const parts = [tutor.logradouro, tutor.num, tutor.bairro].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : '—';
+  };
+  
   const formatCityState = () => {
-    if (tutor.cidade && tutor.cidade.nome && tutor.cidade.estado && tutor.cidade.estado.uf) {
+    if (tutor.cidade?.nome && tutor.cidade?.estado?.uf) {
       return `${tutor.cidade.nome} - ${tutor.cidade.estado.uf}`;
     }
-    return 'Não informado';
+    return '—';
   }
 
   return (
@@ -42,46 +53,52 @@ function TutorDetailModal({ isOpen, onClose, tutor }) {
         </div>
 
         <div className={styles.modalBody}>
-          <h3 className={styles.sectionTitle}>Informações Pessoais</h3>
-          <div className={styles.detailGrid}>
-            <div className={styles.detailGroup}>
-              <label>Nome Completo</label>
-              <p>{tutor.nome || 'Não informado'}</p>
-            </div>
-            <div className={styles.detailGroup}>
-              <label>CPF</label>
-              <p>{tutor.cpf || 'Não informado'}</p>
-            </div>
-            <div className={styles.detailGroup}>
-              <label>Telefone</label>
-              <p>{tutor.telefone || 'Não informado'}</p>
-            </div>
-            <div className={styles.detailGroup}>
-              <label>Data de Nascimento</label>
-              <p>{formatDate(tutor.data_nasc)}</p>
+          {/* PAINEL ESQUERDO */}
+          <div className={styles.panel}>
+            <div className={styles.card}>
+              <h3 className={styles.sectionTitle}>Dados Pessoais</h3>
+              <div className={styles.detailGroup}>
+                <label>Nome Completo</label>
+                <div className={styles.detailField}><i className="fas fa-user"></i><span>{tutor.nome || '—'}</span></div>
+              </div>
+              <div className={styles.detailGroup}>
+                <label>CPF</label>
+                <div className={styles.detailField}><i className="fas fa-id-card"></i><span>{formatCPF(tutor.cpf)}</span></div>
+              </div>
+              <div className={styles.detailGroup}>
+                <label>Telefone</label>
+                <div className={styles.detailField}><i className="fas fa-phone"></i><span>{formatTelefone(tutor.telefone)}</span></div>
+              </div>
+              <div className={styles.detailGroup}>
+                <label>Data de Nascimento</label>
+                <div className={styles.detailField}><i className="fas fa-calendar-alt"></i><span>{formatDate(tutor.data_nasc)}</span></div>
+              </div>
             </div>
           </div>
-
-          <h3 className={styles.sectionTitle} style={{ marginTop: '30px' }}>Endereço</h3>
-          <div className={styles.detailGrid}>
-            <div className={styles.detailGroup}>
-              <label>Logradouro</label>
-              <p>{formatAddress()}</p>
-            </div>
-            <div className={styles.detailGroup}>
-              <label>CEP</label>
-              <p>{tutor.cep || 'Não informado'}</p>
-            </div>
-            <div className={styles.detailGroup}>
-              <label>Cidade / Estado</label>
-              <p>{formatCityState()}</p>
+          
+          {/* PAINEL DIREITO */}
+          <div className={styles.panel}>
+            <div className={styles.card}>
+                <h3 className={styles.sectionTitle}>Endereço</h3>
+                <div className={styles.detailGroup}>
+                    <label>CEP</label>
+                    <div className={styles.detailField}><i className="fas fa-map-marker-alt"></i><span>{tutor.cep || '—'}</span></div>
+                </div>
+                 <div className={styles.detailGroup}>
+                    <label>Cidade / Estado</label>
+                    <div className={styles.detailField}><span>{formatCityState()}</span></div>
+                </div>
+                <div className={styles.detailGroup}>
+                    <label>Logradouro</label>
+                    <div className={styles.detailField}><span>{formatAddress()}</span></div>
+                </div>
             </div>
           </div>
         </div>
 
         <div className={styles.modalFooter}>
-          <button onClick={onClose} className={styles.closeButton}>
-            Fechar
+          <button onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}>
+            <i className="fas fa-times"></i> Fechar
           </button>
         </div>
 

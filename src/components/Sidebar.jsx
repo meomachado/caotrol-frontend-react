@@ -44,9 +44,16 @@ function Sidebar() {
           </li>
           <li>
             <NavLink to="/veterinarios">
-              <i className="fas fa-user-md"></i> Usuários
+              <i className="fas fa-user-md"></i> Veterinários
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/usuarios">
+              <i className="fas fa-users-cog"></i> Usuários
+            </NavLink>
+          </li>
+     
+    
         </ul>
       </nav>
     </div>

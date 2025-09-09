@@ -108,3 +108,47 @@
   padding: 20px;
   color: #6c757d;
 }
+
+/* Adicione estas classes no final do seu arquivo Dashboard.module.css */
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.pageHeader h1 {
+  font-size: 2.5em;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterContainer label {
+  font-weight: 500;
+  color: #34495e;
+}
+
+.filterContainer select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #bdc3c7;
+  background-color: #fff;
+  font-size: 0.95em;
+}
+
+.dateHeader {
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #555;
+  font-size: 1.1em;
+  font-weight: 500;
+}

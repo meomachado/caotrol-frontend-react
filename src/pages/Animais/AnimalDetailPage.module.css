@@ -1,138 +1,244 @@
+/* pages/Animais/AnimalDetailPage.module.css */
 .detailPage {
-    padding: 20px;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  
-  .header h1 {
-    font-size: 2.5em;
-    color: #2c3e50;
-  }
-  
-  .backButton {
-    background-color: #7f8c8d;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 25px 30px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-    margin-bottom: 25px;
-  }
-  
-  .sectionTitle {
-    font-size: 1.5em;
-    color: #34495e;
-    margin: 0 0 20px 0;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e9ecef;
-  }
-  
-  .detailGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-  }
-  
-  .detailGrid label {
-    display: block;
-    font-size: 0.8em;
-    font-weight: 600;
-    color: #7f8c8d;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-  
-  .detailGrid p {
-    margin: 0;
-    font-size: 1.1em;
-    color: #34495e;
-  }
-  
-  .historyList {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .historyItem {
-    display: flex;
-    gap: 20px;
-    padding: 15px;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    background-color: #f9fafb;
-  }
-  
-  .historyDate {
-    font-weight: 600;
-    color: #21584b;
-    white-space: nowrap;
-  }
-  
-  .historyDetails h4 {
-    margin: 0 0 5px 0;
-    color: #34495e;
-  }
-  
-  .historyDetails p {
-    margin: 0;
-    color: #555;
-    font-size: 0.9em;
-  }
-  
-  .statusMessage {
-    padding: 40px;
-    text-align: center;
-    font-size: 1.2em;
-    color: #6c757d;
-  }
-  
-  .error {
-    color: #d32f2f;
-  }
+  background-color: #f0f2f5;
+  padding: 25px;
+  min-height: 100%;
+}
+ 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+ 
+.header h1 {
+  font-size: 2.2em;
+  color: #2c3e50;
+  font-weight: 400;
+}
+.header h1 strong {
+  font-weight: 700;
+}
+ 
+.backButton {
+  background-color: #ffffff;
+  color: #34495e;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 600;
+  border: 1px solid #dfe6e9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.backButton:hover {
+  background-color: #ecf0f1;
+  border-color: #bdc3c7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
 
-  /* Adicione estas novas classes no final de AnimalDetailPage.module.css */
+.layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 25px;
+  align-items: flex-start;
+}
+ 
+.card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+}
+ 
+.sectionTitle {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #27ae60;
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
 
+.detailGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detailGroup label {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: #7f8c8d;
+  text-transform: uppercase;
+}
+.detailGroup p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1em;
+  color: #34495e;
+  font-weight: 500;
+}
+.detailGroup p i {
+  color: #27ae60;
+  width: 15px;
+  text-align: center;
+}
+
+/* --- ABAS (TABS) --- */
 .tabNav {
-    display: flex;
-    border-bottom: 2px solid #e9ecef;
-    margin-bottom: 25px;
-  }
-  
-  .tabNav button {
-    padding: 12px 25px;
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+.tabNav button {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  color: #7f8c8d;
+  position: relative;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tabNav button:hover {
+  background-color: #f0f2f5;
+  color: #34495e;
+}
+.tabNav button.active {
+  color: #27ae60;
+  background-color: #f0f2f5;
+}
+.tabNav button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #27ae60;
+  border-radius: 3px;
+}
+.tabContent {
+  min-height: 300px;
+}
+
+/* --- LISTA DE HISTÓRICO --- */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.historyCard {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+  transition: box-shadow 0.2s ease;
+  position: relative; /* Para o botão de adicionar resultado */
+}
+.historyCard:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #dfe6e9;
+}
+.historyHeader span {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+.historyHeader h4 {
+  margin: 0;
+  font-size: 1.1em;
+}
+.historyContent p {
+  margin: 0 0 5px 0;
+  color: #34495e;
+  font-size: 0.95em;
+  max-width: 85%; /* Deixa espaço para o botão de resultado */
+}
+.historyContent p:last-child {
+  margin-bottom: 0;
+}
+
+.noData {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #95a5a6;
+  padding: 40px 20px;
+  height: 100%;
+}
+.noData i {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+.noData p {
     font-size: 1.1em;
-    font-weight: 600;
-    color: #7f8c8d;
-    position: relative;
-    top: 2px; /* Alinha o botão com a borda inferior */
-  }
-  
-  .tabNav button.active {
-    color: #21584b;
-    border-bottom: 3px solid #21584b;
-  }
-  
-  .tabContent {
-    min-height: 200px; /* Garante uma altura mínima para o conteúdo */
-  }
+    font-weight: 500;
+}
+
+.addResultButton {
+  background-image: linear-gradient(to right, #27ae60, #2ecc71);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  transition: all 0.2s ease;
+}
+.addResultButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+}
+.addResultButton i {
+  margin-right: 8px;
+}
+.resultadoText {
+  margin-top: 10px !important;
+  background-color: #eaf6ef;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #27ae60;
+  font-size: 0.9em;
+}
+
+/* MENSAGENS DE STATUS */
+.statusMessage {
+  padding: 40px;
+  text-align: center;
+  font-size: 1.2em;
+  color: #6c757d;
+}
+.error {
+  color: #d32f2f;
+}

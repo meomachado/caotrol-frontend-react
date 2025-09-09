@@ -36,7 +36,8 @@ function Consultas() {
       const params = new URLSearchParams({
         page: page,
         limit: 10, // Definindo um limite padrão
-        ordenacao,
+        ordenarPor: ordenacao, 
+
       });
       if (busca) params.append("busca", busca);
       if (dataInicio) params.append("dataInicio", dataInicio);
@@ -62,6 +63,14 @@ function Consultas() {
     }, 500);
     return () => clearTimeout(timer);
   }, [currentPage, fetchConsultas]);
+  const handleTryOpenNovaConsulta = () => {
+    const userType = localStorage.getItem('user_type');
+    if (userType !== 'veterinario') {
+      alert('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
+    } else {
+      setIsSelecaoOpen(true);
+    }
+  };
 
   const handleDelete = async (idConsulta) => {
     if (window.confirm("Tem certeza que deseja excluir esta consulta?")) {
@@ -116,7 +125,7 @@ function Consultas() {
       {/* --- CONTEÚDO DA PÁGINA --- */}
       <div className={styles.header}>
         <h1>Consultas</h1>
-        <button className={styles.newButton} onClick={() => setIsSelecaoOpen(true)}>+ Nova Consulta</button>
+        <button className={styles.newButton} onClick={handleTryOpenNovaConsulta}>+ Nova Consulta</button>
       </div>
 
       <div className={styles.actionsBar}>
@@ -139,7 +148,7 @@ function Consultas() {
           <label>Ordenar por</label>
           <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)}>
             <option value="desc">Mais recentes</option>
-            <option value="asc">Mais antigas</option>
+            <option value="data_asc">Mais antigas</option>
           </select>
         </div>
       </div>

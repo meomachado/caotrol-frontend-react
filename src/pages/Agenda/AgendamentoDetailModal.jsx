@@ -1,10 +1,9 @@
-// src/pages/Agenda/AgendamentoDetailModal.jsx
+// pages/Agenda/AgendamentoDetailModal.jsx
 
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
-import styles from "./AgendamentoModal.module.css"; // Reutilizando o mesmo estilo
+import styles from "./AgendamentoModal.module.css";
 
-// ✅ Adicione a nova prop `onStartConsulta`
 function AgendamentoDetailModal({
   isOpen,
   onClose,
@@ -44,7 +43,6 @@ function AgendamentoDetailModal({
     }
   };
 
-  // Formata a hora para exibição (ex: 09:00)
   const formatTime = (date) => {
     return new Intl.DateTimeFormat("pt-BR", {
       hour: "2-digit",
@@ -53,9 +51,14 @@ function AgendamentoDetailModal({
     }).format(new Date(date));
   };
 
-  // ✅ Handler para o novo botão
+  // ✅ LÓGICA DE VERIFICAÇÃO ADICIONADA AQUI
   const handleStartConsultationClick = () => {
-    // Chama a função passada pelo componente pai (Agenda.jsx)
+    const userType = localStorage.getItem('user_type');
+    if (userType !== 'veterinario') {
+      alert('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
+      return; // Interrompe a execução se não for veterinário
+    }
+    
     const idAnimal = eventInfo.extendedProps.id_animal;
     onStartConsulta(idAnimal);
   };
@@ -83,19 +86,16 @@ function AgendamentoDetailModal({
           <div className={styles.formGroup}>
             <label>Status</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              {/* Mostra a opção "Pendente" desabilitada se o status inicial for esse */}
               {initialStatus === "pendente" && (
                 <option value="pendente" disabled>
                   Pendente
                 </option>
               )}
-              {/* Mostra a opção "Agendada" desabilitada se o status inicial for esse */}
               {initialStatus === "agendada" && (
                 <option value="agendada" disabled>
                   Agendada
                 </option>
               )}
-
               <option value="confirmada">Confirmada</option>
               <option value="cancelada">Cancelada</option>
               <option value="marcar-falta">Não Compareceu</option>
@@ -108,7 +108,7 @@ function AgendamentoDetailModal({
             type="button"
             onClick={handleStartConsultationClick}
             className={styles.saveButton}
-            disabled={isConsultationStarted} // ✅ Desabilita se a consulta já foi iniciada
+            disabled={isConsultationStarted}
           >
             Iniciar Consulta
           </button>

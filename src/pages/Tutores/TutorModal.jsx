@@ -1,3 +1,4 @@
+// pages/Tutores/TutorModal.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../services/api";
 import styles from "./TutorModal.module.css";
@@ -15,34 +16,96 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
   const [idEstado, setIdEstado] = useState("");
   const [idCidade, setIdCidade] = useState("");
 
-  // --- ESTADOS DE DADOS E UI ---
+  // --- ESTADOS DE UI E VALIDAÇÃO ---
   const [estados, setEstados] = useState([]);
   const [cidades, setCidades] = useState([]);
   const [error, setError] = useState("");
   const [loadingCep, setLoadingCep] = useState(false);
-  const [loadingEstados, setLoadingEstados] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [filtroCidade, setFiltroCidade] = useState("");
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [validation, setValidation] = useState({ cpf: true, telefone: true });
+
+  // --- REFS PARA UX ---
+  const nomeInputRef = useRef(null);
   const cidadeWrapperRef = useRef(null);
 
-  // Efeito 1: Busca a lista de todos os estados (sem alteração)
+  // --- LÓGICA DE VALIDAÇÃO ---
+  const isFormInvalid = !nome || !validation.cpf || !validation.telefone;
+
+  const validateField = (name, value) => {
+    if (name === "cpf") {
+      setValidation((v) => ({ ...v, cpf: value.length === 14 }));
+    }
+    if (name === "telefone") {
+      setValidation((v) => ({ ...v, telefone: value.length >= 14 }));
+    }
+  };
+
+  // --- FUNÇÕES DE MÁSCARA ---
+  const formatTelefone = (value) => {
+    if (!value) return "";
+    value = value.replace(/\D/g, "");
+    value = value.replace(/(\d{2})(\d)/, "($1) $2");
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+    return value;
+  };
+  const formatCPF = (value) => {
+    if (!value) return "";
+    value = value.replace(/\D/g, "");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d)/, "$1.$2");
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    return value;
+  };
+
+  // --- HANDLERS ---
+  const handleTelefoneChange = (e) => {
+    const { name, value } = e.target;
+    setTelefone(formatTelefone(value));
+    validateField(name, formatTelefone(value));
+  };
+  const handleCpfChange = (e) => {
+    const { name, value } = e.target;
+    setCpf(formatCPF(value));
+    validateField(name, formatCPF(value));
+  };
+
+  // ✅ --- FUNÇÃO QUE ESTAVA FALTANDO ---
+  const handleEstadoChange = async (e) => {
+    const novoEstadoId = e.target.value;
+    setIdEstado(novoEstadoId);
+    // Limpa a cidade para uma nova seleção
+    setIdCidade("");
+    setFiltroCidade("");
+    setCidades([]);
+    if (novoEstadoId) {
+      try {
+        const response = await api.get(`/estados/${novoEstadoId}/cidades`);
+        setCidades(response || []);
+      } catch (err) {
+        setError("Falha ao carregar cidades para este estado.");
+      }
+    }
+  };
+
+  // --- EFEITOS DE CICLO DE VIDA (UX) ---
   useEffect(() => {
     if (isOpen) {
-      setLoadingEstados(true);
-      api
-        .get("/estados")
-        .then((response) => {
-          setEstados(response || []);
-        })
-        .catch(() => setError("Falha ao carregar lista de estados."))
-        .finally(() => setLoadingEstados(false));
+      setTimeout(() => nomeInputRef.current?.focus(), 100);
+      const handleEsc = (event) => {
+        if (event.key === "Escape") onClose();
+      };
+      window.addEventListener("keydown", handleEsc);
+      return () => window.removeEventListener("keydown", handleEsc);
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
-  // Efeito 2 (CORRIGIDO): Lógica ÚNICA para preencher ou limpar o formulário
+  // Carregar dados iniciais e para edição
   useEffect(() => {
     const carregarDados = async () => {
-      // Limpa tudo antes de começar, garantindo um estado limpo
+      api.get("/estados").then((response) => setEstados(response || []));
       setNome("");
       setCpf("");
       setTelefone("");
@@ -56,12 +119,18 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
       setFiltroCidade("");
       setCidades([]);
       setError("");
+      setValidation({ cpf: true, telefone: true });
 
       if (tutorToEdit) {
-        // MODO EDIÇÃO: Preenche os campos
         setNome(tutorToEdit.nome || "");
-        setCpf(tutorToEdit.cpf || "");
-        setTelefone(tutorToEdit.telefone || "");
+        const formattedCpf = formatCPF(tutorToEdit.cpf || "");
+        const formattedTel = formatTelefone(tutorToEdit.telefone || "");
+        setCpf(formattedCpf);
+        setTelefone(formattedTel);
+        setValidation({
+          cpf: formattedCpf.length === 14,
+          telefone: formattedTel.length >= 14,
+        });
         setDataNasc(
           tutorToEdit.data_nasc
             ? new Date(tutorToEdit.data_nasc).toISOString().split("T")[0]
@@ -72,65 +141,20 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
         setNum(tutorToEdit.num || "");
         setBairro(tutorToEdit.bairro || "");
 
-        // Lógica para preencher estado e cidade
         if (tutorToEdit.cidade && tutorToEdit.cidade.estado) {
           const estadoId = tutorToEdit.cidade.estado.id_estado;
           setIdEstado(estadoId);
-
-          try {
-            const response = await api.get(`/estados/${estadoId}/cidades`);
-            setCidades(response || []);
-            setFiltroCidade(tutorToEdit.cidade.nome);
-            setIdCidade(tutorToEdit.id_cidade);
-          } catch (err) {
-            setError("Falha ao carregar a cidade do tutor.");
-          }
+          const response = await api.get(`/estados/${estadoId}/cidades`);
+          setCidades(response || []);
+          setFiltroCidade(tutorToEdit.cidade.nome);
+          setIdCidade(tutorToEdit.id_cidade);
         }
       }
     };
-
-    if (isOpen) {
-      carregarDados();
-    }
+    if (isOpen) carregarDados();
   }, [isOpen, tutorToEdit]);
 
-  // Efeito 3: Detecta clique fora para fechar sugestões (sem alteração)
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        cidadeWrapperRef.current &&
-        !cidadeWrapperRef.current.contains(event.target)
-      ) {
-        setMostrarSugestoes(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [cidadeWrapperRef]);
-
-  // Handler para quando o USUÁRIO troca o estado manualmente
-  const handleEstadoChange = async (e) => {
-    const novoEstadoId = e.target.value;
-    setIdEstado(novoEstadoId);
-
-    // Limpa a cidade para nova seleção
-    setIdCidade("");
-    setFiltroCidade("");
-    setCidades([]);
-
-    if (novoEstadoId) {
-      try {
-        const response = await api.get(`/estados/${novoEstadoId}/cidades`);
-        setCidades(response || []);
-      } catch (err) {
-        setError("Falha ao carregar cidades para este estado.");
-      }
-    }
-  };
-
-  // O restante do código (handleCepChange, handleSubmit, etc.) continua igual.
+  // Lógica de busca de CEP
   const handleCepChange = useCallback(
     async (cepValue) => {
       const formattedCep = cepValue.replace(/\D/g, "");
@@ -138,6 +162,10 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
       setError("");
       if (formattedCep.length !== 8) return;
       setLoadingCep(true);
+      setRua("");
+      setBairro("");
+      setIdEstado("");
+      setFiltroCidade("");
       try {
         const endereco = await api.get(`/enderecos/cep/${formattedCep}`);
         setRua(endereco.logradouro || "");
@@ -157,20 +185,12 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
           if (cidadeEncontrada) {
             setIdCidade(cidadeEncontrada.id_cidade);
             setFiltroCidade(cidadeEncontrada.nome);
-          } else {
-            setFiltroCidade(endereco.cidade);
-            setError("A cidade do CEP não foi encontrada no sistema.");
           }
-        } else {
-          setError("O estado do CEP não foi encontrado no sistema.");
         }
       } catch (err) {
         setError(
           err.response?.data?.message || "CEP inválido ou não encontrado."
         );
-        setRua("");
-        setBairro("");
-        setIdEstado("");
       } finally {
         setLoadingCep(false);
       }
@@ -178,19 +198,34 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     [estados]
   );
 
+  // Navegação por teclado na lista de cidades
+  const handleCidadeKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      setHighlightedIndex((prev) =>
+        prev < cidadesFiltradas.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === "ArrowUp") {
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+    } else if (e.key === "Enter" && highlightedIndex > -1) {
+      e.preventDefault();
+      handleCidadeSelect(cidadesFiltradas[highlightedIndex]);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    if (!nome || !cpf || !telefone) {
-      setError("Os campos Nome, CPF e Telefone são obrigatórios.");
+    if (isFormInvalid) {
+      setError("Verifique os campos obrigatórios.");
       return;
     }
+    setIsSaving(true);
+    setError("");
     const tutorData = {
       nome,
-      cpf,
-      telefone,
+      cpf: cpf.replace(/\D/g, ""),
+      telefone: telefone.replace(/\D/g, ""),
       data_nasc: dataNasc ? new Date(dataNasc).toISOString() : null,
-      cep,
+      cep: cep.replace(/\D/g, ""),
       logradouro: rua,
       num,
       bairro,
@@ -207,6 +242,8 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
       setError(
         err.response?.data?.message || "Ocorreu um erro ao salvar o tutor."
       );
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -214,160 +251,240 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     ? cidades.filter((cidade) =>
         cidade.nome.toLowerCase().includes(filtroCidade.toLowerCase())
       )
-    : cidades;
+    : [];
 
   const handleCidadeSelect = (cidade) => {
     setIdCidade(cidade.id_cidade);
     setFiltroCidade(cidade.nome);
     setMostrarSugestoes(false);
-  };
-
-  const handleFiltroCidadeChange = (e) => {
-    setFiltroCidade(e.target.value);
-    setIdCidade("");
-    setMostrarSugestoes(true);
+    setHighlightedIndex(-1);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <h2>{tutorToEdit ? "Editar Tutor" : "Novo Tutor"}</h2>
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h2>{tutorToEdit ? "Editar Tutor" : "Novo Tutor"}</h2>
+        </div>
+
         <form
           id="tutor-form"
           onSubmit={handleSubmit}
           className={styles.formBody}
         >
-          <div className={styles.formGroup}>
-            <label>Nome Completo</label>
-            <input
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>CPF</label>
-            <input
-              type="text"
-              value={cpf}
-              onChange={(e) =>
-                setCpf(e.target.value.replace(/\D/g, "").slice(0, 11))
-              }
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Telefone</label>
-            <input
-              type="text"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Data de Nascimento</label>
-            <input
-              type="date"
-              value={dataNasc}
-              onChange={(e) => setDataNasc(e.target.value)}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>CEP</label>
-            <input
-              type="text"
-              value={cep}
-              onChange={(e) => handleCepChange(e.target.value)}
-              placeholder="Apenas números"
-              maxLength={8}
-              disabled={loadingEstados || loadingCep}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Estado</label>
-            <select
-              value={idEstado}
-              onChange={handleEstadoChange}
-              disabled={loadingEstados}
-            >
-              <option value="">Selecione</option>
-              {estados.map((e) => (
-                <option key={e.id_estado} value={e.id_estado}>
-                  {e.nome}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className={styles.formGroup} ref={cidadeWrapperRef}>
-            <label>Cidade</label>
-            <div className={styles.cidadeInputContainer}>
-              <input
-                type="text"
-                placeholder="Digite o nome da cidade"
-                value={filtroCidade}
-                onChange={handleFiltroCidadeChange}
-                onFocus={() => setMostrarSugestoes(true)}
-                disabled={!idEstado}
-              />
-              {mostrarSugestoes && cidadesFiltradas.length > 0 && (
-                <ul className={styles.sugestoesLista}>
-                  {cidadesFiltradas.map((cidade) => (
-                    <li
-                      key={cidade.id_cidade}
-                      onClick={() => handleCidadeSelect(cidade)}
-                      className={styles.sugestoesItem}
-                    >
-                      {cidade.nome}
-                    </li>
-                  ))}
-                </ul>
-              )}
+          <div className={styles.leftPanel}>
+            <div className={styles.card}>
+              <h3 className={styles.sectionTitle}>Dados Pessoais</h3>
+              <div className={styles.formGroup}>
+                <label htmlFor="nome">Nome Completo</label>
+                <div className={styles.inputIconWrapper}>
+                  <i className="fas fa-user"></i>
+                  <input
+                    id="nome"
+                    type="text"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    ref={nomeInputRef}
+                    required
+                  />
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="cpf">CPF</label>
+                <div
+                  className={`${styles.inputIconWrapper} ${
+                    !validation.cpf ? styles.invalid : ""
+                  }`}
+                >
+                  <i className="fas fa-id-card"></i>
+                  <input
+                    id="cpf"
+                    name="cpf"
+                    type="text"
+                    value={cpf}
+                    onChange={handleCpfChange}
+                    onBlur={(e) => validateField(e.target.name, e.target.value)}
+                    maxLength="14"
+                    placeholder="000.000.000-00"
+                    required
+                  />
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="telefone">Telefone</label>
+                <div
+                  className={`${styles.inputIconWrapper} ${
+                    !validation.telefone ? styles.invalid : ""
+                  }`}
+                >
+                  <i className="fas fa-phone"></i>
+                  <input
+                    id="telefone"
+                    name="telefone"
+                    type="text"
+                    value={telefone}
+                    onChange={handleTelefoneChange}
+                    onBlur={(e) => validateField(e.target.name, e.target.value)}
+                    maxLength="15"
+                    placeholder="(XX) XXXXX-XXXX"
+                    required
+                  />
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="dataNasc">Data de Nascimento</label>
+                <div className={styles.inputIconWrapper}>
+                  <i className="fas fa-calendar-alt"></i>
+                  <input
+                    id="dataNasc"
+                    type="date"
+                    value={dataNasc}
+                    onChange={(e) => setDataNasc(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label>Rua</label>
-            <input
-              type="text"
-              value={rua}
-              onChange={(e) => setRua(e.target.value)}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Bairro</label>
-            <input
-              type="text"
-              value={bairro}
-              onChange={(e) => setBairro(e.target.value)}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Número</label>
-            <input
-              type="text"
-              value={num}
-              onChange={(e) => setNum(e.target.value)}
-            />
+          <div className={styles.rightPanel}>
+            <div className={styles.card}>
+              <h3 className={styles.sectionTitle}>Endereço</h3>
+
+              {/* ✅ MUDANÇA AQUI: Novo grid para CEP e Estado */}
+              <div className={styles.locationGrid}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="cep">CEP</label>
+                  <div
+                    className={`${styles.inputIconWrapper} ${styles.cepContainer}`}
+                  >
+                    <i className="fas fa-map-marker-alt"></i>
+                    <input
+                      id="cep"
+                      type="text"
+                      value={cep}
+                      onChange={(e) => handleCepChange(e.target.value)}
+                      placeholder="00000-000"
+                      maxLength={8}
+                    />
+                    {loadingCep && <div className={styles.spinner}></div>}
+                  </div>
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="estado">Estado</label>
+                  <select
+                    id="estado"
+                    value={idEstado}
+                    onChange={handleEstadoChange}
+                  >
+                    <option value="">Selecione...</option>
+                    {estados.map((e) => (
+                      <option key={e.id_estado} value={e.id_estado}>
+                        {e.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* ✅ Campo Cidade agora ocupa a linha inteira */}
+              <div className={styles.formGroup} ref={cidadeWrapperRef}>
+                <label htmlFor="cidade">Cidade</label>
+                <div className={styles.cidadeInputContainer}>
+                  <input
+                    id="cidade"
+                    type="text"
+                    placeholder="Digite para buscar..."
+                    value={filtroCidade}
+                    onChange={(e) => setFiltroCidade(e.target.value)}
+                    onFocus={() => setMostrarSugestoes(true)}
+                    onKeyDown={handleCidadeKeyDown}
+                    disabled={!idEstado}
+                  />
+                  {mostrarSugestoes && cidadesFiltradas.length > 0 && (
+                    <ul className={styles.sugestoesLista}>
+                      {cidadesFiltradas.map((cidade, index) => (
+                        <li
+                          key={cidade.id_cidade}
+                          onClick={() => handleCidadeSelect(cidade)}
+                          className={`${styles.sugestoesItem} ${
+                            index === highlightedIndex ? styles.highlighted : ""
+                          }`}
+                        >
+                          {cidade.nome}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.addressGrid}>
+                <div
+                  className={styles.formGroup}
+                  style={{ gridColumn: "1 / -1" }}
+                >
+                  <label htmlFor="rua">Rua</label>
+                  {loadingCep ? (
+                    <div className={styles.skeleton}></div>
+                  ) : (
+                    <input
+                      id="rua"
+                      type="text"
+                      value={rua}
+                      onChange={(e) => setRua(e.target.value)}
+                    />
+                  )}
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="bairro">Bairro</label>
+                  {loadingCep ? (
+                    <div className={styles.skeleton}></div>
+                  ) : (
+                    <input
+                      id="bairro"
+                      type="text"
+                      value={bairro}
+                      onChange={(e) => setBairro(e.target.value)}
+                    />
+                  )}
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="num">Número</label>
+                  <input
+                    id="num"
+                    type="text"
+                    value={num}
+                    onChange={(e) => setNum(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </form>
-        {error && <p className={styles.errorMessage}>{error}</p>}
-        <div className={styles.modalActions}>
-          <button
-            type="button"
-            onClick={onClose}
-            className={styles.cancelButton}
-          >
-            Cancelar
-          </button>
-          <button type="submit" form="tutor-form" className={styles.saveButton}>
-            Salvar
-          </button>
+        <div className={styles.modalFooter}>
+          <div className={styles.errorContainer}>
+            {error && <p className={styles.errorMessage}>{error}</p>}
+          </div>
+          <div className={styles.buttonGroup}>
+            <button
+              type="button"
+              onClick={onClose}
+              className={`${styles.btn} ${styles.btnCancel}`}
+            >
+              <i className="fas fa-times"></i> Cancelar
+            </button>
+            <button
+              type="submit"
+              form="tutor-form"
+              className={`${styles.btn} ${styles.btnSave}`}
+              disabled={isFormInvalid || isSaving}
+            >
+              <i className="fas fa-check"></i>{" "}
+              {isSaving ? "Salvando..." : "Salvar"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

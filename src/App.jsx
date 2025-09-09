@@ -15,6 +15,9 @@ import Animais from "./pages/Animais/Animais";
 import Agenda from "./pages/Agenda/Agenda";
 import Consulta from "./pages/Consulta/Consultas";
 import AnimalDetailPage from './pages/Animais/AnimalDetailPage'; 
+import Relatorios from './pages/Relatorios/Relatorios';
+import Usuarios from './pages/Usuarios/Usuarios';
+import Veterinarios from './pages/Veterinarios/Veterinarios'; 
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
@@ -57,6 +60,11 @@ function App() {
           <Route path="agenda" element={<Agenda />} />
           <Route path="consultas" element={<Consulta />} />
           <Route path="animais/:id" element={<AnimalDetailPage />} />
+          <Route path="relatorios" element={<Relatorios />} />
+          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="veterinarios" element={<Veterinarios />} />
+          
+
 
           {/* Adicione outras rotas aqui no futuro */}
         </Route>

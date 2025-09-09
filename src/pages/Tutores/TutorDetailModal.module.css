@@ -1,109 +1,133 @@
-/* src/pages/Tutores/TutorDetailModal.module.css */
-
+/* pages/Tutores/TutorDetailModal.module.css */
 .modalOverlay {
   position: fixed;
-  inset: 0; /* Atalho para top, right, bottom, left = 0 */
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  backdrop-filter: blur(4px); /* Efeito de desfoque no fundo */
+  backdrop-filter: blur(4px);
 }
 
 .modalContent {
-  background-color: #ffffff;
-  padding: 0; /* Removido para dar controle total ao header, body e footer */
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 750px;
+  background: #f0f2f5;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 95%;
+  max-width: 950px;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Garante que os cantos arredondados sejam aplicados em tudo */
+  overflow: hidden;
 }
 
-/* --- Cabeçalho do Modal --- */
 .modalHeader {
-  padding: 20px 30px;
+  padding: 18px 25px;
+  background-color: #ffffff;
   border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-shrink: 0;
 }
 
 .modalHeader h2 {
   margin: 0;
   font-size: 1.5em;
-  font-weight: 600;
   color: #2c3e50;
 }
 
-/* --- Corpo do Modal --- */
 .modalBody {
-  padding: 30px;
-  background-color: #f9fafb; /* Fundo levemente acinzentado para contraste */
+  padding: 25px;
+  display: flex;
+  gap: 25px;
+}
+
+.panel {
+  flex: 1;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 93%;
 }
 
 .sectionTitle {
   font-size: 1.1em;
   font-weight: 600;
-  color: #34495e;
-  margin-top: 0;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+  color: #27ae60;
+  margin: 0;
+  padding-bottom: 8px;
   border-bottom: 1px solid #e9ecef;
 }
-
-.detailGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Grid responsivo */
-  gap: 25px 30px; /* Espaçamento entre os itens */
-}
-
+  
 .detailGroup {
-  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .detailGroup label {
-  display: block;
-  font-size: 0.8em;
-  font-weight: 600;
-  color: #7f8c8d;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.detailGroup p {
-  margin: 0;
-  font-size: 1.1em;
+  font-weight: 500;
+  font-size: 0.85em;
   color: #34495e;
-  padding: 0; /* Removido padding e background */
-  background-color: transparent;
-  border: none;
 }
 
-/* --- Rodapé e Ações --- */
-.modalFooter {
-  padding: 20px 30px;
+.detailField {
+  position: relative;
   display: flex;
-  justify-content: flex-end;
-  background-color: #f0f2f5;
-  border-top: 1px solid #e9ecef;
+  align-items: center;
+  width: 100%;
+  padding: 10px 10px 10px 40px;
+  border: 1px solid #dfe6e9; /* Borda mais suave */
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 0.95em;
+  background-color: #f8f9fa; /* Fundo cinza claro para indicar "readonly" */
+  color: #34495e;
 }
 
-.closeButton {
-  padding: 10px 25px;
+.detailField i {
+  position: absolute;
+  left: 15px;
+  color: #95a5a6;
+}
+
+.modalFooter {
+  padding: 15px 25px;
+  display: flex;
+  justify-content: flex-end; /* Alinha o botão à direita */
+  align-items: center;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 9px 22px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 1em;
-  background-color: #7f8c8d;
-  color: white;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95em;
 }
 
-.closeButton:hover {
-  background-color: #95a5a6;
+.btn i {
+  font-size: 1em;
+}
+
+.btnCancel {
+  background-color: #ecf0f1;
+  color: #7f8c8d;
+}
+
+.btnCancel:hover {
+  background-color: #dfe6e9;
 }

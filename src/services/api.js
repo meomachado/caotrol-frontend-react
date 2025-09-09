@@ -62,7 +62,6 @@ const api = {
     }
   },
 
-  // --- MÉTODOS GENÉRICOS (Wrappers) ---
   get: (endpoint, requiresAuth = true, responseType = 'json') => 
     api.request(endpoint, 'GET', null, requiresAuth, responseType),
 
@@ -78,8 +77,7 @@ const api = {
   patch: (endpoint, body, requiresAuth = true, responseType = 'json') => 
     api.request(endpoint, 'PATCH', body, requiresAuth, responseType),
 
-  // --- SEUS ENDPOINTS ESPECÍFICOS ---
-  
+
   // Auth
   login: (login, senha) => api.post('/auth/login', { login, senha }, false),
 
@@ -103,6 +101,10 @@ const api = {
   getExamesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/exames`),
   getVacinasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/vacinas`),
 
+  // Exames
+  updateExame: (idExame, data) => api.patch(`/exames/${idExame}`, data), // <-- ADICIONE ESTA LINHA
+
+
   // Consultas
   getConsultas: (params) => api.get(`/consultas?${params}`),
   getConsultaById: (id) => api.get(`/consultas/${id}`),
@@ -110,7 +112,16 @@ const api = {
   
   // Veterinários
   getVeterinarios: (params) => api.get(`/veterinarios?${params}`),
+  createVeterinario: (data) => api.post('/veterinarios', data),
   getVeterinarioById: (id) => api.get(`/veterinarios/${id}`),
+
+  // Relatórios
+  getRelatorioConsultas: (params) => api.get(`/relatorios/consultas-por-periodo?${params}`),
+
+    // Usuários
+    getUsuarios: (params) => api.get(`/usuarios?${params}`),
+    registrarUsuario: (data) => api.post('/usuarios/registrar', data),
+    
   
   // Raças e Espécies
   getEspecies: () => api.get('/especies'),
@@ -132,7 +143,7 @@ const api = {
   marcarFaltaAgendamento: (id) => api.patch(`/agendamentos/${id}/marcar-falta`),
 
   // Dashboard
-  getDashboardData: () => api.get('/dashboard'),
+  getDashboardData: (params) => api.get(`/dashboard?${params}`),
   
   // Documentos (PDFs)
   gerarPrescricaoPreview: (data) => api.post('/documentos/prescricao/visualizar', data, true, 'blob'),

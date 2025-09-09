@@ -1,0 +1,88 @@
+/* pages/Usuarios/Usuarios.module.css */
+.usuariosContainer {
+    width: 100%;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  .header h1 {
+    font-size: 2.5em;
+    color: #2c3e50;
+  }
+  
+  .newUserButton {
+    background-color: #27ae60;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .userList {
+    display: grid;
+    gap: 15px;
+  }
+  
+  .userItem {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .userInfo h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+  }
+  
+  .userInfo p {
+    margin: 0;
+    color: #7f8c8d;
+  }
+  
+  .userType {
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #34495e;
+  }
+  
+  .paginationControls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+  }
+  
+  .paginationControls button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    background-color: #34495e;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .paginationControls button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  
+  .errorMessage {
+    color: #e74c3c;
+    text-align: center;
+    padding: 20px;
+  }
