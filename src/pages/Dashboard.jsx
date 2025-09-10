@@ -83,7 +83,7 @@ function Dashboard() {
   return (
     <div className={styles.dashboardPage}>
       <div className={styles.pageHeader}>
-        <h1>Dashboard</h1>
+        <h1>Início</h1>
         {/* ✅ FILTRO DE VETERINÁRIOS (SÓ APARECE PARA ADMIN/PADRÃO) */}
         {(userType === "admin" || userType === "padrao") && (
           <div className={styles.filterContainer}>

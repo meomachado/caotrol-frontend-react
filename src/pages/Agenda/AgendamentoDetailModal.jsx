@@ -1,8 +1,20 @@
 // pages/Agenda/AgendamentoDetailModal.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import api from "../../services/api";
 import styles from "./AgendamentoModal.module.css";
+
+const getStatusInfo = (status, isRealizada) => {
+  if (isRealizada) return { text: 'Finalizada', color: '#6c757d' };
+  switch (status) {
+    case 'confirmada': return { text: 'Confirmada', color: '#28a745' };
+    case 'agendada': return { text: 'Agendada', color: '#007bff' };
+    case 'pendente': return { text: 'Pendente', color: '#ffc107' };
+    case 'nao_compareceu': return { text: 'Não Compareceu', color: '#dc3545' };
+    case 'cancelada': return { text: 'Cancelada', color: '#6c757d' };
+    default: return { text: 'Indefinido', color: '#ccc' };
+  }
+};
 
 function AgendamentoDetailModal({
   isOpen,
@@ -11,122 +23,87 @@ function AgendamentoDetailModal({
   eventInfo,
   onStartConsulta,
 }) {
-  const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (eventInfo) {
-      setStatus(eventInfo.extendedProps.status || "pendente");
-    }
-  }, [eventInfo]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen || !eventInfo) {
     return null;
   }
-  const handleStatusChange = async () => {
+
+  const handleAction = async (action) => {
     setError("");
+    setIsSubmitting(true);
     const eventId = eventInfo.id;
-
     try {
-      if (status === "confirmada") {
-        await api.patch(`/agendamentos/${eventId}/confirmar`);
-      } else if (status === "cancelada") {
-        await api.patch(`/agendamentos/${eventId}/cancelar`);
-      } else if (status === "marcar-falta") {
-        await api.patch(`/agendamentos/${eventId}/marcar-falta`);
-      }
-
+      await api[action](eventId);
       onSave();
     } catch (err) {
-      setError(err.message || "Erro ao atualizar o status do agendamento.");
-      console.error(err);
+      setError(err.message || `Erro ao executar a ação.`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const formatTime = (date) => {
-    return new Intl.DateTimeFormat("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/Sao_Paulo",
-    }).format(new Date(date));
-  };
-
-  // ✅ LÓGICA DE VERIFICAÇÃO ADICIONADA AQUI
   const handleStartConsultationClick = () => {
     const userType = localStorage.getItem('user_type');
     if (userType !== 'veterinario') {
       alert('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
-      return; // Interrompe a execução se não for veterinário
+      return;
     }
-    
     const idAnimal = eventInfo.extendedProps.id_animal;
-    onStartConsulta(idAnimal);
+    const idAgendamento = eventInfo.id;
+    onStartConsulta(idAnimal, idAgendamento);
   };
 
-  const isConsultationStarted = eventInfo.extendedProps.realizada;
+  const formatTime = (date) => new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo"
+  }).format(new Date(date));
+
   const initialStatus = eventInfo.extendedProps.status;
+  const isConsultationStarted = eventInfo.extendedProps.realizada;
+  const statusInfo = getStatusInfo(initialStatus, isConsultationStarted);
+  const isPastAppointment = new Date(eventInfo.start) < new Date();
+  
+  const canConfirm = !isConsultationStarted && ['pendente', 'agendada'].includes(initialStatus);
+  const canCancel = !isConsultationStarted && ['pendente', 'agendada', 'confirmada'].includes(initialStatus);
+  const canMarkAbsence = !isConsultationStarted && isPastAppointment && ['pendente', 'agendada', 'confirmada'].includes(initialStatus);
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h2>Detalhes do Agendamento</h2>
+        <div className={styles.modalHeader}>
+            <h2>Detalhes do Agendamento</h2>
+        </div>
+        
         <div className={styles.formBody}>
+          <div className={styles.detailGroup}><label>Animal</label><p>{eventInfo.title}</p></div>
+          <div className={styles.detailGroup}><label>Horário</label><p>{formatTime(eventInfo.start)}</p></div>
+          <div className={styles.detailGroup}><label>Veterinário</label><p>{eventInfo.extendedProps.veterinario}</p></div>
           <div className={styles.detailGroup}>
-            <label>Animal</label>
-            <p>{eventInfo.title}</p>
-          </div>
-          <div className={styles.detailGroup}>
-            <label>Horário</label>
-            <p>{formatTime(eventInfo.start)}</p>
-          </div>
-          <div className={styles.detailGroup}>
-            <label>Veterinário</label>
-            <p>{eventInfo.extendedProps.veterinario}</p>
-          </div>
-          <div className={styles.formGroup}>
             <label>Status</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              {initialStatus === "pendente" && (
-                <option value="pendente" disabled>
-                  Pendente
-                </option>
-              )}
-              {initialStatus === "agendada" && (
-                <option value="agendada" disabled>
-                  Agendada
-                </option>
-              )}
-              <option value="confirmada">Confirmada</option>
-              <option value="cancelada">Cancelada</option>
-              <option value="marcar-falta">Não Compareceu</option>
-            </select>
+            <div className={styles.statusDisplay}>
+              <span className={styles.statusBadge} style={{ backgroundColor: statusInfo.color }}>
+                {statusInfo.text}
+              </span>
+            </div>
           </div>
         </div>
-        {error && <p className={styles.errorMessage}>{error}</p>}
-        <div className={styles.modalActions}>
-          <button
-            type="button"
-            onClick={handleStartConsultationClick}
-            className={styles.saveButton}
-            disabled={isConsultationStarted}
-          >
-            Iniciar Consulta
-          </button>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className={styles.cancelButton}
-          >
-            Fechar
-          </button>
-          <button
-            type="button"
-            onClick={handleStatusChange}
-            className={styles.saveButton}
-          >
-            Salvar Status
-          </button>
+        {error && <p className={styles.errorMessage}>{error}</p>}
+
+        <div className={styles.modalFooter}>
+          <button onClick={onClose} className={styles.cancelButton}>Fechar</button>
+          
+          <div className={styles.actionButtonsContainer}>
+            {canConfirm && <button onClick={() => handleAction('confirmarAgendamento')} className={styles.actionButtonConfirm} disabled={isSubmitting}>Confirmar</button>}
+            {canMarkAbsence && <button onClick={() => handleAction('marcarFaltaAgendamento')} className={styles.actionButtonAbsence} disabled={isSubmitting}>Marcar Falta</button>}
+            
+            <button onClick={handleStartConsultationClick} className={styles.actionButtonStart} disabled={isSubmitting || isConsultationStarted}>
+              {isConsultationStarted ? 'Consulta Realizada' : 'Iniciar Consulta'}
+            </button>
+            
+            {canCancel && <button onClick={() => handleAction('cancelarAgendamento')} className={styles.actionButtonCancel} disabled={isSubmitting}>Cancelar Agendamento</button>}
+          </div>
         </div>
       </div>
     </div>

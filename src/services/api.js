@@ -96,19 +96,20 @@ const api = {
   createAnimal: (animalData) => api.post('/animais', animalData),
   updateAnimal: (id, animalData) => api.put(`/animais/${id}`, animalData),
   deleteAnimal: (id) => api.delete(`/animais/${id}`),
-  getConsultasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/consultas`), // ✅ Adicione esta linha
+  getConsultasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/consultas`),
   getPrescricoesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/prescricoes`),
   getExamesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/exames`),
   getVacinasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/vacinas`),
 
   // Exames
-  updateExame: (idExame, data) => api.patch(`/exames/${idExame}`, data), // <-- ADICIONE ESTA LINHA
+  updateExame: (idExame, data) => api.patch(`/exames/${idExame}`, data),
 
 
   // Consultas
   getConsultas: (params) => api.get(`/consultas?${params}`),
   getConsultaById: (id) => api.get(`/consultas/${id}`),
   createConsulta: (consultaData) => api.post('/consultas', consultaData),
+  createConsultaFromAgendamento: (idAgendamento, consultaData) => api.post(`/agendamentos/${idAgendamento}/consulta`, consultaData),
   
   // Veterinários
   getVeterinarios: (params) => api.get(`/veterinarios?${params}`),

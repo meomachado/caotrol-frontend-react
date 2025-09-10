@@ -94,3 +94,231 @@
     font-size: 0.9em;
     text-align: center;
   }
+
+  /* Adicione estas classes ao seu CSS existente */
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px; /* Espaço entre o título e o select */
+}
+
+.statusIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%; /* Deixa o span redondo */
+  display: inline-block;
+}
+
+/* Adicione estas classes ao final de pages/Agenda/AgendamentoModal.module.css */
+
+.modalHeader {
+  padding: 20px 30px;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  color: #343a40;
+  flex-shrink: 0;
+}
+
+.detailGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detailGroup label {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.detailGroup p {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.statusDisplay {
+    margin-top: 5px;
+}
+
+.statusBadge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9em;
+    display: inline-block;
+}
+
+.modalFooter {
+  padding: 20px 30px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between; /* Alinha os botões nas extremidades */
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.actionButtonsContainer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.actionButtonConfirm, .actionButtonAbsence, .actionButtonStart, .actionButtonCancel {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+}
+
+.actionButtonConfirm { background-color: #28a745; color: white; }
+.actionButtonStart { background-color: #007bff; color: white; }
+.actionButtonAbsence { background-color: #ffc107; color: #212529; }
+.actionButtonCancel { background-color: #dc3545; color: white; }
+
+.actionButtonConfirm:disabled,
+.actionButtonAbsence:disabled,
+.actionButtonStart:disabled,
+.actionButtonCancel:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    filter: brightness(0.8);
+}
+
+.actionButtonConfirm:hover:not(:disabled),
+.actionButtonAbsence:hover:not(:disabled),
+.actionButtonStart:hover:not(:disabled),
+.actionButtonCancel:hover:not(:disabled) {
+    filter: brightness(0.9);
+}
+/* src/pages/Agenda/AgendamentoModal.module.css */
+
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100; 
+}
+
+.modalContent {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+  
+.modalContent h2 {
+  padding: 20px 30px;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  color: #343a40;
+  flex-shrink: 0;
+}
+  
+.formBody {
+  padding: 20px 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+  gap: 20px;
+}
+  
+.formGroup {
+  width: 100%;
+  position: relative; /* Para a lista de autocomplete */
+}
+  
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+}
+  
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 1em;
+  background-color: white;
+}
+  
+.modalActions {
+  padding: 20px 30px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  flex-shrink: 0;
+}
+  
+.cancelButton,
+.saveButton {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+  
+.cancelButton {
+  background-color: #6c757d;
+  color: white;
+}
+  
+.saveButton {
+  background-color: #28a745;
+  color: white;
+}
+  
+.errorMessage {
+  color: #dc3545;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+/* Estilos para a lista de autocomplete */
+.autocompleteList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  z-index: 10;
+  max-height: 150px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.autocompleteList li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.autocompleteList li:hover {
+  background-color: #f0f0f0;
+}

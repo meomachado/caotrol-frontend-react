@@ -46,3 +46,31 @@
   .calendarWrapper :global(.fc-event) {
     cursor: pointer;
   }
+
+  /* Adicione estas classes ao seu Agenda.module.css */
+
+.eventBox {
+  padding: 2px 4px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.eventTime {
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.eventTitle {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventStatus {
+  font-size: 0.8em;
+  font-style: italic;
+  opacity: 0.9;
+}

@@ -9,6 +9,7 @@ import AgendamentoModal from "./AgendamentoModal";
 import AgendamentoDetailModal from "./AgendamentoDetailModal";
 import NovaConsultaModal from "../Consulta/NovaConsultaModal";
 
+
 function Agenda() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -17,6 +18,7 @@ function Agenda() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isNovaConsultaOpen, setIsNovaConsultaOpen] = useState(false);
   const [animalIdParaConsulta, setAnimalIdParaConsulta] = useState(null);
+  const [agendamentoIdParaConsulta, setAgendamentoIdParaConsulta] = useState(null);
 
   // CORREÇÃO FINAL: Função refatorada para usar async/await
   // Este é o método mais moderno e confiável para buscar dados.
@@ -44,8 +46,9 @@ function Agenda() {
     setIsDetailModalOpen(true);
   };
 
-  const handleStartConsultaFromAgenda = (animalId) => {
+  const handleStartConsultaFromAgenda = (animalId, agendamentoId) => {
     setAnimalIdParaConsulta(animalId);
+    setAgendamentoIdParaConsulta(agendamentoId);
     setIsDetailModalOpen(false);
     setIsNovaConsultaOpen(true);
   };
@@ -62,6 +65,31 @@ function Agenda() {
     if (calendarRef.current) {
       calendarRef.current.getApi().refetchEvents();
     }
+  };
+
+  const statusMap = {
+    confirmada: 'Confirmada',
+    agendada: 'Agendada',
+    pendente: 'Pendente',
+    nao_compareceu: 'Não Compareceu',
+  };
+
+  // 2. FUNÇÃO QUE CUSTOMIZA O CONTEÚDO DO EVENTO
+  const renderEventContent = (eventInfo) => {
+    const props = eventInfo.event.extendedProps;
+    
+    // Define o texto do status. Se já foi realizada, tem prioridade.
+    const statusText = props.realizada 
+      ? 'Finalizada' 
+      : statusMap[props.status] || props.status;
+
+    return (
+      <div className={styles.eventBox}>
+        <div className={styles.eventTime}>{eventInfo.timeText}</div>
+        <div className={styles.eventTitle}>{eventInfo.event.title}</div>
+        <div className={styles.eventStatus}>{statusText}</div>
+      </div>
+    );
   };
 
   return (
@@ -86,6 +114,7 @@ function Agenda() {
         onClose={() => setIsNovaConsultaOpen(false)}
         onSave={handleSave}
         animalId={animalIdParaConsulta}
+        agendamentoId={agendamentoIdParaConsulta}
       />
 
       <div className={styles.actionsBar}>
@@ -95,8 +124,12 @@ function Agenda() {
         </button>
       </div>
 
+      
+
       <div className={styles.calendarWrapper}>
+  
         <FullCalendar
+        
           ref={calendarRef}
           plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
           initialView="timeGridWeek"
@@ -105,8 +138,10 @@ function Agenda() {
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
+          
           events={fetchEvents}
           locale="pt-br"
+          eventContent={renderEventContent} 
           timeZone="local"
           buttonText={{
             today: "Hoje",
@@ -122,6 +157,7 @@ function Agenda() {
           slotMinTime={"08:00:00"}
           slotMaxTime={"19:00:00"}
           allDaySlot={false}
+          hiddenDays={[0,6]} // Oculta domingos
           slotLabelFormat={{
             hour: "2-digit",
             minute: "2-digit",

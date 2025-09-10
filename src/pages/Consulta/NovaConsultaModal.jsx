@@ -19,7 +19,7 @@ const initialConsultaState = {
   exame: "",
 };
 
-function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
+function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId }) {
   const [animal, setAnimal] = useState(null);
   const [veterinario, setVeterinario] = useState(null);
   const [formData, setFormData] = useState(initialConsultaState);
@@ -31,7 +31,7 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
     type: null,
   });
   const [isSaving, setIsSaving] = useState(false);
-  console.log("a");
+
   useEffect(() => {
     if (isOpen && animalId) {
       setLoading(true);
@@ -64,7 +64,6 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
   };
 
   const handleSaveConsulta = async () => {
-    // 1. Validação: Verifica se o campo mais importante está preenchido
     if (!formData.queixaPrincipal) {
       alert("O campo 'Queixa principal' é obrigatório para salvar.");
       return;
@@ -73,20 +72,16 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
     setError("");
 
     try {
-      // 2. Mapeamento e Conversão dos Dados do Formulário
-      // Converte os nomes do frontend para os esperados pelo backend e formata os números
       const dadosClinicos = {
         queixa: formData.queixaPrincipal,
         suspeita: formData.suspeitaClinica,
         diagnostico: formData.diagnostico,
         tratamento: formData.tratamento,
         mucosas: formData.mucosas,
-        // Converte campos que podem ter decimais
         peso: formData.peso ? parseFloat(formData.peso) : null,
         temperatura: formData.temperatura
           ? parseFloat(formData.temperatura)
           : null,
-        // Converte campos que são inteiros
         tpc: formData.tpc ? parseInt(formData.tpc, 10) : null,
         freq: formData.freqCardiaca
           ? parseInt(formData.freqCardiaca, 10)
@@ -94,47 +89,47 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
         resp: formData.freqResp ? parseInt(formData.freqResp, 10) : null,
       };
 
-      // 3. Montagem do Payload Final para a API
-      const payload = {
-        ids: {
-          id_animal: animal.id_animal,
-          id_tutor: animal.tutor.id_tutor,
-        },
-        dadosConsulta: {
-          ...dadosClinicos,
-          data: new Date(),
-          status: "finalizada",
-          
-          prescricao: formData.prescricao
-            ? [{ descricao: formData.prescricao }]
-            : [],
-          exame: formData.exame ? [{ solicitacao: formData.exame }] : [],
-
-          anamnese: {
-            castrado: animal.castrado,
-            alergias: animal.alergias,
-            obs: animal.observacoes,
+      const dadosConsulta = {
+        ...dadosClinicos,
+        data: new Date(),
+        status: "finalizada",
+        prescricao: formData.prescricao
+          ? [{ descricao: formData.prescricao }]
+          : [],
+        exame: formData.exame ? [{ solicitacao: formData.exame }] : [],
+        anamnese: {
+          castrado: animal.castrado,
+          alergias: animal.alergias,
+          obs: animal.observacoes,
         }
-        },
       };
-      await api.createConsulta(payload);
+      
+      if (agendamentoId) {
+        await api.createConsultaFromAgendamento(agendamentoId, dadosConsulta);
+      } else {
+        const payload = {
+            ids: {
+              id_animal: animal.id_animal,
+              id_tutor: animal.tutor.id_tutor,
+            },
+            dadosConsulta: dadosConsulta,
+        };
+        await api.createConsulta(payload);
+      }
 
-      // 5. Sucesso
       alert("Consulta salva com sucesso!");
-      onSave(); // Fecha o modal e atualiza a lista de consultas na tela anterior
+      onSave();
     } catch (err) {
-      // 6. Tratamento de Erro
       setError(
         err.response?.data?.message || "Ocorreu um erro ao salvar a consulta."
       );
       console.error("Erro ao salvar consulta:", err);
     } finally {
-      // 7. Finalização
       setLoading(false);
     }
   };
 
-  // ... (o resto do seu componente)
+  // ... (o resto do seu componente, handleVacinaSave, formatDate, calculateAge, handleOpenPdfModal, handleGeneratePdf, e o JSX permanecem os mesmos)
   const handleVacinaSave = () => {
     setIsVacinaModalOpen(false);
     alert("Vacina registrada com sucesso!");
@@ -173,9 +168,6 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
     setFormData((prev) => ({ ...prev, [type]: text }));
 
     const isPrescricao = type === "prescricao";
-    const endpoint = isPrescricao
-      ? "/documentos/prescricao/visualizar"
-      : "/documentos/exame/visualizar";
 
     const payload = {
       nome_tutor: animal?.tutor?.nome ?? "Não informado",
@@ -446,7 +438,7 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId }) {
                   <button
                     className={styles.saveButton}
                     onClick={handleSaveConsulta}
-                    disabled={isSaving} //
+                    disabled={isSaving} 
                   >
                     {isSaving ? "Salvando..." : "Salvar"}
                   </button>
