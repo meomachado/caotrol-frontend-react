@@ -1,30 +1,37 @@
 // src/services/api.js
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = "http://localhost:3000/api";
 
 const api = {
   /**
    * Função principal que realiza todas as requisições.
    * Aceita um 'responseType' para lidar com JSON (padrão) ou Blobs (para arquivos/PDFs).
    */
-  request: async (endpoint, method = 'GET', body = null, requiresAuth = true, responseType = 'json') => {
+  request: async (
+    endpoint,
+    method = "GET",
+    body = null,
+    requiresAuth = true,
+    responseType = "json"
+  ) => {
+    // ... (todo o resto da sua função request continua igual)
     const headers = {};
 
     if (requiresAuth) {
-      const token = localStorage.getItem('jwt_token');
+      const token = localStorage.getItem("jwt_token");
       if (!token) {
-        console.error('Token JWT não encontrado. Redirecionando para login.');
-        window.location.href = '/';
-        throw new Error('Não autorizado: Token não encontrado.');
+        console.error("Token JWT não encontrado. Redirecionando para login.");
+        window.location.href = "/";
+        throw new Error("Não autorizado: Token não encontrado.");
       }
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     const config = { method, headers };
 
     if (body) {
       if (!(body instanceof FormData)) {
-        headers['Content-Type'] = 'application/json';
+        headers["Content-Type"] = "application/json";
         config.body = JSON.stringify(body);
       } else {
         config.body = body; // Para uploads, o browser define o Content-Type
@@ -36,123 +43,136 @@ const api = {
 
       if (response.status === 401 && requiresAuth) {
         localStorage.clear();
-        alert('Sessão expirada. Faça login novamente.');
-        window.location.href = '/';
+        alert("Sessão expirada. Faça login novamente.");
+        window.location.href = "/";
         return;
       }
 
       if (response.status === 204) return null; // Resposta "No Content"
 
-      if (responseType === 'blob') {
+      if (responseType === "blob") {
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Erro ao ler a resposta de erro como JSON.' }));
-          throw new Error(errorData.message || `Erro na requisição do arquivo: ${response.status}`);
+          const errorData = await response
+            .json()
+            .catch(() => ({
+              message: "Erro ao ler a resposta de erro como JSON.",
+            }));
+          throw new Error(
+            errorData.message ||
+              `Erro na requisição do arquivo: ${response.status}`
+          );
         }
         return response.blob();
       }
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || `Erro na requisição: ${response.status}`);
+        throw new Error(
+          data.message || `Erro na requisição: ${response.status}`
+        );
       }
       return data;
     } catch (error) {
-      console.error('Erro na requisição da API:', error);
+      console.error("Erro na requisição da API:", error);
       throw error;
     }
   },
 
-  get: (endpoint, requiresAuth = true, responseType = 'json') => 
-    api.request(endpoint, 'GET', null, requiresAuth, responseType),
+  get: (endpoint, requiresAuth = true, responseType = "json") =>
+    api.request(endpoint, "GET", null, requiresAuth, responseType),
 
-  post: (endpoint, body, requiresAuth = true, responseType = 'json') => 
-    api.request(endpoint, 'POST', body, requiresAuth, responseType),
+  post: (endpoint, body, requiresAuth = true, responseType = "json") =>
+    api.request(endpoint, "POST", body, requiresAuth, responseType),
 
-  put: (endpoint, body, requiresAuth = true, responseType = 'json') => 
-    api.request(endpoint, 'PUT', body, requiresAuth, responseType),
+  put: (endpoint, body, requiresAuth = true, responseType = "json") =>
+    api.request(endpoint, "PUT", body, requiresAuth, responseType),
 
-  delete: (endpoint, requiresAuth = true, responseType = 'json') => 
-    api.request(endpoint, 'DELETE', null, requiresAuth, responseType),
+  delete: (endpoint, requiresAuth = true, responseType = "json") =>
+    api.request(endpoint, "DELETE", null, requiresAuth, responseType),
 
-  patch: (endpoint, body, requiresAuth = true, responseType = 'json') => 
-    api.request(endpoint, 'PATCH', body, requiresAuth, responseType),
+  patch: (endpoint, body, requiresAuth = true, responseType = "json") =>
+    api.request(endpoint, "PATCH", body, requiresAuth, responseType),
 
-
-  // Auth
+  // --- SEÇÃO DE AUTENTICAÇÃO ---
   login: (login, senha) => api.post('/auth/login', { login, senha }, false),
-
-  // Tutores
+  requestPasswordReset: (email) => api.post('/auth/forgot-password', { email }, false),
+  resetPassword: (token, novaSenha) => api.post('/auth/reset-password', { token, novaSenha }, false),
+  
+  // --- Tutores ---
   getTutores: (params) => api.get(`/tutores?${params}`),
   getTutorById: (id) => api.get(`/tutores/${id}`),
   searchTutores: (termo) => api.get(`/tutores/search?termo=${termo}`),
-  createTutor: (tutorData) => api.post('/tutores', tutorData),
+  createTutor: (tutorData) => api.post("/tutores", tutorData),
   updateTutor: (id, tutorData) => api.put(`/tutores/${id}`, tutorData),
   deleteTutor: (id) => api.delete(`/tutores/${id}`),
   getAnimaisByTutor: (idTutor) => api.get(`/tutores/${idTutor}/animais`),
-
-  // Animais
+  
+  // --- Animais ---
   getAnimais: (params) => api.get(`/animais?${params}`),
   getAnimalById: (id) => api.get(`/animais/${id}`),
-  createAnimal: (animalData) => api.post('/animais', animalData),
+  createAnimal: (animalData) => api.post("/animais", animalData),
   updateAnimal: (id, animalData) => api.put(`/animais/${id}`, animalData),
   deleteAnimal: (id) => api.delete(`/animais/${id}`),
   getConsultasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/consultas`),
   getPrescricoesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/prescricoes`),
   getExamesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/exames`),
   getVacinasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/vacinas`),
-
-  // Exames
+  
+  // --- Exames ---
   updateExame: (idExame, data) => api.patch(`/exames/${idExame}`, data),
-
-
-  // Consultas
+  
+  // --- Consultas ---
   getConsultas: (params) => api.get(`/consultas?${params}`),
   getConsultaById: (id) => api.get(`/consultas/${id}`),
-  createConsulta: (consultaData) => api.post('/consultas', consultaData),
-  createConsultaFromAgendamento: (idAgendamento, consultaData) => api.post(`/agendamentos/${idAgendamento}/consulta`, consultaData),
-  
-  // Veterinários
-  getVeterinarios: (params) => api.get(`/veterinarios?${params}`),
-  createVeterinario: (data) => api.post('/veterinarios', data),
-  getVeterinarioById: (id) => api.get(`/veterinarios/${id}`),
-
-  // Relatórios
-  getRelatorioConsultas: (params) => api.get(`/relatorios/consultas-por-periodo?${params}`),
-
-    // Usuários
-    getUsuarios: (params) => api.get(`/usuarios?${params}`),
-    registrarUsuario: (data) => api.post('/usuarios/registrar', data),
+  createConsulta: (consultaData) => api.post("/consultas", consultaData),
+  createConsultaFromAgendamento: (idAgendamento, consultaData) =>
+    api.post(`/agendamentos/${idAgendamento}/consulta`, consultaData),
     
+  // --- Veterinários ---
+  getVeterinarios: (params) => api.get(`/veterinarios?${params}`),
+  createVeterinario: (data) => api.post("/veterinarios", data),
+  getVeterinarioById: (id) => api.get(`/veterinarios/${id}`),
+  // ***** NOVO *****
+  updateVeterinario: (id, data) => api.put(`/veterinarios/${id}`, data),
+
+  // --- Relatórios ---
+  getRelatorioConsultas: (params) => api.get(`/relatorios/consultas-por-periodo?${params}`),
   
-  // Raças e Espécies
-  getEspecies: () => api.get('/especies'),
-  getRacas: () => api.get('/racas'),
+  // --- Usuários ---
+  getUsuarios: (params) => api.get(`/usuarios?${params}`),
+  registrarUsuario: (data) => api.post("/usuarios/registrar", data),
+  // ***** NOVO *****
+  updateUsuario: (id, data) => api.patch(`/usuarios/${id}`, data),
+
+  // --- Raças e Espécies ---
+  getEspecies: () => api.get("/especies"),
+  getRacas: () => api.get("/racas"),
   
-  // Endereço (ViaCEP)
+  // --- Endereço (ViaCEP) ---
   getEnderecoByCep: (cep) => api.get(`/enderecos/cep/${cep}`),
   
-  // Estados e Cidades
-  getEstados: () => api.get('/estados'),
+  // --- Estados e Cidades ---
+  getEstados: () => api.get("/estados"),
   getCidadesByEstado: (idEstado) => api.get(`/estados/${idEstado}/cidades`),
-
-  // Agendamentos
+  
+  // --- Agendamentos ---
   getAgendamentos: (params) => api.get(`/agendamentos?${params}`),
   getHorariosDisponiveis: (params) => api.get(`/agendamentos/horarios-disponiveis?${params}`),
-  createAgendamento: (agendamentoData) => api.post('/agendamentos', agendamentoData),
+  createAgendamento: (agendamentoData) => api.post("/agendamentos", agendamentoData),
   confirmarAgendamento: (id) => api.patch(`/agendamentos/${id}/confirmar`),
   cancelarAgendamento: (id) => api.patch(`/agendamentos/${id}/cancelar`),
   marcarFaltaAgendamento: (id) => api.patch(`/agendamentos/${id}/marcar-falta`),
-
-  // Dashboard
+  
+  // --- Dashboard ---
   getDashboardData: (params) => api.get(`/dashboard?${params}`),
   
-  // Documentos (PDFs)
-  gerarPrescricaoPreview: (data) => api.post('/documentos/prescricao/visualizar', data, true, 'blob'),
-  gerarExamePreview: (data) => api.post('/documentos/exame/visualizar', data, true, 'blob'),
-  imprimirPrescricao: (id) => api.get(`/prescricoes/${id}/imprimir`, true, 'blob'),
-  imprimirExame: (id) => api.get(`/exames/${id}/imprimir`, true, 'blob'),
-
-  // Vacinas
+  // --- Documentos (PDFs) ---
+  gerarPrescricaoPreview: (data) => api.post("/documentos/prescricao/visualizar", data, true, "blob"),
+  gerarExamePreview: (data) => api.post("/documentos/exame/visualizar", data, true, "blob"),
+  imprimirPrescricao: (id) => api.get(`/prescricoes/${id}/imprimir`, true, "blob"),
+  imprimirExame: (id) => api.get(`/exames/${id}/imprimir`, true, "blob"),
+  
+  // --- Vacinas ---
   registrarVacina: (idAnimal, vacinaData) => api.post(`/animais/${idAnimal}/vacinas`, vacinaData),
 };
 

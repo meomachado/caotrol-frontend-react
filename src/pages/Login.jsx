@@ -1,8 +1,7 @@
 // src/pages/Login.jsx
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { useNavigate, Link } from "react-router-dom";import api from "../services/api";
 import logoImage from "../assets/logo_login.png";
 import { jwtDecode } from "jwt-decode"; // Importe o decodificador
 
@@ -80,6 +79,11 @@ function Login() {
           <button type="submit" className="login-button">
             Entrar
           </button>
+           {/* ADICIONE ESTA PARTE */}
+           <div className="forgot-password-link">
+          <Link to="/recuperar-senha">Esqueceu a senha?</Link>
+        </div>
+          {/* FIM DA PARTE ADICIONADA */}
           {errorMessage && <p className="error-message">{errorMessage}</p>}
         </form>
       </div>

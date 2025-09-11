@@ -17,42 +17,38 @@ import Consulta from "./pages/Consulta/Consultas";
 import AnimalDetailPage from './pages/Animais/AnimalDetailPage'; 
 import Relatorios from './pages/Relatorios/Relatorios';
 import Usuarios from './pages/Usuarios/Usuarios';
-import Veterinarios from './pages/Veterinarios/Veterinarios'; 
+// REMOVIDO: import Veterinarios from './pages/Veterinarios/Veterinarios'; 
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword'; 
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem("jwt_token"); 
-  //ele verifica se o token de seguranca existe quando um usuario realizou o login
-  return isAuthenticated ? children : <Navigate to="/login" replace />; //aqui funciona como um if/else 
-  //Se isAuthenticated for verdadeiro (ou seja, o token existe), então mostre os componentes filhos (children). 
-  //Se for falso (token não existe), redirecione o usuário para a página /login
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 }; 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />  
-        {/*path é o caminho que ele vai colocar na URL*/}
-        {/* é o componente que ele vai exibir - Login.jsx nesse caso */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          //basicamente http://localhost:3000/ te manda pra dashboard sem necessariamente ter a   
-          //palavra dashboar depois da barra 
-        
+        {/* --- ROTAS PÚBLICAS --- */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/recuperar-senha" element={<ForgotPassword />} />
+        <Route path="/resetar-senha/:token" element={<ResetPassword />} />
 
-        {/* Rotas Protegidas */}
+        {/* Rota raiz padrão */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        
+        {/* --- ROTAS PROTEGIDAS --- */}
         <Route
-          path="/" // essa é a rota principal que esta envolvida no privateRoute
-          //ela so sera acessada se o usuario estiver logado
-          element={  
+          path="/" 
+          element={ 
             <PrivateRoute> 
               <MainLayout />
             </PrivateRoute>
           }
         >
-          {/* Rotas aninhadas dentro do MainLayout */}
-          {/*essas rotas estao aninhadas, ou seja, todas elas serao renderizadas dentro
-             do main layout */}
+          {/* Rotas aninhadas que precisam de login */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="animais" element={<Animais />} />
@@ -62,13 +58,10 @@ function App() {
           <Route path="animais/:id" element={<AnimalDetailPage />} />
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="usuarios" element={<Usuarios />} />
-          <Route path="veterinarios" element={<Veterinarios />} />
-          
-
-
-          {/* Adicione outras rotas aqui no futuro */}
+          {/* REMOVIDO: <Route path="veterinarios" element={<Veterinarios />} /> */}
         </Route>
 
+        {/* Rota para páginas não encontradas */}
         <Route path="*" element={<div>404 - Página Não Encontrada</div>} />
       </Routes>
     </Router>

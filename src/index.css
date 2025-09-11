@@ -118,3 +118,19 @@ button:active {
   width: 100vw; /* 100% da largura da tela */
   height: 100vh; /* 100% da altura da tela */
 }
+
+/* ... outros estilos ... */
+.forgot-password-link {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.forgot-password-link a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: underline;
+}

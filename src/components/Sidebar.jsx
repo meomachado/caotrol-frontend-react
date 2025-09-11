@@ -11,7 +11,6 @@ function Sidebar() {
       </div>
       <nav className={styles.sidebarNav}>
         <ul>
-          
           <li>
             <NavLink to="/dashboard" end>
               <i className="fas fa-home"></i> Início
@@ -43,17 +42,10 @@ function Sidebar() {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/veterinarios">
-              <i className="fas fa-user-md"></i> Veterinários
-            </NavLink>
-          </li>
-          <li>
             <NavLink to="/usuarios">
               <i className="fas fa-users-cog"></i> Usuários
             </NavLink>
           </li>
-     
-    
         </ul>
       </nav>
     </div>

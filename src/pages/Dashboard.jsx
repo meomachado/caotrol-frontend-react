@@ -153,9 +153,14 @@ function Dashboard() {
                       <td>{a.animal?.nome || "N/A"}</td>
                       <td>{a.tutor?.nome || "N/A"}</td>
                       <td>{a.veterinario?.nome || "N/A"}</td>
-                      <td>
-                        <span className={styles.statusChip}>{a.status}</span>
-                      </td>
+<td>
+  <span
+    className={styles.statusChip}
+    style={{ backgroundColor: a.cor, color: '#FFFFFF', fontWeight: 'bold' }}
+  >
+    {a.status}
+  </span>
+</td>
                     </tr>
                   ))
                 ) : (

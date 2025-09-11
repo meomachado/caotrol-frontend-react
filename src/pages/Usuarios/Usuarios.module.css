@@ -1,88 +1,230 @@
-/* pages/Usuarios/Usuarios.module.css */
+/* src/pages/Usuarios/Usuarios.module.css */
+
 .usuariosContainer {
-    width: 100%;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-  }
-  
-  .header h1 {
-    font-size: 2.5em;
-    color: #2c3e50;
-  }
-  
-  .newUserButton {
-    background-color: #27ae60;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .userList {
-    display: grid;
-    gap: 15px;
-  }
-  
-  .userItem {
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 20px 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .userInfo h4 {
-    margin: 0 0 5px 0;
-    font-size: 1.2em;
-  }
-  
-  .userInfo p {
-    margin: 0;
-    color: #7f8c8d;
-  }
-  
-  .userType {
-    font-weight: bold;
-    text-transform: capitalize;
-    color: #34495e;
-  }
-  
-  .paginationControls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-top: 30px;
-  }
-  
-  .paginationControls button {
-    padding: 10px 20px;
-    border-radius: 8px;
-    background-color: #34495e;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .paginationControls button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
-  }
-  
-  .errorMessage {
-    color: #e74c3c;
-    text-align: center;
-    padding: 20px;
-  }
+  width: 100%;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  font-size: 2.5em;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.headerActions {
+  display: flex;
+  gap: 15px;
+}
+
+.actionButton, .newUserButton {
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.actionButton {
+  background-color: #ecf0f1;
+  color: #34495e;
+  border: 1px solid #bdc3c7;
+}
+
+.actionButton:hover {
+  background-color: #dfe6e9;
+  border-color: #95a5a6;
+}
+
+.newUserButton {
+  background-color: #27ae60;
+  color: white;
+}
+
+.newUserButton:hover {
+  background-color: #2ecc71;
+  transform: translateY(-2px);
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tabs button {
+  padding: 15px 30px;
+  font-size: 1.1em;
+  font-weight: 500;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: #7f8c8d;
+  position: relative;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabs button.activeTab {
+  color: #27ae60;
+}
+
+.tabs button.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #27ae60;
+}
+
+.userList {
+  display: grid;
+  gap: 15px;
+}
+
+.userItem {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.userItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* AVATAR/INICIAIS */
+.userInfoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #27ae60;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: 700;
+}
+
+.userInfo h4 {
+  margin: 0 0 5px 0;
+  color: #34495e;
+  font-size: 1.2em;
+}
+
+.userInfo p {
+  margin: 0;
+  color: #7f8c8d; /* Contraste melhorado */
+  font-size: 0.95em;
+}
+
+.userType {
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #34495e;
+  background-color: #ecf0f1;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.85em;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.iconButton {
+  background-color: transparent;
+  color: #7f8c8d;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.iconButton:hover {
+  background-color: #f0f2f5;
+  color: #3498db;
+}
+
+.paginationControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.paginationControls button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: #34495e;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.paginationControls button:hover:not(:disabled) {
+  background-color: #2c3e50;
+}
+
+.paginationControls button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.paginationControls span {
+  font-weight: 500;
+  color: #7f8c8d;
+}
+
+.centeredMessage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.1em;
+  color: #6c757d;
+}
+
+.errorMessage {
+  color: #e74c3c;
+  text-align: center;
+  padding: 20px;
+}
