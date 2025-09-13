@@ -66,7 +66,7 @@ function Tutores() {
       );
     }
   };
-
+  
   // --- ALTERAÇÃO PRINCIPAL AQUI (handleOpenDetailModal) ---
   const handleOpenDetailModal = async (tutor) => {
     try {
@@ -103,6 +103,15 @@ function Tutores() {
     }
   };
 
+  const formatCPF = (value) => {
+    if (!value) return ""; // Retorna vazio se não houver valor
+    value = value.replace(/\D/g, ""); // 1. Remove tudo que não é dígito
+    value = value.replace(/(\d{3})(\d)/, "$1.$2"); // 2. Adiciona o primeiro ponto
+    value = value.replace(/(\d{3})(\d)/, "$1.$2"); // 3. Adiciona o segundo ponto
+    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); // 4. Adiciona o traço
+    return value;
+  };
+
   const renderTutorList = () => {
     if (loading) return <p>Carregando tutores...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -111,10 +120,19 @@ function Tutores() {
 
     return tutores.map((tutor) => (
       <div key={tutor.id_tutor} className={styles.tutorItem}>
+
+      <div className={styles.tutorInfoWrapper}>
+        <div className={styles.tutorAvatar}>
+          {tutor.nome.charAt(0).toUpperCase()}
+        </div>
         <div className={styles.tutorInfo}>
           <h4>{tutor.nome}</h4>
-          <p>CPF: {tutor.cpf}</p>
+          <p>CPF: {formatCPF(tutor.cpf)}</p>
         </div>
+      </div>
+
+      <div className={styles.tutorActions}></div>
+       \
         <div className={styles.tutorActions}>
           <button
             className={styles.detailsButton}

@@ -216,3 +216,24 @@
   font-weight: 500;
   color: #7f8c8d;
 }
+/* Adicione em Tutores.module.css */
+
+.tutorInfoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tutorAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #27ae60; /* Um azul para diferenciar de usuários */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: 700;
+  flex-shrink: 0; /* Impede que o avatar encolha */
+}
