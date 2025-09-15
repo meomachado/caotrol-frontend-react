@@ -7,7 +7,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
   const [nome, setNome] = useState("");
   const [dataNasc, setDataNasc] = useState("");
   const [sexo, setSexo] = useState("M");
-  const [idTutor, setIdTutor] = useState("");
+  const [idTutor, setIdTutor] = useState(null);
   const [idEspecie, setIdEspecie] = useState("");
   const [idRaca, setIdRaca] = useState("");
   const [temperamento, setTemperamento] = useState("");
@@ -23,7 +23,6 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
   const [tutorSearchTerm, setTutorSearchTerm] = useState("");
   const [searchedTutores, setSearchedTutores] = useState([]);
   const [showTutorResults, setShowTutorResults] = useState(false);
-  const [selectedTutorName, setSelectedTutorName] = useState("");
 
   const [racaSearchTerm, setRacaSearchTerm] = useState("");
   const [showRacaResults, setShowRacaResults] = useState(false);
@@ -42,7 +41,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
     if (isOpen) {
       setError("");
       setSearchedTutores([]);
-      
+
       // Limpa os campos do animal, mas preserva o tutor se ele for pré-selecionado
       setNome("");
       setDataNasc("");
@@ -60,7 +59,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
         setDataNasc(animalToEdit.data_nasc ? new Date(animalToEdit.data_nasc).toISOString().split("T")[0] : "");
         setSexo(animalToEdit.sexo || "M");
         setIdTutor(animalToEdit.id_tutor || "");
-        setSelectedTutorName(animalToEdit.tutor ? `${animalToEdit.tutor.nome} - ${animalToEdit.tutor.cpf}` : "");
+        setTutorSearchTerm(animalToEdit.tutor ? `${animalToEdit.tutor.nome} - ${animalToEdit.tutor.cpf}` : "");
         if (racaDoAnimal) {
           setIdEspecie(racaDoAnimal.id_especie);
           setRacaSearchTerm(racaDoAnimal.nome);
@@ -72,36 +71,14 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
         // LÓGICA PARA PRÉ-SELEÇÃO
         setIdTutor(tutorToPreselect.id_tutor);
         const cpfDisplay = String(tutorToPreselect.cpf).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-        const tutorFullName = `${tutorToPreselect.nome} - ${cpfDisplay}`;
-        setSelectedTutorName(tutorFullName);
-        setTutorSearchTerm(tutorFullName);
+        setTutorSearchTerm(`${tutorToPreselect.nome} - ${cpfDisplay}`);
       } else {
         // Limpa tudo se for um cadastro novo sem pré-seleção
-        setIdTutor("");
-        setSelectedTutorName("");
+        setIdTutor(null);
         setTutorSearchTerm("");
       }
     }
   }, [isOpen, animalToEdit, racas, tutorToPreselect]);
-
-  useEffect(() => {
-    if (!selectedTutorName || tutorSearchTerm !== selectedTutorName) {
-      if (tutorSearchTerm.length < 2) {
-        setSearchedTutores([]);
-        setShowTutorResults(false);
-        return;
-      }
-      const delayDebounceFn = setTimeout(() => {
-        api.get(`/tutores/search?termo=${tutorSearchTerm}`)
-          .then((response) => {
-            setSearchedTutores(response || []);
-            setShowTutorResults(true);
-          })
-          .catch(() => setSearchedTutores([]));
-      }, 400);
-      return () => clearTimeout(delayDebounceFn);
-    }
-  }, [tutorSearchTerm, selectedTutorName]);
 
   useEffect(() => {
     if (isOpen) {
@@ -109,10 +86,34 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
     }
   }, [isOpen]);
 
-  // Função de salvar agora aceita uma ação
+  // A dependência 'searchedTutores' foi removida para evitar o loop.
+  useEffect(() => {
+    const isTutorSelected = searchedTutores.some(tutor => `${tutor.nome} - ${tutor.cpf}` === tutorSearchTerm);
+    if (!isTutorSelected) {
+      setIdTutor(null);
+    }
+    
+    if (tutorSearchTerm.length < 2) {
+      setSearchedTutores([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(() => {
+      api.get(`/tutores/search?termo=${tutorSearchTerm}`)
+        .then((response) => {
+          setSearchedTutores(response || []);
+        })
+        .catch(() => setSearchedTutores([]));
+    }, 400);
+    return () => clearTimeout(delayDebounceFn);
+  }, [tutorSearchTerm]);
+
   const handleSave = async (action) => {
     if (isFormInvalid) {
       setError("Campos com * são obrigatórios.");
+      return;
+    }
+    if (!idTutor) {
+      setError("Por favor, selecione um tutor da lista de busca.");
       return;
     }
     setIsSaving(true);
@@ -134,7 +135,6 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
 
       if (action === 'saveAndAddAnother') {
         alert('Animal salvo com sucesso! Cadastre o próximo.');
-        // Limpa apenas os campos do animal para o próximo cadastro
         setNome('');
         setDataNasc('');
         setSexo('M');
@@ -143,9 +143,8 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
         setTemperamento('');
         setPorte('');
         setRacaSearchTerm('');
-        nomeInputRef.current?.focus(); // Foca no campo de nome para agilizar
+        nomeInputRef.current?.focus();
       } else {
-        // Ação padrão: 'saveAndClose'
         onSave(savedAnimal);
       }
     } catch (err) {
@@ -165,7 +164,6 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}><h2>{animalToEdit ? "Editar Animal" : "Novo Animal"}</h2></div>
         <form id="animal-form" className={styles.formBody}>
-          {/* O formulário permanece o mesmo */}
           <div className={styles.panel}>
             <div className={styles.card}>
               <h3 className={styles.sectionTitle}>Identificação</h3>
@@ -174,12 +172,27 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
                 <label>Tutor <span style={{ color: "red" }}>*</span></label>
                 <div className={styles.inputIconWrapper}>
                   <i className="fas fa-user"></i>
-                  <input type="text" placeholder="Buscar por nome ou CPF..." value={selectedTutorName} onChange={(e) => { setSelectedTutorName(e.target.value); setTutorSearchTerm(e.target.value); setIdTutor(""); }} onFocus={() => setShowTutorResults(true)} onBlur={() => setTimeout(() => setShowTutorResults(false), 200)} required disabled={!!tutorToPreselect} />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar por nome ou CPF..." 
+                    value={tutorSearchTerm} 
+                    onChange={(e) => { 
+                      setTutorSearchTerm(e.target.value); 
+                      setShowTutorResults(true);
+                    }} 
+                    onFocus={() => setShowTutorResults(true)} 
+                    onBlur={() => setTimeout(() => setShowTutorResults(false), 200)} 
+                    required disabled={!!tutorToPreselect} 
+                  />
                 </div>
                 {showTutorResults && searchedTutores.length > 0 && (
                   <ul className={styles.autocompleteList}>
                     {searchedTutores.map((tutor) => (
-                      <li key={tutor.id_tutor} onMouseDown={() => { setIdTutor(tutor.id_tutor); setSelectedTutorName(`${tutor.nome} - ${tutor.cpf}`); setShowTutorResults(false); }}>
+                      <li key={tutor.id_tutor} onMouseDown={() => { 
+                        setIdTutor(tutor.id_tutor); 
+                        setTutorSearchTerm(`${tutor.nome} - ${tutor.cpf}`); 
+                        setShowTutorResults(false); 
+                      }}>
                         {tutor.nome} - {tutor.cpf}
                       </li>
                     ))}

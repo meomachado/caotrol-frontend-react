@@ -25,29 +25,30 @@
 .headerActions {
   display: flex;
   gap: 10px;
-  align-items: center; /* Garante o alinhamento vertical dos botões */
+  align-items: center;
 }
 
-.backButton {
+.secondaryButton {
   padding: 8px 18px;
   font-size: 0.9em;
   gap: 8px;
-  background-color: #ffffff;
+  background-color: #ecf0f1;
   color: #34495e;
   border-radius: 8px;
   font-weight: 600;
-  border: 1px solid #dfe6e9;
+  border: 1px solid #dcdcdc;
   cursor: pointer;
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
 }
 
-.backButton:hover {
-  background-color: #ecf0f1;
+.secondaryButton:hover {
+  background-color: #e0e6e8;
+  border-color: #c0c0c0;
 }
 
-.deleteButton {
+.dangerButton {
   padding: 8px 18px;
   font-size: 0.9em;
   gap: 8px;
@@ -62,10 +63,49 @@
   transition: all 0.2s ease;
 }
 
-.deleteButton:hover {
+.dangerButton:hover {
   background-color: #c0392b;
 }
 
+.editButton {
+  padding: 8px 18px;
+  font-size: 0.9em;
+  gap: 8px;
+  background-color: #3498db;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid #2980b9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.editButton:hover {
+  background-color: #2980b9;
+}
+
+.actionButtonPrimary {
+  background-color: #27ae60;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+.actionButtonPrimary:hover {
+  background-color: #219d55;
+  transform: translateY(-2px);
+}
 
 .layout {
   display: grid;
@@ -117,7 +157,7 @@
   color: #34495e;
   font-weight: 400;
 }
-.detailGroup p i {
+.detailGroup p svg {
   color: #27ae60;
   width: 15px;
   text-align: center;
@@ -171,26 +211,25 @@
   margin-bottom: 15px;
 }
 
-.newButton {
-  background-color: #27ae60;
-  color: white;
-  padding: 7px 14px;
+.addResultButton {
+  padding: 6px 12px;
   font-size: 0.85em;
-  gap: 6px;
+  background-color: #3498db;
+  color: white;
   border-radius: 8px;
-  font-weight: 600;
   border: none;
   cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  gap: 6px;
 }
 
-.newButton:hover {
-  background-color: #2ecc71;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+.addResultButton:hover {
+  background-color: #2980b9;
 }
 
 .historyList {
@@ -238,28 +277,6 @@
   line-height: 1.4;
 }
 
-.addResultButton {
-  padding: 6px 12px;
-  font-size: 0.8em;
-  background-image: linear-gradient(to right, #27ae60, #2ecc71);
-  color: white;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.addResultButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
-}
-
 .resultadoText {
   margin-top: 8px !important;
   padding: 8px;
@@ -280,9 +297,9 @@
   text-align: center;
   color: #95a5a6;
 }
-.noData i {
-    font-size: 2.5em;
-    margin-bottom: 15px;
+.noData svg {
+  font-size: 2.5em;
+  margin-bottom: 15px;
 }
 .error {
   color: #d32f2f;
@@ -297,36 +314,4 @@
     align-items: flex-start;
     gap: 15px;
   }
-}
-
-/* pages/Animais/AnimalDetailPage.module.css */
-
-/* ... (todos os estilos existentes) ... */
-
-.headerActions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-
-
-/* ALTERAÇÃO: Adicionado estilo para o botão de editar */
-.editButton {
-  padding: 8px 18px;
-  font-size: 0.9em;
-  gap: 8px;
-  background-color: #3498db;
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  border: 1px solid #2980b9;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
-}
-
-.editButton:hover {
-  background-color: #2980b9;
 }

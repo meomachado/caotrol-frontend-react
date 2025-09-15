@@ -1,54 +1,62 @@
 /* src/pages/Agenda/Agenda.module.css */
 
 .agendaContainer {
-    height: 100%;
-  }
-  
-  .actionsBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .actionsBar h1 {
-    font-size: 2.2em;
-    color: #343a40;
-    margin: 0;
-  }
-  
-  .newButton {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 1em;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .calendarWrapper {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  }
-  
-  /* Pequenos ajustes para deixar o FullCalendar mais bonito */
-  .calendarWrapper :global(.fc-button) {
-    background-color: #21584b !important;
-    border-color: #21584b !important;
-  }
-  
-  .calendarWrapper :global(.fc-event) {
-    cursor: pointer;
-  }
+  height: 100%;
+}
 
-  /* Adicione estas classes ao seu Agenda.module.css */
+/* Ações bar substituída por .pageHeader para padronização */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.pageHeader h1 {
+  font-size: 2.2em;
+  color: #343a40;
+  margin: 0;
+}
 
+/* Novo estilo para o botão principal, copiado de Tutores.module.css */
+.actionButtonPrimary {
+  background-color: #27ae60;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+.actionButtonPrimary:hover {
+  background-color: #219d55;
+  transform: translateY(-2px);
+}
+    
+.calendarWrapper {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Pequenos ajustes para deixar o FullCalendar mais bonito */
+.calendarWrapper :global(.fc-button) {
+  background-color: #21584b !important;
+  border-color: #21584b !important;
+}
+    
+.calendarWrapper :global(.fc-event) {
+  cursor: pointer;
+}
+
+/* Adicione estas classes ao seu Agenda.module.css */
 .eventBox {
   padding: 2px 4px;
   overflow: hidden;
@@ -56,19 +64,19 @@
   display: flex;
   flex-direction: column;
 }
-
+    
 .eventTime {
   font-size: 0.8em;
   font-weight: 500;
 }
-
+    
 .eventTitle {
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
+    
 .eventStatus {
   font-size: 0.8em;
   font-style: italic;
