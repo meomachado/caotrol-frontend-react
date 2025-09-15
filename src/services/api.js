@@ -126,8 +126,6 @@ const api = {
   getVeterinarioById: (id) => api.get(`/veterinarios/${id}`),
   updateVeterinario: (id, data) => api.put(`/veterinarios/${id}`, data),
 
-  // --- Relatórios ---
-  getRelatorioConsultas: (params) => api.get(`/relatorios/consultas-por-periodo?${params}`),
   
   // --- Usuários ---
   getUsuarios: (params) => api.get(`/usuarios?${params}`),

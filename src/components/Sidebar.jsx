@@ -37,11 +37,6 @@ function Sidebar() {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/relatorios">
-              <i className="fas fa-chart-line"></i> Relatórios
-            </NavLink>
-          </li>
-          <li>
             <NavLink to="/usuarios">
               <i className="fas fa-users-cog"></i> Usuários
             </NavLink>
