@@ -1,40 +1,45 @@
 /* src/components/Header.module.css */
-
 .headerContainer {
-    width: 100%; /* Isso faz ele se esticar dentro do .mainContentWrapper */
-    background-color: #21584b;
-    color: white;
-    padding: 10px 30px;
-    display: flex;
-    align-items: center;
-    
-    justify-content: flex-end;
-    min-height: 50px;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  .userInfo {
-    display: flex;
+  /* === MUDANÇAS PARA FIXAR O HEADER === */
+  position: fixed;
+  top: 0;
+  left: 250px; /* Começa exatamente onde a sidebar termina */
+  width: calc(100% - 250px); /* Ocupa 100% da largura menos o espaço da sidebar */
+  z-index: 999; /* Fica acima do conteúdo, mas abaixo da sidebar se houver sobreposição */
+  
+  /* --- Estilos visuais mantidos --- */
+  background-color: #21584b;
+  color: white;
+  padding: 10px 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 50px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-sizing: border-box; /* Garante que o padding não afete a largura total */
+}
 
-    align-items: center;
-    gap: 20px; /* Espaço entre o nome e o botão */
-  }
-  
-  .userInfo span {
-    font-weight: bold;
-    font-size: 1em;
-  }
-  
-  .logoutButton {
-    background-color: #f8f9fa;
-    color: #343a40;
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-size: 0.9em;
-    font-weight: 500;
-    border: 1px solid #dee2e6;
-  }
-  
-  .logoutButton:hover {
-    background-color: #e9ecef;
-  }
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.userInfo span {
+  font-weight: bold;
+  font-size: 1em;
+}
+
+.logoutButton {
+  background-color: #f8f9fa;
+  color: #343a40;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-weight: 500;
+  border: 1px solid #dee2e6;
+}
+
+.logoutButton:hover {
+  background-color: #e9ecef;
+}

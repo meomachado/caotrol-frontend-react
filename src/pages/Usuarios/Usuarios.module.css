@@ -1,21 +1,29 @@
 /* src/pages/Usuarios/Usuarios.module.css */
 
-.usuariosContainer {
+.pageContainer {
   width: 100%;
-  padding: 20px;
 }
 
-.header {
+/* === HEADER PADRONIZADO === */
+.pageHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 }
 
-.header h1 {
-  font-size: 2.5em;
-  font-weight: 700;
+.pageHeader h1 {
+  font-size: 2.2rem;
   color: #2c3e50;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.pageSubtitle {
+  color: #7f8c8d;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 4px;
 }
 
 .headerActions {
@@ -23,40 +31,57 @@
   gap: 15px;
 }
 
-.actionButton, .newUserButton {
-  padding: 12px 25px;
+/* === BOTÕES PADRONIZADOS === */
+.actionButtonPrimary {
+  background-color: #27ae60;
+  color: white;
+  padding: 12px 20px;
   border-radius: 8px;
-  font-size: 1em;
-  font-weight: 600;
+  font-size: 0.95em;
   border: none;
   cursor: pointer;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
 }
 
-.actionButton {
+.actionButtonPrimary:hover {
+  background-color: #219d55;
+  transform: translateY(-2px);
+}
+
+.actionButtonSecondary {
   background-color: #ecf0f1;
   color: #34495e;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95em;
   border: 1px solid #bdc3c7;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
-.actionButton:hover {
+.actionButtonSecondary:hover {
   background-color: #dfe6e9;
   border-color: #95a5a6;
 }
 
-.newUserButton {
-  background-color: #27ae60;
-  color: white;
+/* === CONTAINER DE CONTEÚDO PRINCIPAL === */
+.contentCard {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 25px;
 }
 
-.newUserButton:hover {
-  background-color: #2ecc71;
-  transform: translateY(-2px);
-}
-
+/* === TABS PADRONIZADAS === */
 .tabs {
   display: flex;
   margin-bottom: 30px;
@@ -92,60 +117,67 @@
   background-color: #27ae60;
 }
 
-.userList {
+/* === LISTA E CARDS DE USUÁRIOS E VETERINÁRIOS === */
+.listGrid {
   display: grid;
-  gap: 15px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
-.userItem {
+.itemCard {
   background-color: #ffffff;
   border-radius: 10px;
-  padding: 20px 25px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  padding: 16px 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* ✨ Alteração aqui: removido 'transform' do 'transition' */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.userItem:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+.itemCard:hover {
+  background-color: #f9f9f9;
+  border-color: #e0e0e0;
+  /* ✨ Alteração aqui: removido a linha `transform: translateY(-3px);` */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra mais sutil no hover */
 }
 
-/* AVATAR/INICIAIS */
-.userInfoWrapper {
+.infoWrapper {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
-.userAvatar {
-  width: 50px;
-  height: 50px;
+.avatar {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: #27ae60;
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
-.userInfo h4 {
-  margin: 0 0 5px 0;
-  color: #34495e;
-  font-size: 1.2em;
+.info h4 {
+  margin: 0 0 2px 0;
+  color: #2c3e50;
+  font-size: 1.1em;
+  font-weight: 600;
 }
 
-.userInfo p {
+.info p {
   margin: 0;
-  color: #7f8c8d; /* Contraste melhorado */
-  font-size: 0.95em;
+  color: #7f8c8d;
+  font-size: 0.9em;
 }
 
-.userType {
+.typeBadge {
   font-weight: 500;
   text-transform: capitalize;
   color: #34495e;
@@ -155,7 +187,7 @@
   font-size: 0.85em;
 }
 
-.userActions {
+.actions {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -181,50 +213,48 @@
   color: #3498db;
 }
 
+/* === ESTADOS E PAGINAÇÃO === */
+.loadingState, .errorState, .noData {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+.errorState {
+  color: #e74c3c;
+}
+
 .paginationControls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 12px;
+  margin-top: 2rem;
 }
 
 .paginationControls button {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 8px;
-  background-color: #34495e;
-  color: white;
-  border: none;
+  background-color: #fff;
+  color: #34495e;
+  border: 1px solid #dcdcdc;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .paginationControls button:hover:not(:disabled) {
-  background-color: #2c3e50;
+  background-color: #f5f5f5;
+  border-color: #c0c0c0;
 }
 
 .paginationControls button:disabled {
-  background-color: #bdc3c7;
+  background-color: #f5f5f5;
+  color: #c0c0c0;
   cursor: not-allowed;
 }
 
 .paginationControls span {
   font-weight: 500;
-  color: #7f8c8d;
-}
-
-.centeredMessage {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 1.1em;
-  color: #6c757d;
-}
-
-.errorMessage {
-  color: #e74c3c;
-  text-align: center;
-  padding: 20px;
+  color: #34495e;
 }

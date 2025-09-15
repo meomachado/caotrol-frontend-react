@@ -3,6 +3,7 @@ import api from '../../services/api';
 import styles from './Usuarios.module.css';
 import UsuarioModal from './UsuarioModal';
 import VeterinarioModal from '../Veterinarios/VeterinarioModal';
+import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt } from "react-icons/fa";
 
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -28,7 +29,7 @@ function Usuarios() {
     try {
       const params = new URLSearchParams({ page, limit: 10 }).toString();
       const response = await api.getUsuarios(params);
-      setUsuarios(response.data || []);
+      setUsuarios(Array.isArray(response.data) ? response.data : []);
       setUserTotalPages(response.totalPages || 0);
       setUserCurrentPage(response.currentPage || 1);
     } catch (err) {
@@ -44,7 +45,7 @@ function Usuarios() {
     try {
       const params = new URLSearchParams({ page, limit: 10 }).toString();
       const response = await api.getVeterinarios(params);
-      setVeterinarios(response.data || []);
+      setVeterinarios(Array.isArray(response.data) ? response.data : []);
       setVetTotalPages(response.totalPages || 0);
       setVetCurrentPage(response.currentPage || 1);
     } catch (err) {
@@ -94,55 +95,54 @@ function Usuarios() {
     } else {
       fetchVeterinarios(1);
     }
-    // Aqui você pode adicionar um "toast" de sucesso.
   };
 
   const renderContent = () => {
-    if (loading) return <p className={styles.centeredMessage}>Carregando...</p>;
-    if (error) return <p className={`${styles.centeredMessage} ${styles.errorMessage}`}>{error}</p>;
+    if (loading) return <p className={styles.loadingState}>Carregando...</p>;
+    if (error) return <p className={styles.errorState}>{error}</p>;
 
     if (activeTab === 'usuarios') {
-        if (!usuarios || usuarios.length === 0) return <p className={styles.centeredMessage}>Nenhum usuário encontrado.</p>;
-        return usuarios.map((user) => (
-            <div key={user.id_usuario} className={styles.userItem}>
-                <div className={styles.userInfoWrapper}>
-                    <div className={styles.userAvatar}>
-                        {user.login.charAt(0).toUpperCase()}
-                    </div>
-                    <div className={styles.userInfo}>
-                        <h4>{user.login}</h4>
-                        <p>
-                            <span className={styles.userType}>{user.tipo}</span>
-                        </p>
-                    </div>
-                </div>
-                <div className={styles.userActions}>
-                    <button onClick={() => handleEditUser(user)} className={styles.iconButton} title="Editar">
-                        <i className="fas fa-pencil-alt"></i>
-                    </button>
-                </div>
+      if (!usuarios || usuarios.length === 0) return <p className={styles.noData}>Nenhum usuário encontrado.</p>;
+      return usuarios.map((user) => (
+        <div key={user.id_usuario} className={`${styles.itemCard} ${styles.userItem}`}>
+          <div className={styles.infoWrapper}>
+            <div className={styles.avatar}>
+              {user.login.charAt(0).toUpperCase()}
             </div>
-        ));
+            <div className={styles.info}>
+              <h4>{user.login}</h4>
+              <p>
+                <span className={styles.typeBadge}>{user.tipo}</span>
+              </p>
+            </div>
+          </div>
+          <div className={styles.actions}>
+            <button onClick={() => handleEditUser(user)} className={styles.iconButton} title="Editar">
+              <FaPencilAlt />
+            </button>
+          </div>
+        </div>
+      ));
     } else {
-        if (!veterinarios || veterinarios.length === 0) return <p className={styles.centeredMessage}>Nenhum perfil de veterinário encontrado.</p>;
-        return veterinarios.map((vet) => (
-            <div key={vet.id_veterinario} className={styles.userItem}>
-                <div className={styles.userInfoWrapper}>
-                    <div className={styles.userAvatar}>
-                        {vet.nome.charAt(0).toUpperCase()}
-                    </div>
-                    <div className={styles.userInfo}>
-                        <h4>{vet.nome}</h4>
-                        <p>CRMV: {vet.crmv}</p>
-                    </div>
-                </div>
-                <div className={styles.userActions}>
-                    <button onClick={() => handleEditVet(vet)} className={styles.iconButton} title="Editar">
-                         <i className="fas fa-pencil-alt"></i>
-                    </button>
-                </div>
+      if (!veterinarios || veterinarios.length === 0) return <p className={styles.noData}>Nenhum perfil de veterinário encontrado.</p>;
+      return veterinarios.map((vet) => (
+        <div key={vet.id_veterinario} className={`${styles.itemCard} ${styles.vetItem}`}>
+          <div className={styles.infoWrapper}>
+            <div className={styles.avatar}>
+              {vet.nome.charAt(0).toUpperCase()}
             </div>
-        ));
+            <div className={styles.info}>
+              <h4>{vet.nome}</h4>
+              <p>CRMV: {vet.crmv}</p>
+            </div>
+          </div>
+          <div className={styles.actions}>
+            <button onClick={() => handleEditVet(vet)} className={styles.iconButton} title="Editar">
+              <FaPencilAlt />
+            </button>
+          </div>
+        </div>
+      ));
     }
   };
   
@@ -167,7 +167,7 @@ function Usuarios() {
   };
 
   return (
-    <div className={styles.usuariosContainer}>
+    <div className={styles.pageContainer}>
       <UsuarioModal 
         isOpen={isUsuarioModalOpen}
         onClose={handleCloseModals}
@@ -181,36 +181,41 @@ function Usuarios() {
         initialData={editingVet}
       />
 
-      <div className={styles.header}>
-        <h1>Gerenciamento de Acessos</h1>
+      <div className={styles.pageHeader}>
+        <div>
+          <h1>Gerenciamento de Acessos</h1>
+          <p className={styles.pageSubtitle}>Gerencie os usuários e perfis de veterinários do sistema</p>
+        </div>
         <div className={styles.headerActions}>
-          <button className={styles.actionButton} onClick={handleNewVet}>
-            <i className="fas fa-user-md"></i> Novo Perfil Vet
+          <button className={styles.actionButtonSecondary} onClick={handleNewVet}>
+            <FaUserMd /> Novo Perfil Vet
           </button>
-          <button className={styles.newUserButton} onClick={handleNewUser}>
-            <i className="fas fa-plus"></i> Novo Usuário
+          <button className={styles.actionButtonPrimary} onClick={handleNewUser}>
+            <FaUserPlus /> Novo Usuário
           </button>
         </div>
       </div>
 
-      <div className={styles.tabs}>
-        <button 
-          className={activeTab === 'usuarios' ? styles.activeTab : ''} 
-          onClick={() => setActiveTab('usuarios')}>
-          <i className="fas fa-users"></i> Usuários do Sistema
-        </button>
-        <button 
-          className={activeTab === 'veterinarios' ? styles.activeTab : ''} 
-          onClick={() => setActiveTab('veterinarios')}>
-          <i className="fas fa-user-md"></i> Perfis de Veterinário
-        </button>
-      </div>
-      
-      <div className={styles.userList}>
-        {renderContent()}
-      </div>
+      <div className={styles.contentCard}>
+        <div className={styles.tabs}>
+          <button 
+            className={activeTab === 'usuarios' ? styles.activeTab : ''} 
+            onClick={() => setActiveTab('usuarios')}>
+            <FaUsers /> Usuários do Sistema
+          </button>
+          <button 
+            className={activeTab === 'veterinarios' ? styles.activeTab : ''} 
+            onClick={() => setActiveTab('veterinarios')}>
+            <FaUserMd /> Perfis de Veterinário
+          </button>
+        </div>
+        
+        <div className={styles.listGrid}>
+          {renderContent()}
+        </div>
 
-      {renderPagination()}
+        {renderPagination()}
+      </div>
     </div>
   );
 }

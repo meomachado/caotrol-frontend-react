@@ -2,19 +2,18 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import styles from "./Dashboard.module.css";
+// ✅ Ícones importados para os cards e o header
+import { FaCalendarAlt, FaCalendarCheck, FaClipboardList, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [summary, setSummary] = useState({});
   const [appointments, setAppointments] = useState([]);
-
-  // --- NOVOS ESTADOS PARA O FILTRO ---
   const [veterinarios, setVeterinarios] = useState([]);
-  const [filtroVetId, setFiltroVetId] = useState(""); // '' para o padrão, 'todos' ou um ID
+  const [filtroVetId, setFiltroVetId] = useState("todos"); // 'todos' como padrão
   const [userType, setUserType] = useState("");
 
-  // Efeito para buscar a lista de veterinários (apenas para admins/padrão)
   useEffect(() => {
     const tipo = localStorage.getItem("user_type");
     setUserType(tipo);
@@ -29,21 +28,17 @@ function Dashboard() {
     }
   }, []);
 
-  // Efeito para buscar os dados do dashboard quando o filtro muda
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Monta os parâmetros: se filtroVetId tiver um valor, ele é enviado
         const params = new URLSearchParams();
-        if (filtroVetId) {
+        if (filtroVetId && filtroVetId !== "todos") {
           params.append("id_vet_filtro", filtroVetId);
         }
 
         const data = await api.getDashboardData(params.toString());
-
         setSummary(data.resumoDiario);
         setAppointments(data.proximasConsultas);
       } catch (err) {
@@ -55,7 +50,7 @@ function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [filtroVetId]); // ✅ Roda o efeito sempre que o filtroVetId mudar
+  }, [filtroVetId]);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -82,12 +77,18 @@ function Dashboard() {
 
   return (
     <div className={styles.dashboardPage}>
+      {/* ✅ HEADER E SUBTÍTULO UNIFICADOS */}
       <div className={styles.pageHeader}>
-        <h1>Início</h1>
-        {/* ✅ FILTRO DE VETERINÁRIOS (SÓ APARECE PARA ADMIN/PADRÃO) */}
+        <div>
+          <h1>Início</h1>
+          <p className={styles.pageSubtitle}>
+            <FaCalendarAlt /> {getCurrentDate()}
+          </p>
+        </div>
+        
         {(userType === "admin" || userType === "padrao") && (
           <div className={styles.filterContainer}>
-            <label htmlFor="vet-filter">Visualizar agenda de:</label>
+            <label htmlFor="vet-filter">Agenda de:</label>
             <select
               id="vet-filter"
               value={filtroVetId}
@@ -104,32 +105,40 @@ function Dashboard() {
         )}
       </div>
 
-      <div className={styles.dateHeader}>
-        <i className="fas fa-calendar-alt"></i>
-        <span>{getCurrentDate()}</span>
-      </div>
-
       {loading ? (
         <div className={styles.loading}>Carregando...</div>
       ) : (
         <>
           <h2 className={styles.sectionTitle}>Resumo Diário</h2>
+          {/* ✅ CARDS COM ÍCONES */}
           <div className={styles.summaryCards}>
             <div className={styles.summaryCard}>
-              <h3>Agendamentos</h3>
-              <p>{summary.agendados}</p>
+              <div className={styles.cardIcon} style={{backgroundColor: '#eaf4fc'}}><FaClipboardList style={{color: '#3498db'}} /></div>
+              <div className={styles.cardContent}>
+                <h3>Agendamentos</h3>
+                <p>{summary.agendados}</p>
+              </div>
             </div>
             <div className={styles.summaryCard}>
-              <h3>Confirmados</h3>
-              <p>{summary.confirmados}</p>
+              <div className={styles.cardIcon} style={{backgroundColor: '#e8f5e9'}}><FaCalendarCheck style={{color: '#27ae60'}}/></div>
+              <div className={styles.cardContent}>
+                <h3>Confirmados</h3>
+                <p>{summary.confirmados}</p>
+              </div>
             </div>
             <div className={styles.summaryCard}>
-              <h3>Atendidos</h3>
-              <p>{summary.atendidos}</p>
+              <div className={styles.cardIcon} style={{backgroundColor: '#fff3e0'}}><FaCheckCircle style={{color: '#f39c12'}}/></div>
+              <div className={styles.cardContent}>
+                <h3>Atendidos</h3>
+                <p>{summary.atendidos}</p>
+              </div>
             </div>
             <div className={styles.summaryCard}>
-              <h3>Faltas</h3>
-              <p>{summary.faltas}</p>
+              <div className={styles.cardIcon} style={{backgroundColor: '#fdecea'}}><FaTimesCircle style={{color: '#e74c3c'}}/></div>
+              <div className={styles.cardContent}>
+                <h3>Faltas</h3>
+                <p>{summary.faltas}</p>
+              </div>
             </div>
           </div>
 
@@ -153,14 +162,14 @@ function Dashboard() {
                       <td>{a.animal?.nome || "N/A"}</td>
                       <td>{a.tutor?.nome || "N/A"}</td>
                       <td>{a.veterinario?.nome || "N/A"}</td>
-<td>
-  <span
-    className={styles.statusChip}
-    style={{ backgroundColor: a.cor, color: '#FFFFFF', fontWeight: 'bold' }}
-  >
-    {a.status}
-  </span>
-</td>
+                      <td>
+                        <span
+                          className={styles.statusChip}
+                          style={{ backgroundColor: a.cor, color: '#FFFFFF', fontWeight: 'bold' }}
+                        >
+                          {a.status}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 ) : (

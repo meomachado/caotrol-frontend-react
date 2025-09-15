@@ -1,301 +1,100 @@
-/* src/pages/Animais/AnimalModal.module.css */
-
-.modalOverlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100; 
-}
-
-.modalContent {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  max-width: 900px;
-  max-height: 80vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
-
-  
-  .modalContent h2 {
-    padding: 20px 30px;
-    margin: 0;
-    border-bottom: 1px solid #eee;
-    color: #343a40;
-    flex-shrink: 0;
-  }
-  
-  .formBody {
-    padding: 20px 30px;
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
-    gap: 20px;
-  }
-  
-  .formGroup {
-    width: 100%;
-  }
-  
-  .formGroup label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #495057;
-  }
-  
-  .formGroup input,
-  .formGroup select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 1em;
-    background-color: white;
-  }
-  
-  .modalActions {
-    padding: 20px 30px;
-    border-top: 1px solid #eee;
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    flex-shrink: 0;
-  }
-  
-  .cancelButton,
-  .saveButton {
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    border: none;
-  }
-  
-  .cancelButton {
-    background-color: #6c757d;
-    color: white;
-  }
-  
-  .saveButton {
-    background-color: #28a745;
-    color: white;
-  }
-  
-  .errorMessage {
-    color: #dc3545;
-    font-size: 0.9em;
-    text-align: center;
-  }
-
-  /* Adicione estas classes ao seu CSS existente */
-
-.statusHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 5px; /* Espaço entre o título e o select */
-}
-
-.statusIndicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%; /* Deixa o span redondo */
-  display: inline-block;
-}
-
-/* Adicione estas classes ao final de pages/Agenda/AgendamentoModal.module.css */
-
-.modalHeader {
-  padding: 20px 30px;
-  margin: 0;
-  border-bottom: 1px solid #eee;
-  color: #343a40;
-  flex-shrink: 0;
-}
-
-.detailGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.detailGroup label {
-    font-size: 0.9em;
-    font-weight: 500;
-    color: #6c757d;
-}
-
-.detailGroup p {
-    font-size: 1.1em;
-    font-weight: 600;
-    margin: 0;
-}
-
-.statusDisplay {
-    margin-top: 5px;
-}
-
-.statusBadge {
-    padding: 6px 14px;
-    border-radius: 20px;
-    color: white;
-    font-weight: bold;
-    font-size: 0.9em;
-    display: inline-block;
-}
-
-.modalFooter {
-  padding: 20px 30px;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: space-between; /* Alinha os botões nas extremidades */
-  align-items: center;
-  gap: 15px;
-  flex-shrink: 0;
-}
-
-.actionButtonsContainer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-
-.actionButtonConfirm, .actionButtonAbsence, .actionButtonStart, .actionButtonCancel {
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: filter 0.2s ease;
-}
-
-.actionButtonConfirm { background-color: #28a745; color: white; }
-.actionButtonStart { background-color: #007bff; color: white; }
-.actionButtonAbsence { background-color: #ffc107; color: #212529; }
-.actionButtonCancel { background-color: #dc3545; color: white; }
-
-.actionButtonConfirm:disabled,
-.actionButtonAbsence:disabled,
-.actionButtonStart:disabled,
-.actionButtonCancel:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-    filter: brightness(0.8);
-}
-
-.actionButtonConfirm:hover:not(:disabled),
-.actionButtonAbsence:hover:not(:disabled),
-.actionButtonStart:hover:not(:disabled),
-.actionButtonCancel:hover:not(:disabled) {
-    filter: brightness(0.9);
-}
 /* src/pages/Agenda/AgendamentoModal.module.css */
 
 .modalOverlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100; 
+  z-index: 1001;
+  backdrop-filter: blur(4px);
 }
 
 .modalContent {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  max-width: 900px;
-  max-height: 80vh;
+  background: #f0f2f5;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 95%;
+  max-width: 800px;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: 18px 25px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #2c3e50;
+}
+
+.formBody {
+  padding: 20px 25px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  gap: 25px;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
   padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
-  
-.modalContent h2 {
-  padding: 20px 30px;
+
+.sectionTitle {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #27ae60;
   margin: 0;
-  border-bottom: 1px solid #eee;
-  color: #343a40;
-  flex-shrink: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
 }
-  
-.formBody {
-  padding: 20px 30px;
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
-  gap: 20px;
-}
-  
+
 .formGroup {
-  width: 100%;
-  position: relative; /* Para a lista de autocomplete */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
 }
-  
+
 .formGroup label {
-  display: block;
-  margin-bottom: 8px;
   font-weight: 500;
-  color: #495057;
+  font-size: 0.85em;
+  color: #34495e;
 }
-  
+
 .formGroup input,
 .formGroup select {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
   box-sizing: border-box;
-  font-size: 1em;
-  background-color: white;
-}
-  
-.modalActions {
-  padding: 20px 30px;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  flex-shrink: 0;
-}
-  
-.cancelButton,
-.saveButton {
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-}
-  
-.cancelButton {
-  background-color: #6c757d;
-  color: white;
-}
-  
-.saveButton {
-  background-color: #28a745;
-  color: white;
-}
-  
-.errorMessage {
-  color: #dc3545;
-  font-size: 0.9em;
-  text-align: center;
+  font-size: 0.95em;
+  background-color: #fdfdfd;
+  transition: all 0.3s ease;
 }
 
-/* Estilos para a lista de autocomplete */
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+}
+
 .autocompleteList {
   position: absolute;
   top: 100%;
@@ -303,22 +102,158 @@
   right: 0;
   background-color: #fff;
   border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 5px 5px;
+  border-radius: 8px;
   list-style-type: none;
-  margin: 0;
-  padding: 0;
-  z-index: 10;
-  max-height: 150px;
+  margin-top: 5px;
+  padding: 5px;
+  z-index: 1002;
+  max-height: 160px;
   overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .autocompleteList li {
-  padding: 10px;
+  padding: 10px 15px;
   cursor: pointer;
+  border-radius: 6px;
 }
 
 .autocompleteList li:hover {
-  background-color: #f0f0f0;
+  background-color: #f0f2f5;
+}
+
+.modalFooter {
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-top: 1px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.errorContainer {
+  flex: 1;
+}
+
+.errorMessage {
+  color: #e74c3c;
+  font-weight: 500;
+  text-align: left;
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 9px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95em;
+}
+
+.btn i {
+  font-size: 1em;
+}
+
+.btnCancel {
+  background-color: #ecf0f1;
+  color: #7f8c8d;
+}
+
+.btnCancel:hover {
+  background-color: #dfe6e9;
+}
+
+.btnSave {
+  background-image: linear-gradient(to right, #27ae60, #2ecc71);
+  color: white;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
+}
+
+.btnSave:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+}
+
+.btnSave:disabled {
+  background-image: none;
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Nova classe para o layout de duas colunas */
+.gridGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Classes para o modal de detalhes (AgendamentoDetailModal) */
+
+.detailGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailGroup label {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.detailGroup p {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0;
+  color: #34495e;
+}
+
+.statusDisplay {
+  margin-top: 5px;
+}
+
+.statusBadge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9em;
+  display: inline-block;
+}
+
+.actionButtonsContainer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btnStart { background-color: #007bff; color: white; }
+.btnAbsence { background-color: #ffc107; color: #212529; }
+.btnDanger { background-color: #dc3545; color: white; }
+
+.btnStart:hover { filter: brightness(0.9); }
+.btnAbsence:hover { filter: brightness(0.9); }
+.btnDanger:hover { filter: brightness(0.9); }
+
+.btnStart:disabled,
+.btnAbsence:disabled,
+.btnDanger:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  filter: brightness(0.8);
 }

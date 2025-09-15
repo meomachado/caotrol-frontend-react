@@ -212,8 +212,7 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (action) => {
     if (isFormInvalid) {
       setError("Verifique os campos obrigatórios.");
       return;
@@ -226,26 +225,26 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
       telefone: telefone.replace(/\D/g, ""),
       data_nasc: dataNasc ? new Date(dataNasc).toISOString() : null,
       cep: cep.replace(/\D/g, ""),
-      logradouro: rua,
-      num,
-      bairro,
+      logradouro: rua, num, bairro,
       id_cidade: idCidade ? parseInt(idCidade, 10) : undefined,
     };
     try {
+      let savedTutor;
       if (tutorToEdit) {
-        await api.put(`/tutores/${tutorToEdit.id_tutor}`, tutorData);
+        savedTutor = await api.put(`/tutores/${tutorToEdit.id_tutor}`, tutorData);
       } else {
-        await api.post("/tutores", tutorData);
+        savedTutor = await api.post("/tutores", tutorData);
       }
-      onSave();
+      onSave(action, savedTutor); // Envia a ação e os dados do tutor
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Ocorreu um erro ao salvar o tutor."
-      );
+      setError(err.response?.data?.message || "Ocorreu um erro ao salvar.");
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (!isOpen) return null;
+
 
   const cidadesFiltradas = filtroCidade
     ? cidades.filter((cidade) =>
@@ -264,6 +263,8 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>{tutorToEdit ? "Editar Tutor" : "Novo Tutor"}</h2>
@@ -463,29 +464,27 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
             </div>
           </div>
         </form>
-        <div className={styles.modalFooter}>
+       {/* ATUALIZAR O RODAPÉ COM OS NOVOS BOTÕES */}
+       <div className={styles.modalFooter}>
           <div className={styles.errorContainer}>
             {error && <p className={styles.errorMessage}>{error}</p>}
           </div>
           <div className={styles.buttonGroup}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={`${styles.btn} ${styles.btnCancel}`}
-            >
+            <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}>
               <i className="fas fa-times"></i> Cancelar
             </button>
-            <button
-              type="submit"
-              form="tutor-form"
-              className={`${styles.btn} ${styles.btnSave}`}
-              disabled={isFormInvalid || isSaving}
-            >
-              <i className="fas fa-check"></i>{" "}
-              {isSaving ? "Salvando..." : "Salvar"}
+            <button type="button" onClick={() => handleSubmit('saveAndClose')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
+              <i className="fas fa-save"></i> {isSaving ? "Salvando..." : "Salvar e Fechar"}
             </button>
+            {/* O novo botão só aparece ao criar um novo tutor */}
+            {!tutorToEdit && (
+              <button type="button" onClick={() => handleSubmit('saveAndAddAnimal')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
+                {isSaving ? "Salvando..." : "Salvar e Adicionar Animal"} <i className="fas fa-paw"></i>
+              </button>
+            )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

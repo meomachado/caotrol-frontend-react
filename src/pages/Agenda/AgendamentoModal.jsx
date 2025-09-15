@@ -1,5 +1,3 @@
-// src/pages/Agenda/AgendamentoModal.jsx
-
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import styles from "./AgendamentoModal.module.css";
@@ -39,14 +37,14 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
       
       // Define a data e busca a lista de veterinários
       setDia(selectedDate ? selectedDate.split('T')[0] : new Date().toISOString().split('T')[0]);
-      api.get("/veterinarios?limit=1000").then((res) => setVeterinarios(res.data || []));
+      api.get("/veterinarios?limit=1000").then((res) => setVeterinarios(Array.isArray(res.data) ? res.data : []));
     }
   }, [isOpen, selectedDate]);
 
   // Busca animais quando um tutor é selecionado
   useEffect(() => {
     if (idTutor) {
-      api.get(`/tutores/${idTutor}/animais`).then((res) => setAnimais(res || []));
+      api.get(`/tutores/${idTutor}/animais`).then((res) => setAnimais(Array.isArray(res) ? res : []));
     } else {
       setAnimais([]);
     }
@@ -56,7 +54,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   useEffect(() => {
     if (idVeterinario && dia) {
       api.get(`/agendamentos/horarios-disponiveis?id_veterinario=${idVeterinario}&dia=${dia}`)
-         .then((res) => setHorarios(res || []));
+        .then((res) => setHorarios(Array.isArray(res) ? res : []));
     } else {
       setHorarios([]);
     }
@@ -71,8 +69,8 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
     }
     const timer = setTimeout(() => {
       api.searchTutores(tutorSearchTerm).then(res => {
-          setSearchedTutores(res || []);
-          setShowTutorResults(true);
+        setSearchedTutores(Array.isArray(res) ? res : []);
+        setShowTutorResults(true);
       });
     }, 400);
     return () => clearTimeout(timer);
@@ -107,82 +105,95 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>Novo Agendamento</h2>
+        <div className={styles.modalHeader}>
+            <h2>Novo Agendamento</h2>
+        </div>
+        
         <form id="agendamento-form" onSubmit={handleSubmit} className={styles.formBody}>
-          
-          {/* Campo de busca para Tutor */}
-          <div className={styles.formGroup}>
-            <label>Tutor</label>
-            <input
-              type="text"
-              placeholder="Digite para buscar o tutor..."
-              value={tutorSearchTerm}
-              onChange={(e) => {
-                setTutorSearchTerm(e.target.value);
-                setIdTutor("");
-                setIdAnimal("");
-              }}
-              onFocus={() => setShowTutorResults(true)}
-              onBlur={() => setTimeout(() => setShowTutorResults(false), 200)}
-            />
-            {showTutorResults && searchedTutores.length > 0 && (
-              <ul className={styles.autocompleteList}>
-                {searchedTutores.map((tutor) => (
-                  <li key={tutor.id_tutor} onMouseDown={() => {
-                    setIdTutor(tutor.id_tutor);
-                    setTutorSearchTerm(`${tutor.nome} - ${tutor.cpf}`);
-                    setShowTutorResults(false);
-                  }}>
-                    {tutor.nome} - {tutor.cpf}
-                  </li>
+          <div className={styles.card}>
+            <h3 className={styles.sectionTitle}>Informações do Agendamento</h3>
+            
+            {/* Campo de busca para Tutor */}
+            <div className={styles.formGroup}>
+              <label>Tutor</label>
+              <input
+                type="text"
+                placeholder="Digite para buscar o tutor..."
+                value={tutorSearchTerm}
+                onChange={(e) => {
+                  setTutorSearchTerm(e.target.value);
+                  setIdTutor("");
+                  setIdAnimal("");
+                }}
+                onFocus={() => setShowTutorResults(true)}
+                onBlur={() => setTimeout(() => setShowTutorResults(false), 200)}
+              />
+              {showTutorResults && searchedTutores.length > 0 && (
+                <ul className={styles.autocompleteList}>
+                  {searchedTutores.map((tutor) => (
+                    <li key={tutor.id_tutor} onMouseDown={() => {
+                      setIdTutor(tutor.id_tutor);
+                      setTutorSearchTerm(`${tutor.nome} - ${tutor.cpf}`);
+                      setShowTutorResults(false);
+                    }}>
+                      {tutor.nome} - {tutor.cpf}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Campo de seleção para Animal (depende do Tutor) */}
+            <div className={styles.formGroup}>
+              <label>Animal</label>
+              <select value={idAnimal} onChange={(e) => setIdAnimal(e.target.value)} disabled={!idTutor}>
+                <option value="">Selecione um animal</option>
+                {animais.map((animal) => (
+                  <option key={animal.id_animal} value={animal.id_animal}>
+                    {animal.nome}
+                  </option>
                 ))}
-              </ul>
-            )}
-          </div>
+              </select>
+            </div>
+            
+            {/* Campo de seleção para Veterinário */}
+            <div className={styles.formGroup}>
+              <label>Veterinário</label>
+              <select value={idVeterinario} onChange={(e) => setIdVeterinario(e.target.value)}>
+                <option value="">Selecione um veterinário</option>
+                {veterinarios.map((vet) => (
+                  <option key={vet.id_veterinario} value={vet.id_veterinario}>
+                    {vet.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Campo de seleção para Animal (depende do Tutor) */}
-          <div className={styles.formGroup}>
-            <label>Animal</label>
-            <select value={idAnimal} onChange={(e) => setIdAnimal(e.target.value)} disabled={!idTutor}>
-              <option value="">Selecione um animal</option>
-              {animais.map((animal) => (
-                <option key={animal.id_animal} value={animal.id_animal}>
-                  {animal.nome}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Campo de seleção para Veterinário */}
-          <div className={styles.formGroup}>
-            <label>Veterinário</label>
-            <select value={idVeterinario} onChange={(e) => setIdVeterinario(e.target.value)}>
-              <option value="">Selecione um veterinário</option>
-              {veterinarios.map((vet) => (
-                <option key={vet.id_veterinario} value={vet.id_veterinario}>
-                  {vet.nome}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Dia</label>
-            <input type="date" value={dia} onChange={(e) => setDia(e.target.value)} />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Horário</label>
-            <select value={horario} onChange={(e) => setHorario(e.target.value)} disabled={!idVeterinario || !dia}>
-              <option value="">Selecione um horário</option>
-              {horarios.map((h) => (<option key={h} value={h}>{h}</option>))}
-            </select>
+            {/* Agrupamento de Dia e Horário */}
+            <div className={styles.gridGroup}>
+                <div className={styles.formGroup}>
+                    <label>Dia</label>
+                    <input type="date" value={dia} onChange={(e) => setDia(e.target.value)} />
+                </div>
+                <div className={styles.formGroup}>
+                    <label>Horário</label>
+                    <select value={horario} onChange={(e) => setHorario(e.target.value)} disabled={!idVeterinario || !dia}>
+                        <option value="">Selecione um horário</option>
+                        {horarios.map((h) => (<option key={h} value={h}>{h}</option>))}
+                    </select>
+                </div>
+            </div>
           </div>
         </form>
-        {error && <p className={styles.errorMessage}>{error}</p>}
-        <div className={styles.modalActions}>
-          <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
-          <button type="submit" form="agendamento-form" className={styles.saveButton}>Salvar</button>
+        
+        <div className={styles.modalFooter}>
+          <div className={styles.errorContainer}>
+            {error && <p className={styles.errorMessage}>{error}</p>}
+          </div>
+          <div className={styles.buttonGroup}>
+            <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}>Cancelar</button>
+            <button type="submit" form="agendamento-form" className={`${styles.btn} ${styles.btnSave}`}>Salvar</button>
+          </div>
         </div>
       </div>
     </div>

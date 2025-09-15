@@ -1,237 +1,146 @@
-// pages/Tutores/Tutores.jsx
+// src/pages/Tutores/Tutores.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import styles from "./Tutores.module.css";
 import TutorModal from "./TutorModal";
-import TutorDetailModal from "./TutorDetailModal";
+import AnimalModal from "../Animais/AnimalModal";
+import { useNavigate } from "react-router-dom";
+// ✅ Ícones do React-Icons
+import { FaPlus, FaSearch } from "react-icons/fa";
 
 function Tutores() {
   const [tutores, setTutores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTutor, setEditingTutor] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedTutor, setSelectedTutor] = useState(null);
+  const [isTutorModalOpen, setIsTutorModalOpen] = useState(false);
+  const [isAnimalModalOpen, setIsAnimalModalOpen] = useState(false);
+  const [tutorParaNovoAnimal, setTutorParaNovoAnimal] = useState(null);
   const [busca, setBusca] = useState("");
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-
   const [ordenarPor, setOrdenarPor] = useState("id_desc");
+  const navigate = useNavigate();
 
-  const fetchTutores = useCallback(
-    async (page) => {
-      try {
-        setLoading(true);
-        setError(null);
-        const url = `/tutores?busca=${busca}&page=${page}&limit=10&ordenarPor=${ordenarPor}`;
-        const response = await api.get(url);
-
-        setTutores(response.data || []);
-        setTotalPages(response.totalPages || 0);
-        setCurrentPage(response.currentPage || 1);
-      } catch (err) {
-        setError("Não foi possível carregar os tutores.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [busca, ordenarPor]
-  );
+  const fetchTutores = useCallback(async (page) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams({ busca, page, limit: 10, ordenarPor }).toString();
+      const response = await api.get(`/tutores?${params}`);
+      setTutores(response.data || []);
+      setTotalPages(response.totalPages || 0);
+      setCurrentPage(response.currentPage || 1);
+    } catch (err) {
+      setError("Não foi possível carregar os tutores.");
+    } finally {
+      setLoading(false);
+    }
+  }, [busca, ordenarPor]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchTutores(currentPage);
     }, 500);
     return () => clearTimeout(timer);
-  }, [busca, currentPage, fetchTutores, ordenarPor]);
+  }, [busca, currentPage, fetchTutores]);
 
   const handleOpenCreateModal = () => {
-    setEditingTutor(null);
-    setIsModalOpen(true);
-  };
-
-  // --- ALTERAÇÃO AQUI (handleOpenEditModal) ---
-  const handleOpenEditModal = async (tutor) => {
-    try {
-      // Busca os dados completos do tutor antes de abrir o modal de edição
-      const response = await api.get(`/tutores/${tutor.id_tutor}`);
-      setEditingTutor(response); // Agora com cidade e estado
-      setIsModalOpen(true);
-    } catch (err) {
-      setError(
-        "Não foi possível carregar os dados completos do tutor para edição."
-      );
-    }
+    setIsTutorModalOpen(true);
   };
   
-  // --- ALTERAÇÃO PRINCIPAL AQUI (handleOpenDetailModal) ---
-  const handleOpenDetailModal = async (tutor) => {
-    try {
-      // 1. Busca os dados completos do tutor na API
-      const response = await api.get(`/tutores/${tutor.id_tutor}`);
+  const handleNavigateToDetail = (tutorId) => {
+    navigate(`/tutores/${tutorId}`);
+  };
 
-      // 2. Passa os dados completos para o estado
-      setSelectedTutor(response);
+  const handleSaveTutor = (action, novoTutor) => {
+    setIsTutorModalOpen(false);
+    fetchTutores(1);
 
-      // 3. Abre o modal
-      setIsDetailModalOpen(true);
-    } catch (err) {
-      setError("Não foi possível carregar os detalhes do tutor.");
-      console.error(err);
+    if (action === 'saveAndAddAnimal' && novoTutor) {
+      setTutorParaNovoAnimal(novoTutor);
+      setIsAnimalModalOpen(true);
     }
   };
 
-  const handleSave = () => {
-    setIsModalOpen(false);
-    setEditingTutor(null);
-    fetchTutores(currentPage);
-  };
-
-  const handleDelete = async (tutorId) => {
-    // Substituir window.confirm por um modal customizado em uma aplicação real
-    if (window.confirm("Tem certeza que deseja excluir este tutor?")) {
-      try {
-        await api.delete(`/tutores/${tutorId}`);
-        fetchTutores(currentPage);
-      } catch (error) {
-        console.error("Erro ao deletar tutor:", error);
-        alert("Não foi possível excluir o tutor.");
-      }
-    }
+  const handleSaveAnimal = () => {
+    setIsAnimalModalOpen(false);
+    setTutorParaNovoAnimal(null);
+    alert("Animal cadastrado com sucesso!");
   };
 
   const formatCPF = (value) => {
-    if (!value) return ""; // Retorna vazio se não houver valor
-    value = value.replace(/\D/g, ""); // 1. Remove tudo que não é dígito
-    value = value.replace(/(\d{3})(\d)/, "$1.$2"); // 2. Adiciona o primeiro ponto
-    value = value.replace(/(\d{3})(\d)/, "$1.$2"); // 3. Adiciona o segundo ponto
-    value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); // 4. Adiciona o traço
-    return value;
+    if (!value) return "";
+    return value.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
   };
 
   const renderTutorList = () => {
-    if (loading) return <p>Carregando tutores...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (tutores.length === 0 && !loading)
-      return <p>Nenhum tutor encontrado.</p>;
+    if (loading) return <div className={styles.loadingState}>Carregando tutores...</div>;
+    if (error) return <div className={styles.errorState}>{error}</div>;
+    if (tutores.length === 0) return <div className={styles.noData}>Nenhum tutor encontrado.</div>;
 
     return tutores.map((tutor) => (
       <div key={tutor.id_tutor} className={styles.tutorItem}>
-
-      <div className={styles.tutorInfoWrapper}>
-        <div className={styles.tutorAvatar}>
-          {tutor.nome.charAt(0).toUpperCase()}
+        <div className={styles.tutorInfoWrapper}>
+          <div className={styles.tutorAvatar}>{tutor.nome.charAt(0).toUpperCase()}</div>
+          <div className={styles.tutorInfo}>
+            <h4>{tutor.nome}</h4>
+            <p>CPF: {formatCPF(tutor.cpf)}</p>
+          </div>
         </div>
-        <div className={styles.tutorInfo}>
-          <h4>{tutor.nome}</h4>
-          <p>CPF: {formatCPF(tutor.cpf)}</p>
-        </div>
-      </div>
-
-      <div className={styles.tutorActions}></div>
-       \
-        <div className={styles.tutorActions}>
-          <button
-            className={styles.detailsButton}
-            onClick={() => handleOpenDetailModal(tutor)}
-          >
-            Ver detalhes
-          </button>
-          <button
-            className={styles.iconButton}
-            title="Editar"
-            onClick={() => handleOpenEditModal(tutor)}
-          >
-            <i className="fas fa-pencil-alt"></i>
-          </button>
-          <button
-            className={`${styles.iconButton} ${styles.deleteButton}`}
-            title="Excluir"
-            onClick={() => handleDelete(tutor.id_tutor)}
-          >
-            <i className="fas fa-trash-alt"></i>
-          </button>
-        </div>
+        <button className={styles.detailsButton} onClick={() => handleNavigateToDetail(tutor.id_tutor)}>Ver detalhes</button>
       </div>
     ));
   };
 
   return (
-    <div className={styles.tutoresContainer}>
-      {isModalOpen && (
-        <TutorModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSave}
-          tutorToEdit={editingTutor}
-        />
-      )}
-      <TutorDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        tutor={selectedTutor}
-      />
-
+    <div className={styles.pageContainer}>
+      <TutorModal isOpen={isTutorModalOpen} onClose={() => setIsTutorModalOpen(false)} onSave={handleSaveTutor} />
+      <AnimalModal isOpen={isAnimalModalOpen} onClose={() => setIsAnimalModalOpen(false)} onSave={handleSaveAnimal} tutorToPreselect={tutorParaNovoAnimal} />
+      
+      {/* ✅ HEADER PADRONIZADO */}
       <div className={styles.pageHeader}>
-        <h1>Tutores</h1>
-      </div>
-
-      <div className={styles.actionsBar}>
-        <div className={styles.searchInputContainer}>
-          <i className={`fas fa-search ${styles.searchIcon}`}></i>
-          <input
-            type="text"
-            placeholder="Buscar por nome ou CPF..."
-            className={styles.searchInput}
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
+        <div>
+            <h1>Tutores</h1>
+            <p className={styles.pageSubtitle}>Liste, busque e gerencie os tutores</p>
         </div>
-        <div className={styles.sortGroup}>
-          <label htmlFor="sort">Ordenar por:</label>
-          <select
-            id="sort"
-            value={ordenarPor}
-            onChange={(e) => setOrdenarPor(e.target.value)}
-          >
-            <option value="id_desc">Mais Recentes</option>
-            <option value="nome_asc">Nome (A-Z)</option>
-            <option value="nome_desc">Nome (Z-A)</option>
-          </select>
+        <button className={styles.actionButtonPrimary} onClick={handleOpenCreateModal}>
+          <FaPlus /> Novo Tutor
+        </button>
+      </div>
+
+      {/* ✅ FILTROS UNIFICADOS */}
+      <div className={styles.filterContainer}>
+        <div className={styles.searchGroup}>
+            <FaSearch className={styles.searchIcon} />
+            <input 
+              type="text" 
+              placeholder="Buscar por nome ou CPF..." 
+              className={styles.searchInput} 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+            />
         </div>
-        <button
-          className={styles.newTutorButton}
-          onClick={handleOpenCreateModal}
-        >
-          <i className="fas fa-plus"></i> Novo Tutor
-        </button>
+        <div className={styles.filterGroup}>
+            <label htmlFor="sort">Ordenar por:</label>
+            <select id="sort" value={ordenarPor} onChange={(e) => setOrdenarPor(e.target.value)}>
+                <option value="id_desc">Mais Recentes</option>
+                <option value="nome_asc">Nome (A-Z)</option>
+                <option value="nome_desc">Nome (Z-A)</option>
+            </select>
+        </div>
       </div>
-
-      <div className={styles.tutorList}>{renderTutorList()}</div>
-
-      {/* ✅ CORREÇÃO: Bloco de paginação agora está sempre visível */}
-      <div className={styles.paginationControls}>
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1 || totalPages === 0}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {currentPage} de {totalPages || 1}
-        </span>
-        <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages || totalPages === 0}
-        >
-          Próxima
-        </button>
+      
+      <div className={styles.tutorList}>
+        {renderTutorList()}
       </div>
+      
+      {totalPages > 0 && (
+        <div className={styles.paginationControls}>
+            <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+        </div>
+      )}
     </div>
   );
 }

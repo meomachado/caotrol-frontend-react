@@ -1,8 +1,21 @@
 /* src/App.css - Estilos de Layout para MainLayout, Header, Sidebar */
 
+/* Estrutura principal do aplicativo com Flexbox */
+.appContainer {
+  display: flex;
+  background-color: #f0f2f5; /* Cor de fundo geral */
+  min-height: 100vh;
+}
 
+/* Área de conteúdo principal */
+.contentArea {
+  flex-grow: 1; /* Faz esta área crescer e ocupar todo o espaço restante */
+  padding: 2rem; /* Adiciona um respiro interno (32px) */
+  width: 100%;
+  overflow-y: auto; /* Adiciona scroll apenas aqui, se necessário */
+}
 
-
+/* Estilos que você já tinha (mantidos) */
 .logged-in-user {
   font-weight: bold;
   font-size: 1.1em;
@@ -16,6 +29,7 @@
   font-size: 0.9em;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
 .logout-button:hover {
   background-color: #c82333;
   color: white;

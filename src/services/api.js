@@ -5,7 +5,6 @@ const API_BASE_URL = "http://localhost:3000/api";
 const api = {
   /**
    * Função principal que realiza todas as requisições.
-   * Aceita um 'responseType' para lidar com JSON (padrão) ou Blobs (para arquivos/PDFs).
    */
   request: async (
     endpoint,
@@ -14,7 +13,6 @@ const api = {
     requiresAuth = true,
     responseType = "json"
   ) => {
-    // ... (todo o resto da sua função request continua igual)
     const headers = {};
 
     if (requiresAuth) {
@@ -34,7 +32,7 @@ const api = {
         headers["Content-Type"] = "application/json";
         config.body = JSON.stringify(body);
       } else {
-        config.body = body; // Para uploads, o browser define o Content-Type
+        config.body = body;
       }
     }
 
@@ -48,18 +46,15 @@ const api = {
         return;
       }
 
-      if (response.status === 204) return null; // Resposta "No Content"
+      if (response.status === 204) return null;
 
       if (responseType === "blob") {
         if (!response.ok) {
-          const errorData = await response
-            .json()
-            .catch(() => ({
-              message: "Erro ao ler a resposta de erro como JSON.",
-            }));
+          const errorData = await response.json().catch(() => ({
+            message: "Erro ao ler a resposta de erro como JSON.",
+          }));
           throw new Error(
-            errorData.message ||
-              `Erro na requisição do arquivo: ${response.status}`
+            errorData.message || `Erro na requisição do arquivo: ${response.status}`
           );
         }
         return response.blob();
@@ -67,9 +62,7 @@ const api = {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(
-          data.message || `Erro na requisição: ${response.status}`
-        );
+        throw new Error(data.message || `Erro na requisição: ${response.status}`);
       }
       return data;
     } catch (error) {
@@ -80,16 +73,12 @@ const api = {
 
   get: (endpoint, requiresAuth = true, responseType = "json") =>
     api.request(endpoint, "GET", null, requiresAuth, responseType),
-
   post: (endpoint, body, requiresAuth = true, responseType = "json") =>
     api.request(endpoint, "POST", body, requiresAuth, responseType),
-
   put: (endpoint, body, requiresAuth = true, responseType = "json") =>
     api.request(endpoint, "PUT", body, requiresAuth, responseType),
-
   delete: (endpoint, requiresAuth = true, responseType = "json") =>
     api.request(endpoint, "DELETE", null, requiresAuth, responseType),
-
   patch: (endpoint, body, requiresAuth = true, responseType = "json") =>
     api.request(endpoint, "PATCH", body, requiresAuth, responseType),
 
@@ -97,7 +86,8 @@ const api = {
   login: (login, senha) => api.post('/auth/login', { login, senha }, false),
   requestPasswordReset: (email) => api.post('/auth/forgot-password', { email }, false),
   resetPassword: (token, novaSenha) => api.post('/auth/reset-password', { token, novaSenha }, false),
-  
+  verifyEmail: (token) => api.get(`/auth/verify-email/${token}`, false),
+
   // --- Tutores ---
   getTutores: (params) => api.get(`/tutores?${params}`),
   getTutorById: (id) => api.get(`/tutores/${id}`),
@@ -105,6 +95,7 @@ const api = {
   createTutor: (tutorData) => api.post("/tutores", tutorData),
   updateTutor: (id, tutorData) => api.put(`/tutores/${id}`, tutorData),
   deleteTutor: (id) => api.delete(`/tutores/${id}`),
+  // ✅ CORREÇÃO APLICADA AQUI: URL ajustada para corresponder ao backend
   getAnimaisByTutor: (idTutor) => api.get(`/tutores/${idTutor}/animais`),
   
   // --- Animais ---
@@ -117,7 +108,8 @@ const api = {
   getPrescricoesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/prescricoes`),
   getExamesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/exames`),
   getVacinasByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/vacinas`),
-  
+  getAnamnesesByAnimal: (idAnimal) => api.get(`/animais/${idAnimal}/anamneses`),
+
   // --- Exames ---
   updateExame: (idExame, data) => api.patch(`/exames/${idExame}`, data),
   
@@ -132,7 +124,6 @@ const api = {
   getVeterinarios: (params) => api.get(`/veterinarios?${params}`),
   createVeterinario: (data) => api.post("/veterinarios", data),
   getVeterinarioById: (id) => api.get(`/veterinarios/${id}`),
-  // ***** NOVO *****
   updateVeterinario: (id, data) => api.put(`/veterinarios/${id}`, data),
 
   // --- Relatórios ---
@@ -141,7 +132,6 @@ const api = {
   // --- Usuários ---
   getUsuarios: (params) => api.get(`/usuarios?${params}`),
   registrarUsuario: (data) => api.post("/usuarios/registrar", data),
-  // ***** NOVO *****
   updateUsuario: (id, data) => api.patch(`/usuarios/${id}`, data),
 
   // --- Raças e Espécies ---

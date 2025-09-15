@@ -1,18 +1,8 @@
-/* src/components/MainLayout.module.css */
-/* src/components/MainLayout.module.css */
-
-.mainContentWrapper {
-    margin-left: 200px;
-    width: calc(100% - 250px);
-    background-color: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    
-    /* ✅ A LINHA QUE FALTAVA 👇 */
-    align-items: stretch; /* Força os filhos (Header) a se esticarem */
-  }
-  .pageContent {
-    /* O padding vai aqui, para o conteúdo abaixo do header */
-    padding: 20px 150px;
-  }
+.pageContent {
+  margin-left: 250px;       /* reserva espaço da sidebar */
+  margin-top: 20px;         /* espaço do header (mesmo valor da altura dele) */
+  padding: 4rem;            /* espaçamento interno normal */
+   /* altura ajustada sem o header */
+  box-sizing: border-box;
+  background: #f9f9f9;
+}

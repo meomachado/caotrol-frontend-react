@@ -1,98 +1,116 @@
+// src/pages/Consultas/Consultas.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import styles from "./Consultas.module.css";
 import ConsultaDetailModal from "./ConsultaDetailModal";
-import ConsultaModal from "./ConsultaModal";
 import SelecaoAnimalModal from "./SelecaoAnimalModal";
 import NovaConsultaModal from "./NovaConsultaModal";
+import TutorModal from "../Tutores/TutorModal";
+import AnimalModal from "../Animais/AnimalModal";
+// ✅ Ícones do React-Icons importados
+import { FaPlus, FaSearch, FaEye } from "react-icons/fa";
 
 function Consultas() {
   const [consultas, setConsultas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSelecaoOpen, setIsSelecaoOpen] = useState(false);
-  const [isNovaConsultaOpen, setIsNovaConsultaOpen] = useState(false);
-  const [animalIdParaConsulta, setAnimalIdParaConsulta] = useState(null);
-
-  // Estados para filtros
   const [busca, setBusca] = useState("");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [ordenacao, setOrdenacao] = useState("desc");
-
-  // Modais de detalhe e edição
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedConsulta, setSelectedConsulta] = useState(null);
-
-
-  // ✅ 1. Estados para controle da paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [animalRecemCriado, setAnimalRecemCriado] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedConsulta, setSelectedConsulta] = useState(null);
+  const [isSelecaoOpen, setIsSelecaoOpen] = useState(false);
+  const [isTutorModalOpen, setIsTutorModalOpen] = useState(false);
+  const [isNovaConsultaOpen, setIsNovaConsultaOpen] = useState(false);
+  const [isAnimalModalOpen, setIsAnimalModalOpen] = useState(false);
+  const [animalIdParaConsulta, setAnimalIdParaConsulta] = useState(null);
+  const [tutorRecemCriado, setTutorRecemCriado] = useState(null);
+  const [tutorParaNovoAnimal, setTutorParaNovoAnimal] = useState(null);
 
-  // ✅ 2. Função de busca agora é um useCallback e aceita a página
   const fetchConsultas = useCallback(async (page) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: page,
-        limit: 10, // Definindo um limite padrão
-        ordenarPor: ordenacao, 
-
-      });
-      if (busca) params.append("busca", busca);
-      if (dataInicio) params.append("dataInicio", dataInicio);
-      if (dataFim) params.append("dataFim", dataFim);
-
+      const params = new URLSearchParams({ page, limit: 10, ordenarPor: ordenacao, busca, dataInicio, dataFim });
+      if (params.get('dataInicio') === '') params.delete('dataInicio');
+      if (params.get('dataFim') === '') params.delete('dataFim');
       const response = await api.get(`/consultas?${params.toString()}`);
-      
       setConsultas(response.data || []);
       setTotalPages(response.totalPages || 0);
       setCurrentPage(response.currentPage || 1);
     } catch (err) {
       setError("Não foi possível carregar as consultas.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [busca, dataInicio, dataFim, ordenacao]); // Dependências da função
+  }, [busca, dataInicio, dataFim, ordenacao]);
 
-  // ✅ 3. useEffect agora depende da página atual e da função de busca
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchConsultas(currentPage);
     }, 500);
     return () => clearTimeout(timer);
   }, [currentPage, fetchConsultas]);
-  const handleTryOpenNovaConsulta = () => {
+
+  const handleAbrirFluxoNovaConsulta = () => {
     const userType = localStorage.getItem('user_type');
     if (userType !== 'veterinario') {
       alert('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
+      return;
+    }
+    setTutorRecemCriado(null);
+    setIsSelecaoOpen(true);
+  };
+  
+  const handleAbrirModalNovoTutor = () => {
+    setIsSelecaoOpen(false);
+    setIsTutorModalOpen(true);
+  };
+
+  const handleSalvarTutor = (action, novoTutor) => {
+    setIsTutorModalOpen(false);
+    if (action === 'saveAndAddAnimal') {
+      handleAbrirModalNovoAnimal(novoTutor);
     } else {
+      setTutorRecemCriado(novoTutor);
       setIsSelecaoOpen(true);
     }
   };
-
-  const handleDelete = async (idConsulta) => {
-    if (window.confirm("Tem certeza que deseja excluir esta consulta?")) {
-      try {
-        await api.delete(`/consultas/${idConsulta}`);
-        fetchConsultas(currentPage); // Recarrega a página atual
-      } catch (err) {
-        setError("Erro ao excluir consulta.");
-        console.error(err);
-      }
-    }
+  
+  const handleFecharModalTutor = () => {
+    setIsTutorModalOpen(false);
+    setIsSelecaoOpen(true);
   };
 
- 
-
-  const formatDate = (dateString) => {
-    return new Intl.DateTimeFormat("pt-BR", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
-    }).format(new Date(dateString));
+  const handleAnimalSelecionado = (animalId) => {
+    setAnimalIdParaConsulta(animalId);
+    setIsSelecaoOpen(false);
+    setIsNovaConsultaOpen(true);
   };
 
+  const handleFecharModalNovaConsulta = () => {
+    setIsNovaConsultaOpen(false);
+    setAnimalIdParaConsulta(null);
+    fetchConsultas(1);
+  };
+  
+  const handleAbrirModalNovoAnimal = (tutor) => {
+    setTutorParaNovoAnimal(tutor);
+    setIsSelecaoOpen(false);
+    setIsAnimalModalOpen(true);
+  };
+
+  const handleSalvarAnimal = (novoAnimal) => {
+    setIsAnimalModalOpen(false);
+    setTutorRecemCriado(tutorParaNovoAnimal); 
+    setAnimalRecemCriado(novoAnimal);
+    setTutorParaNovoAnimal(null);
+    setIsSelecaoOpen(true);
+  };
+  
   const handleOpenDetailModal = async (idConsulta) => {
     try {
       const response = await api.get(`/consultas/${idConsulta}`);
@@ -102,57 +120,65 @@ function Consultas() {
       setError("Erro ao carregar detalhes da consulta.");
     }
   };
-
-  const handleAnimalSelecionado = (animalId) => {
-    setAnimalIdParaConsulta(animalId);
-    setIsSelecaoOpen(false);
-    setIsNovaConsultaOpen(true);
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    const formattedDate = new Intl.DateTimeFormat("pt-BR").format(date);
+    const formattedTime = new Intl.DateTimeFormat("pt-BR", { hour: '2-digit', minute: '2-digit' }).format(date);
+    return `${formattedDate} às ${formattedTime}`;
   };
-
-  const handleCloseNovaConsulta = () => {
-    setIsNovaConsultaOpen(false);
-    setAnimalIdParaConsulta(null);
-    fetchConsultas(1); // Volta para a primeira página após nova consulta
-  };
-
+  
   return (
-    <div className={styles.consultasContainer}>
-      {/* --- MODAIS --- */}
+    <div className={styles.pageContainer}>
+      {/* --- RENDERIZAÇÃO DE TODOS OS MODAIS --- */}
       <ConsultaDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} consulta={selectedConsulta} />
-      <SelecaoAnimalModal isOpen={isSelecaoOpen} onClose={() => setIsSelecaoOpen(false)} onAnimalSelecionado={handleAnimalSelecionado} />
-      <NovaConsultaModal isOpen={isNovaConsultaOpen} onClose={handleCloseNovaConsulta} onSave={handleCloseNovaConsulta} animalId={animalIdParaConsulta} />
-
-      {/* --- CONTEÚDO DA PÁGINA --- */}
-      <div className={styles.header}>
-        <h1>Consultas</h1>
-        <button className={styles.newButton} onClick={handleTryOpenNovaConsulta}>+ Nova Consulta</button>
+      <SelecaoAnimalModal isOpen={isSelecaoOpen} onClose={() => setIsSelecaoOpen(false)} onAnimalSelecionado={handleAnimalSelecionado} onAddNewTutor={handleAbrirModalNovoTutor} onAddNewAnimal={handleAbrirModalNovoAnimal} newlyCreatedTutor={tutorRecemCriado} newlyCreatedAnimal={animalRecemCriado}/>
+      <TutorModal isOpen={isTutorModalOpen} onClose={handleFecharModalTutor} onSave={handleSalvarTutor}/>
+      <AnimalModal isOpen={isAnimalModalOpen} onClose={() => {setIsAnimalModalOpen(false); setIsSelecaoOpen(true)}} onSave={handleSalvarAnimal} tutorToPreselect={tutorParaNovoAnimal}/>
+      <NovaConsultaModal isOpen={isNovaConsultaOpen} onClose={handleFecharModalNovaConsulta} onSave={handleFecharModalNovaConsulta} animalId={animalIdParaConsulta} />
+      
+      {/* ✅ Cabeçalho e Subtítulo padronizados */}
+      <div className={styles.pageHeader}>
+        <div>
+            <h1>Consultas</h1>
+            <p className={styles.pageSubtitle}>Gerencie o histórico de atendimentos</p>
+        </div>
+        <button className={styles.actionButtonPrimary} onClick={handleAbrirFluxoNovaConsulta}>
+          <FaPlus /> Nova Consulta
+        </button>
       </div>
 
-      <div className={styles.actionsBar}>
-        <div className={styles.searchInputContainer}>
-          <input type="text" placeholder="Buscar por nome do animal, tutor(a) ou CPF do Tutor(a)" className={styles.searchInput} value={busca} onChange={(e) => setBusca(e.target.value)} />
-          <i className={`fas fa-search ${styles.searchIcon}`}></i>
+      {/* ✅ Barra de filtros e busca unificada */}
+      <div className={styles.filterContainer}>
+        <div className={styles.searchGroup}>
+            <FaSearch className={styles.searchIcon} />
+            <input 
+              type="text" 
+              placeholder="Buscar por animal, tutor ou CPF..." 
+              className={styles.searchInput} 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+            />
+        </div>
+        <div className={styles.filterGroup}>
+            <label>De:</label>
+            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+        </div>
+        <div className={styles.filterGroup}>
+            <label>Até:</label>
+            <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+        </div>
+        <div className={styles.filterGroup}>
+            <label>Ordenar por:</label>
+            <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)}>
+                <option value="desc">Mais recentes</option>
+                <option value="data_asc">Mais antigas</option>
+            </select>
         </div>
       </div>
 
-      <div className={styles.filtersBar}>
-        <div className={styles.filterGroup}>
-          <label>Início</label>
-          <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
-        </div>
-        <div className={styles.filterGroup}>
-          <label>Término</label>
-          <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
-        </div>
-        <div className={styles.filterGroup}>
-          <label>Ordenar por</label>
-          <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)}>
-            <option value="desc">Mais recentes</option>
-            <option value="data_asc">Mais antigas</option>
-          </select>
-        </div>
-      </div>
-
+      {/* --- TABELA DE CONSULTAS --- */}
       <div className={styles.tableContainer}>
         <table className={styles.consultasTable}>
           <thead>
@@ -165,17 +191,21 @@ function Consultas() {
             </tr>
           </thead>
           <tbody>
-            {loading && (<tr><td colSpan="5">Carregando...</td></tr>)}
-            {error && (<tr><td colSpan="5" style={{ color: "red" }}>{error}</td></tr>)}
+            {loading && (<tr><td colSpan="5" className={styles.loadingState}>Carregando...</td></tr>)}
+            {error && (<tr><td colSpan="5" className={styles.errorState}>{error}</td></tr>)}
+            {!loading && !error && consultas.length === 0 && (<tr><td colSpan="5" className={styles.noData}>Nenhuma consulta encontrada.</td></tr>)}
             {!loading && !error && consultas.map((c) => (
               <tr key={c.id_consulta}>
                 <td>{formatDate(c.data)}</td>
                 <td>{c.animal?.nome || "N/A"}</td>
                 <td>{c.animal?.tutor?.nome || "N/A"}</td>
                 <td>{c.veterinario?.nome || "N/A"}</td>
-                <td className={styles.actionButtons}>
-                  <button onClick={() => handleOpenDetailModal(c.id_consulta)} title="Ver Detalhes"><i className="fas fa-eye"></i></button>
-                  <button onClick={() => handleDelete(c.id_consulta)} title="Excluir"><i className="fas fa-trash-alt"></i></button>
+                <td>
+                  <div className={styles.actionButtons}>
+                    <button onClick={() => handleOpenDetailModal(c.id_consulta)} title="Visualizar consulta">
+                      <FaEye />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -183,12 +213,14 @@ function Consultas() {
         </table>
       </div>
 
-      {/* ✅ 4. Controles de Paginação */}
-      <div className={styles.paginationControls}>
-        <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1 || totalPages === 0}>Anterior</button>
-        <span>Página {currentPage} de {totalPages}</span>
-        <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>Próxima</button>
-      </div>
+      {/* --- CONTROLES DE PAGINAÇÃO --- */}
+      {totalPages > 0 && (
+        <div className={styles.paginationControls}>
+            <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+        </div>
+      )}
     </div>
   );
 }

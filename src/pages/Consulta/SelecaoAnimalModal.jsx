@@ -1,88 +1,152 @@
-// src/pages/Consultas/SelecaoAnimalModal.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import styles from './SelecaoAnimalModal.module.css';
+import styles from './SelecaoAnimalModal.module.css'; // Usaremos o novo CSS
 
-function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado }) {
-  const [tutores, setTutores] = useState([]);
+function SelecaoAnimalModal({ isOpen, onClose, onAnimalSelecionado, onAddNewTutor, onAddNewAnimal, newlyCreatedTutor, newlyCreatedAnimal }) {
+  const [tutor, setTutor] = useState(null);
   const [animais, setAnimais] = useState([]);
-  const [idTutor, setIdTutor] = useState('');
   const [idAnimal, setIdAnimal] = useState('');
+  
+  // Estados para a busca de tutor
+  const [searchTerm, setSearchTerm] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Busca a lista de tutores quando o modal abre
+  const handleTutorSelect = (selectedTutor) => {
+    setTutor(selectedTutor);
+    const cpfLimpo = String(selectedTutor.cpf).replace(/\D/g, "");
+    const cpfDisplay = cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    setSearchTerm(`${selectedTutor.nome} - ${cpfDisplay}`);
+    setShowSuggestions(false); // Garante que as sugestões fechem ao selecionar
+    setIdAnimal('');
+  };
+
+  // Efeito para lidar com um tutor/animal recém-criado
   useEffect(() => {
     if (isOpen) {
-      // Limpa os estados anteriores
-      setIdTutor('');
-      setIdAnimal('');
-      setAnimais([]);
-      
-      // Assumindo uma rota que busca todos os tutores
-      api.get('/tutores').then(response => {
-        setTutores(response.data || []);
-      });
+      if (newlyCreatedTutor) {
+        handleTutorSelect(newlyCreatedTutor);
+      } else {
+        // Reseta completamente o estado ao abrir
+        setTutor(null);
+        setIdAnimal('');
+        setAnimais([]);
+        setSearchTerm('');
+        setSuggestions([]);
+      }
     }
-  }, [isOpen]);
-
-  // Busca os animais do tutor selecionado
+  }, [isOpen, newlyCreatedTutor]);
+  
+  // Efeito para adicionar e selecionar um animal recém-criado
   useEffect(() => {
-    if (idTutor) {
-      setIdAnimal(''); // Limpa a seleção de animal ao trocar de tutor
-      // Assumindo a rota que busca animais de um tutor
-      api.get(`/tutores/${idTutor}/animais`).then(response => {
+    if (isOpen && newlyCreatedAnimal) {
+      setAnimais(prevAnimais => [...prevAnimais, newlyCreatedAnimal]);
+      setIdAnimal(newlyCreatedAnimal.id_animal);
+    }
+  }, [isOpen, newlyCreatedAnimal]);
+
+  // Efeito de busca com debounce (atraso para pesquisar)
+  useEffect(() => {
+    // Não busca se o campo estiver vazio ou se um tutor já foi selecionado
+    if (searchTerm.length < 2 || tutor) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      api.searchTutores(searchTerm).then(response => {
+        setSuggestions(response || []);
+      }).finally(() => setIsSearching(false));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm, tutor]);
+
+  // Efeito para buscar animais quando um tutor é selecionado
+  useEffect(() => {
+    if (tutor) {
+      api.getAnimaisByTutor(tutor.id_tutor).then(response => {
         setAnimais(response || []);
       });
+    } else {
+      setAnimais([]);
     }
-  }, [idTutor]);
-
-  const handleConfirmar = () => {
-    if (idAnimal) {
-      onAnimalSelecionado(idAnimal);
-    }
-  };
+  }, [tutor]);
 
   if (!isOpen) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalHeader}><h2>Selecionar Paciente</h2></div>
+        <div className={styles.modalHeader}>
+          <h2>Selecionar Paciente</h2>
+        </div>
         <div className={styles.modalBody}>
           <div className={styles.formGroup}>
-            <label>1. Selecione o Tutor</label>
-            <select value={idTutor} onChange={e => setIdTutor(e.target.value)}>
-              <option value="">-- Busque ou selecione um tutor --</option>
-              {tutores.map(tutor => (
-                <option key={tutor.id_tutor} value={tutor.id_tutor}>
-                  {tutor.nome} - {tutor.cpf}
-                </option>
-              ))}
-            </select>
+            <label>1. Busque pelo nome ou CPF do Tutor</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => {
+                setSearchTerm(e.target.value);
+                setTutor(null); // Limpa a seleção ao digitar
+                setShowSuggestions(true); // Permite que a busca recomece
+              }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              placeholder="Digite para buscar..."
+            />
+            {showSuggestions && searchTerm.length >= 2 && !tutor && (
+              <div className={styles.autocompleteContainer}>
+                {isSearching ? (
+                  <div className={styles.noResults}><p>Buscando...</p></div>
+                ) : suggestions.length > 0 ? (
+                  <ul className={styles.autocompleteList}>
+                    {suggestions.map(sug => (
+                      <li key={sug.id_tutor} onMouseDown={() => handleTutorSelect(sug)}>
+                        {sug.nome} - {sug.cpf}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className={styles.noResults}>
+                    <p>Nenhum tutor encontrado.</p>
+                    <button className={styles.newTutorButton} onMouseDown={onAddNewTutor}>
+                      <i className="fas fa-plus"></i> Cadastrar este tutor
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          {idTutor && (
+          {tutor && (
             <div className={styles.formGroup}>
               <label>2. Selecione o Animal</label>
-              <ul className={styles.animalList}>
+              <div className={styles.animalList}>
                 {animais.length > 0 ? (
                   animais.map(animal => (
-                    <li
-                      key={animal.id_animal}
-                      className={`${styles.animalItem} ${idAnimal === animal.id_animal ? styles.selected : ''}`}
-                      onClick={() => setIdAnimal(animal.id_animal)}
-                    >
+                    <div key={animal.id_animal} className={`${styles.animalItem} ${idAnimal === animal.id_animal ? styles.selected : ''}`} onClick={() => setIdAnimal(animal.id_animal)}>
                       {animal.nome}
-                    </li>
+                    </div>
                   ))
                 ) : (
-                  <li className={styles.animalItem}>Nenhum animal encontrado.</li>
+                  <div className={styles.noAnimalMessage}>
+                     <p>Este tutor não possui animais cadastrados.</p>
+                     <button className={styles.newAnimalButton} onClick={() => onAddNewAnimal(tutor)}>
+                       <i className="fas fa-plus"></i> Cadastrar Animal
+                     </button>
+                  </div>
                 )}
-              </ul>
+              </div>
             </div>
           )}
         </div>
         <div className={styles.modalFooter}>
+        <button className={styles.newTutorButton} onClick={onAddNewTutor}>
+            <i className="fas fa-user-plus"></i> Cadastrar Novo Tutor
+   </button>
           <button className={styles.buttonSecondary} onClick={onClose}>Cancelar</button>
-          <button className={styles.buttonPrimary} onClick={handleConfirmar} disabled={!idAnimal}>
+          <button className={styles.buttonPrimary} onClick={() => onAnimalSelecionado(idAnimal)} disabled={!idAnimal}>
             Iniciar Consulta
           </button>
         </div>

@@ -1,228 +1,417 @@
+/* GERAL DO MODAL */
 .modalOverlay {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0,0,0,.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modalContent {
-    background: #fff;
-    border-radius: 12px;
-    width: 95%;
-    max-width: 1200px;
-    height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,.25);
-  }
-  
-  /* Cabeçalho */
-  .modalHeader {
-    background-color: #21584b;
-    color: #fff;
-    padding: 16px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .modalHeader h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-  }
-  .headerMeta {
-    display: flex;
-    gap: 18px;
-    font-size: 13px;
-    opacity: .95;
-  }
-  .headerMeta strong { font-weight: 700; }
-  
-  /* Corpo em 2 colunas */
-  .modalBody {
-    flex: 1;
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    overflow: auto;
-    background: #f3f5f4;
-  }
-  
-  .leftPanel {
-    flex: 1;
-    min-width: 360px;
-  }
-  
-  .rightPanel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    min-width: 360px;
-  }
-  
-  /* Card “Última anamnese” */
-  .card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px;
-    border: 1px solid #e6ebea;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  }
-  .cardHeader h3 {
-    margin: 0 0 12px 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #2c2c2c;
-  }
-  
-  .detailGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 18px;
-  }
-  
-  .detailItem label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: #6d7570;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    font-weight: 700;
-  }
-  
-.detailGrid {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background-color: #f4f7fa;
+  border-radius: 16px;
+  width: 95%;
+  max-width: 1400px;
+  height: 95vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* --- CABEÇALHO ATUALIZADO COM FICHA RESUMIDA --- */
+.header {
+  padding: 16px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e5eb;
+  flex-shrink: 0;
+}
+
+.headerTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.headerTopRow h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #e74c3c;
+}
+
+.headerAnimalInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: #f8faff;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.animalAvatar {
+  font-size: 1.8rem;
+  color: #27ae60;
+  background-color: #eaf4fc;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 colunas */
-  gap: 12px 20px;
+  place-items: center;
+  flex-shrink: 0;
 }
 
-.roInput {
-  background: #f5f5f5;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.95em;
-  color: #333;
+.animalBrief {
+  flex-grow: 1;
 }
 
-.roBlock {
-  background: #f5f5f5;
-  padding: 8px 12px;
+.animalName {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.tutorName {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.animalDetails {
+  display: flex;
+  gap: 16px;
+  font-size: 0.9rem;
+  color: #34495e;
+}
+
+.animalDetails span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prontuarioButton {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #bdc3c7;
+  color: #34495e;
   border-radius: 6px;
-  font-size: 0.95em;
-  color: #333;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* --- LAYOUT PRINCIPAL COM GRID --- */
+.mainBody {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 30%) 1fr; 
+  gap: 24px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.leftColumn {
+  height: 100%;
+  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* <-- ADICIONE ESTA LINHA */
+  gap: 20px;
+  padding-right: 10px;
+}
+.rightColumn {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 10px;
+}
+
+/* Estilizando a barra de rolagem */
+.leftColumn::-webkit-scrollbar, .rightColumn::-webkit-scrollbar {
+  width: 8px;
+}
+.leftColumn::-webkit-scrollbar-track, .rightColumn::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.leftColumn::-webkit-scrollbar-thumb, .rightColumn::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+.leftColumn::-webkit-scrollbar-thumb:hover, .rightColumn::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* --- CARDS DE CONTEÚDO --- */
+.anamnesisCard,
+.sectionCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e5eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cardHeader h3,
+.cardHeader h4,
+.cardTitle {
+  margin: 0;
+  color: #34495e;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cardTitle {
+  margin-bottom: 16px;
+}
+
+/* --- COLUNA ESQUERDA (ANAMNESE) --- */
+.editToggle {
+  background-color: #ecf0f1;
+  color: #34495e;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.editToggle:hover {
+  background-color: #dde3e4;
+}
+
+.displayData {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  min-height: 45px;
   white-space: pre-wrap;
-}
-
-  
-  .fullWidth { grid-column: 1 / -1; }
-  .spacer { height: 8px; }
-  
-  /* vitals da coluna direita */
-  .vitalsGrid {
-    background: #fff;
-    border: 1px solid #e6ebea;
-    border-radius: 12px;
-    padding: 14px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 12px 16px;
-  }
-  .vitalItem label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: #6d7570;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    font-weight: 700;
-  }
-  
-  /* Rodapé */
-  .modalFooter {
-    padding: 14px 24px;
-    border-top: 1px solid #e9ecef;
-    background: #f9f9f9;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-  
-  .button {
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    transition: filter .2s ease;
-  }
-  .buttonPrimary { background-color: #21584b; color: #fff; }
-  .buttonSecondary { background-color: #e0e0e0; color: #333; }
-  .button:hover { filter: brightness(.95); }
-  
-  /* Responsivo */
-  @media (max-width: 980px) {
-    .modalBody { flex-direction: column; }
-    .leftPanel, .rightPanel { min-width: 100%; }
-    .detailGrid, .vitalsGrid { grid-template-columns: 1fr; }
-  }
-  .divider {
-    border: none;
-    border-top: 1px solid #e0e0e0;
-    margin: 20px 0;
-  }
-  
-  .documentSection {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .documentHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .documentHeader h4 {
-    margin: 0;
-    font-size: 1.1em;
-    color: #333;
-  }
-  
-  .printButton {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    color: #333;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-  }
-  
-  .printButton i {
-    color: #555;
-  }
-
-  /* Adicione no final de NovaConsultaModal.module.css */
-.rightPanel input[readOnly],
-.rightPanel textarea[readOnly] {
-  background-color: #e9ecef; /* Um cinza claro para indicar que não é editável */
-  cursor: default; /* Remove o cursor de texto */
+  word-wrap: break-word;
   color: #495057;
-  border-color: #ced4da;
+  border: 1px solid #dee2e6;
+  font-size: 0.95rem;
 }
 
-.rightPanel textarea[readOnly] {
-    resize: none; /* Impede que o usuário redimensione a textarea */
+/* --- COLUNA DIREITA (CONSULTA) --- */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.formGroup label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* ESTILO PARA TEXTAREA AUTOEXPANSÍVEL */
+.autoResizeTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: none;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.autoResizeTextarea:focus {
+  outline: none;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+/* CARD DE SINAIS VITAIS COMPACTO */
+.vitalsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
+}
+
+.vitalsGrid .formGroup {
+  gap: 3px;
+  margin-bottom: 0;
+}
+
+.vitalsGrid .formGroup label {
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.vitalsGrid .formGroup input {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vitalsGrid .formGroup input:focus {
+  outline: none;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+/* MODIFICADO: Renomeado de .formGroupCheck para .formGroupInline */
+.formGroupInline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.formGroupInline label {
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #555;
+  flex-shrink: 0; /* Impede que o label encolha */
+}
+
+/* ADICIONADO: Estilo para o novo select */
+.selectInput {
+  flex-grow: 12px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.selectInput:focus {
+  outline: none;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+.selectInput:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* --- RODAPÉ FIXO --- */
+.footer {
+  padding: 16px 24px;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e5eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.footerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.actionButton,
+.prontuarioButton {
+  padding: 10px 20px;
+  background-color: #ecf0f1;
+  border: 1px solid #bdc3c7;
+  color: #34495e;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #dde3e4;
+  border-color: #a5aeb5;
+}
+
+.footerControls {
+  display: flex;
+  gap: 16px;
+}
+
+.cancelButton,
+.saveButton {
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: filter 0.2s;
+}
+
+.cancelButton {
+  background-color: #95a5a6;
+  color: #fff;
+}
+
+.saveButton {
+  background-color: #27ae60;
+  color: #fff;
+}
+
+.cancelButton:hover,
+.saveButton:hover {
+  filter: brightness(0.9);
+}
+
+.saveButton:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
 }

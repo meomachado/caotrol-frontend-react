@@ -1,8 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import api from "../../services/api";
 import styles from "./NovaConsultaModal.module.css";
 import VacinaModal from "../Vacinas/VacinaModal";
 import PdfGeneratorModal from "../Documentos/PdfGeneratorModal";
+import HistoryModal from "./HistoryModal";
+import {
+  FaPaw, FaVenusMars, FaBirthdayCake, FaTag, FaBookMedical, FaStethoscope,
+  FaEdit, FaCheck, FaTimes, FaSave, FaFilePrescription, FaVial, FaSyringe
+} from 'react-icons/fa';
+
+// --- COMPONENTE INTERNO MOVido PARA FORA ---
+// Isso melhora a performance, pois o componente não é recriado a cada renderização.
+function AutoResizeTextarea(props) {
+  const textareaRef = useRef(null);
+
+  const adjustHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustHeight();
+  }, [props.value]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      {...props}
+      onInput={adjustHeight}
+      rows={1}
+      className={styles.autoResizeTextarea}
+    />
+  );
+}
 
 const initialConsultaState = {
   peso: "",
@@ -19,7 +52,13 @@ const initialConsultaState = {
   exame: "",
 };
 
-function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId }) {
+function NovaConsultaModal({
+  isOpen,
+  onClose,
+  onSave,
+  animalId,
+  agendamentoId,
+}) {
   const [animal, setAnimal] = useState(null);
   const [veterinario, setVeterinario] = useState(null);
   const [formData, setFormData] = useState(initialConsultaState);
@@ -31,29 +70,67 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
     type: null,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [initialVacinaData, setInitialVacinaData] = useState(null);
+  const [isAnamnesisEditing, setIsAnamnesisEditing] = useState(false);
+  const [anamnesisData, setAnamnesisData] = useState({
+    castrado: false,
+    alergias: "",
+    obs: "",
+  });
+  const [historyModalState, setHistoryModalState] = useState({
+    isOpen: false,
+    type: null,
+  });
+
+  const handleAddDose = (vacina) => {
+    setInitialVacinaData({ nome: vacina.nome });
+    setHistoryModalState({ isOpen: false, type: null });
+    setIsVacinaModalOpen(true);
+  };
 
   useEffect(() => {
     if (isOpen && animalId) {
       setLoading(true);
       setError("");
       setFormData(initialConsultaState);
+      setIsAnamnesisEditing(false);
+
       const fetchInitialData = async () => {
         try {
-          const animalResponse = await api.get(`/animais/${animalId}`);
+          const animalResponse = await api.getAnimalById(animalId);
           setAnimal(animalResponse);
+
           const vetId = localStorage.getItem("vet_id");
           if (vetId) {
-            const vetResponse = await api.get(`/veterinarios/${vetId}`);
+            const vetResponse = await api.getVeterinarioById(vetId);
             setVeterinario(vetResponse);
           } else {
             throw new Error("ID do veterinário não encontrado.");
           }
+
+          const anamnesesResponse = await api.getAnamnesesByAnimal(animalId);
+          if (anamnesesResponse && anamnesesResponse.length > 0) {
+            const ultimaAnamnese = anamnesesResponse[0];
+            setAnamnesisData({
+              castrado: ultimaAnamnese.castrado,
+              alergias: ultimaAnamnese.alergias || "",
+              obs: ultimaAnamnese.obs || "",
+            });
+          } else {
+            setAnamnesisData({
+              castrado: animalResponse.castrado,
+              alergias: animalResponse.alergias || "",
+              obs: animalResponse.observacoes || "",
+            });
+          }
         } catch (err) {
           setError("Não foi possível carregar os dados necessários.");
+          console.error(err);
         } finally {
           setLoading(false);
         }
       };
+
       fetchInitialData();
     }
   }, [isOpen, animalId]);
@@ -63,21 +140,43 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleOpenHistory = (type) => {
+    setHistoryModalState({ isOpen: true, type });
+  };
+
+  const handleAnamnesisChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    let finalValue;
+
+    if (name === "castrado") {
+      finalValue = value === 'true';
+    } else if (type === "checkbox") {
+      finalValue = checked;
+    } else {
+      finalValue = value;
+    }
+
+    setAnamnesisData((prev) => ({
+      ...prev,
+      [name]: finalValue,
+    }));
+  };
+
   const handleSaveConsulta = async () => {
     if (!formData.queixaPrincipal) {
       alert("O campo 'Queixa principal' é obrigatório para salvar.");
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     setError("");
 
     try {
-      const dadosClinicos = {
+      const dadosConsultaParaApi = {
         queixa: formData.queixaPrincipal,
         suspeita: formData.suspeitaClinica,
         diagnostico: formData.diagnostico,
         tratamento: formData.tratamento,
-        mucosas: formData.mucosas,
+        mucosas: formData.mucosas || null,
         peso: formData.peso ? parseFloat(formData.peso) : null,
         temperatura: formData.temperatura
           ? parseFloat(formData.temperatura)
@@ -87,32 +186,29 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
           ? parseInt(formData.freqCardiaca, 10)
           : null,
         resp: formData.freqResp ? parseInt(formData.freqResp, 10) : null,
-      };
-
-      const dadosConsulta = {
-        ...dadosClinicos,
-        data: new Date(),
-        status: "finalizada",
         prescricao: formData.prescricao
           ? [{ descricao: formData.prescricao }]
           : [],
         exame: formData.exame ? [{ solicitacao: formData.exame }] : [],
         anamnese: {
-          castrado: animal.castrado,
-          alergias: animal.alergias,
-          obs: animal.observacoes,
-        }
+          castrado: anamnesisData.castrado,
+          alergias: anamnesisData.alergias,
+          obs: anamnesisData.obs,
+        },
       };
-      
+
       if (agendamentoId) {
-        await api.createConsultaFromAgendamento(agendamentoId, dadosConsulta);
+        await api.createConsultaFromAgendamento(
+          agendamentoId,
+          dadosConsultaParaApi
+        );
       } else {
         const payload = {
-            ids: {
-              id_animal: animal.id_animal,
-              id_tutor: animal.tutor.id_tutor,
-            },
-            dadosConsulta: dadosConsulta,
+          ids: {
+            id_animal: animal.id_animal,
+            id_tutor: animal.tutor.id_tutor,
+          },
+          dadosConsulta: dadosConsultaParaApi,
         };
         await api.createConsulta(payload);
       }
@@ -125,11 +221,10 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
       );
       console.error("Erro ao salvar consulta:", err);
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
-  // ... (o resto do seu componente, handleVacinaSave, formatDate, calculateAge, handleOpenPdfModal, handleGeneratePdf, e o JSX permanecem os mesmos)
   const handleVacinaSave = () => {
     setIsVacinaModalOpen(false);
     alert("Vacina registrada com sucesso!");
@@ -154,19 +249,13 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
     return `${months} mes(es)`;
   };
 
-  // ✅ 3. Função para abrir o modal de PDF
   const handleOpenPdfModal = (type) => {
-    // type será 'prescricao' ou 'exame'
     setPdfModalState({ isOpen: true, type: type });
   };
 
-  // ✅ 4. Função que é chamada pelo modal de PDF para gerar o documento
   const handleGeneratePdf = async (text) => {
     const { type } = pdfModalState;
-
-    // Atualiza o formulário principal com o texto digitado
     setFormData((prev) => ({ ...prev, [type]: text }));
-
     const isPrescricao = type === "prescricao";
 
     const payload = {
@@ -174,21 +263,29 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
       nome_animal: animal?.nome ?? "Não informado",
       especie: animal?.raca?.especie?.nome ?? "N/A",
       raca: animal?.raca?.nome ?? "N/A",
+      idade: calculateAge(animal?.data_nasc),
+      peso: formData.peso ? `${formData.peso} Kg` : "N/A",
       nome_veterinario: veterinario?.nome ?? "Não informado",
       crmv_veterinario: veterinario?.crmv ?? "N/A",
       data_consulta: new Date().toISOString(),
       ...(isPrescricao
-        ? { descricoes_prescricao: text.split("\n") }
-        : { solicitacoes_exame: text.split("\n") }),
+        ? {
+            descricoes_prescricao: text
+              .split("\n")
+              .filter((line) => line.trim() !== ""),
+          }
+        : {
+            solicitacoes_exame: text
+              .split("\n")
+              .filter((line) => line.trim() !== ""),
+          }),
     };
 
     try {
-      // ✅ A CORREÇÃO ESTÁ AQUI
-      // Trocamos a chamada genérica pela função específica correta
-      const response = isPrescricao 
+      const response = isPrescricao
         ? await api.gerarPrescricaoPreview(payload)
         : await api.gerarExamePreview(payload);
-        
+
       const file = new Blob([response], { type: "application/pdf" });
       const fileURL = URL.createObjectURL(file);
       window.open(fileURL, "_blank");
@@ -196,6 +293,20 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
     } catch (error) {
       console.error(`Erro ao gerar PDF de ${type}:`, error);
       alert(`Não foi possível gerar o PDF de ${type}.`);
+    }
+  };
+
+  const handleAddNewFromHistory = () => {
+    const { type } = historyModalState;
+    setHistoryModalState({ isOpen: false, type: null });
+
+    if (type === "vacinas") {
+      setInitialVacinaData(null);
+      setIsVacinaModalOpen(true);
+    } else if (type === "exames") {
+      handleOpenPdfModal("exame");
+    } else if (type === "prescricoes") {
+      handleOpenPdfModal("prescricao");
     }
   };
 
@@ -209,8 +320,18 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
           onClose={() => setIsVacinaModalOpen(false)}
           onSave={handleVacinaSave}
           animalId={animal.id_animal}
+          initialData={initialVacinaData}
         />
       )}
+
+      <HistoryModal
+        isOpen={historyModalState.isOpen}
+        onClose={() => setHistoryModalState({ isOpen: false, type: null })}
+        animalId={animal?.id_animal}
+        type={historyModalState.type}
+        onAddNew={handleAddNewFromHistory}
+        onAddDose={handleAddDose}
+      />
 
       <PdfGeneratorModal
         isOpen={pdfModalState.isOpen}
@@ -231,219 +352,116 @@ function NovaConsultaModal({ isOpen, onClose, onSave, animalId, agendamentoId })
 
       <div className={styles.modalOverlay}>
         <div className={styles.modalContent}>
-          <div className={styles.header}>
-            <h2>Nova Consulta</h2>
-            <button className={styles.closeButton} onClick={onClose}>
-              &times;
-            </button>
-          </div>
+          <header className={styles.header}>
+            <div className={styles.headerTopRow}>
+              <h2><FaStethoscope /> Nova Consulta</h2>
+              <button className={styles.closeButton} onClick={onClose}><FaTimes /></button>
+            </div>
+
+            {!loading && animal && (
+              <div className={styles.headerAnimalInfo}>
+                <div className={styles.animalAvatar}><FaPaw /></div>
+                <div className={styles.animalBrief}>
+                  <h3 className={styles.animalName}>{animal.nome}</h3>
+                  <p className={styles.tutorName}>Tutor: {animal.tutor.nome}</p>
+                </div>
+                <div className={styles.animalDetails}>
+                  <span><FaTag /> {animal.raca.especie.nome} / {animal.raca.nome}</span>
+                  <span><FaVenusMars /> {animal.sexo === "F" ? "Fêmea" : "Macho"}</span>
+                  <span><FaBirthdayCake /> {calculateAge(animal.data_nasc)}</span>
+                </div>
+                <button className={styles.prontuarioButton} onClick={() => window.open(`/animais/${animalId}`, '_blank')}>
+                  Ver Prontuário
+                </button>
+              </div>
+            )}
+          </header>
 
           {loading && <p className={styles.loadingText}>Carregando...</p>}
           {error && <p className={styles.errorText}>{error}</p>}
 
           {!loading && !error && animal && (
             <>
-              <div className={styles.animalHeader}>
-                <div className={styles.animalInfo}>
-                  <i className="fas fa-paw"></i>
-                  <h3>{animal.nome}</h3>
-                </div>
-                <div className={styles.tutorInfo}>
-                  <p>
-                    <strong>Tutor:</strong> {animal.tutor.nome}
-                  </p>
-                  <p>
-                    <strong>CPF:</strong> {animal.tutor.cpf}
-                  </p>
-                  <p>
-                    <strong>Telefone:</strong> {animal.tutor.telefone}
-                  </p>
-                </div>
-                <div className={styles.animalActions}>
-                  <button>Editar</button>
-                  <button>Trocar Animal</button>
-                  <button>Consultas Anteriores</button>
-                </div>
-              </div>
-
-              <div className={styles.mainBody}>
-                {/* Painel Esquerdo - Anamnese */}
-                <div className={styles.leftPanel}>
-                  <div className={styles.card}>
-                    <h4>Última anamnese</h4>
-                    <div className={styles.anamneseGrid}>
-                      <div>
-                        <label>Espécie</label>
-                        <p>{animal.raca.especie.nome}</p>
-                      </div>
-                      <div>
-                        <label>Raça</label>
-                        <p>{animal.raca.nome}</p>
-                      </div>
-                      <div>
-                        <label>Sexo</label>
-                        <p>{animal.sexo === "F" ? "Fêmea" : "Macho"}</p>
-                      </div>
-                      <div>
-                        <label>Porte</label>
-                        <p>{animal.porte}</p>
-                      </div>
-                      <div>
-                        <label>Temperamento</label>
-                        <p>{animal.temperamento}</p>
-                      </div>
-                      <div>
-                        <label>Idade</label>
-                        <p>{calculateAge(animal.data_nasc)}</p>
-                      </div>
-                      <div>
-                        <label>Nascimento</label>
-                        <p>{formatDate(animal.data_nasc)}</p>
-                      </div>
-                      <div>
-                        <label>Castrado</label>
-                        <p>{animal.castrado ? "Sim" : "Não"}</p>
-                      </div>
+              <main className={styles.mainBody}>
+                {/* --- COLUNA ESQUERDA (ANAMNESE) --- */}
+                <aside className={styles.leftColumn}>
+                  <div className={styles.anamnesisCard}>
+                    <div className={styles.cardHeader}>
+                      <h3><FaBookMedical /> Anamnese</h3>
+                      <button className={styles.editToggle} onClick={() => setIsAnamnesisEditing(!isAnamnesisEditing)}>
+                        {isAnamnesisEditing ? <><FaCheck /> Concluir</> : <><FaEdit /> Editar</>}
+                      </button>
                     </div>
-                    <div className={styles.fullWidth}>
+
+                    <div className={styles.formGroupInline}>
+                      <label htmlFor="castrado">Castrado?</label>
+                      <select
+                        id="castrado"
+                        name="castrado"
+                        value={anamnesisData.castrado}
+                        onChange={handleAnamnesisChange}
+                        disabled={!isAnamnesisEditing}
+                        className={styles.selectInput}
+                      >
+                        <option value={true}>Sim</option>
+                        <option value={false}>Não</option>
+                      </select>
+                    </div>
+
+                    <div className={styles.formGroup}>
                       <label>Alergias</label>
-                      <p>{animal.alergias || "Nenhuma"}</p>
+                      {isAnamnesisEditing ? (
+                        <AutoResizeTextarea name="alergias" value={anamnesisData.alergias} onChange={handleAnamnesisChange} />
+                      ) : (
+                        <p className={styles.displayData}>{anamnesisData.alergias || "Nenhuma informação"}</p>
+                      )}
                     </div>
-                    <div className={styles.fullWidth}>
+                    <div className={styles.formGroup}>
                       <label>Observações</label>
-                      <p>{animal.observacoes || "Nenhuma"}</p>
+                      {isAnamnesisEditing ? (
+                        <AutoResizeTextarea name="obs" value={anamnesisData.obs} onChange={handleAnamnesisChange} />
+                      ) : (
+                        <p className={styles.displayData}>{anamnesisData.obs || "Nenhuma informação"}</p>
+                      )}
                     </div>
                   </div>
-                </div>
+                </aside>
 
-                {/* Painel Direito - Formulário */}
-                <div className={styles.rightPanel}>
-                  <div className={styles.vitalsGrid}>
-                    <div>
-                      <label>Peso</label>
-                      <input
-                        type="text"
-                        name="peso"
-                        value={formData.peso}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Temperatura</label>
-                      <input
-                        type="text"
-                        name="temperatura"
-                        value={formData.temperatura}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>TPC</label>
-                      <input
-                        type="text"
-                        name="tpc"
-                        value={formData.tpc}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Mucosas</label>
-                      <input
-                        type="text"
-                        name="mucosas"
-                        value={formData.mucosas}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Frequência Cardíaca</label>
-                      <input
-                        type="text"
-                        name="freqCardiaca"
-                        value={formData.freqCardiaca}
-                        onChange={handleChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Frequência Respiratória</label>
-                      <input
-                        type="text"
-                        name="freqResp"
-                        value={formData.freqResp}
-                        onChange={handleChange}
-                      />
+                {/* --- COLUNA DIREITA (CONSULTA) --- */}
+                <section className={styles.rightColumn}>
+                  <div className={styles.sectionCard}>
+                    <h4 className={styles.cardTitle}>Sinais Vitais</h4>
+                    <div className={styles.vitalsGrid}>
+                      <div className={styles.formGroup}><label>Peso (Kg)</label><input type="text" name="peso" value={formData.peso} onChange={handleChange} /></div>
+                      <div className={styles.formGroup}><label>Temperatura (°C)</label><input type="text" name="temperatura" value={formData.temperatura} onChange={handleChange} /></div>
+                      <div className={styles.formGroup}><label>TPC (seg)</label><input type="text" name="tpc" value={formData.tpc} onChange={handleChange} /></div>
+                      <div className={styles.formGroup}><label>Mucosas</label><input type="text" name="mucosas" value={formData.mucosas} onChange={handleChange} /></div>
+                      <div className={styles.formGroup}><label>Freq. Cardíaca</label><input type="text" name="freqCardiaca" value={formData.freqCardiaca} onChange={handleChange} /></div>
+                      <div className={styles.formGroup}><label>Freq. Resp.</label><input type="text" name="freqResp" value={formData.freqResp} onChange={handleChange} /></div>
                     </div>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>Queixa principal</label>
-                    <textarea
-                      name="queixaPrincipal"
-                      value={formData.queixaPrincipal}
-                      onChange={handleChange}
-                    ></textarea>
+                  
+                  <div className={styles.sectionCard}>
+                    <h4 className={styles.cardTitle}>Avaliação Clínica</h4>
+                    <div className={styles.formGroup}><label>Queixa Principal</label><AutoResizeTextarea name="queixaPrincipal" value={formData.queixaPrincipal} onChange={handleChange} /></div>
+                    <div className={styles.formGroup}><label>Suspeita Clínica</label><AutoResizeTextarea name="suspeitaClinica" value={formData.suspeitaClinica} onChange={handleChange} /></div>
+                    <div className={styles.formGroup}><label>Diagnóstico</label><AutoResizeTextarea name="diagnostico" value={formData.diagnostico} onChange={handleChange} /></div>
+                    <div className={styles.formGroup}><label>Tratamento</label><AutoResizeTextarea name="tratamento" value={formData.tratamento} onChange={handleChange} /></div>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>Suspeita Clínica</label>
-                    <textarea
-                      name="suspeitaClinica"
-                      value={formData.suspeitaClinica}
-                      onChange={handleChange}
-                    ></textarea>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Diagnóstico</label>
-                    <textarea
-                      name="diagnostico"
-                      value={formData.diagnostico}
-                      onChange={handleChange}
-                    ></textarea>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Tratamento</label>
-                    <textarea
-                      name="tratamento"
-                      value={formData.tratamento}
-                      onChange={handleChange}
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
+                </section>
+              </main>
 
-              <div className={styles.footer}>
+              <footer className={styles.footer}>
                 <div className={styles.footerActions}>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => handleOpenPdfModal("prescricao")}
-                  >
-                    <i className="fas fa-file-prescription"></i> Prescrição
-                  </button>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => handleOpenPdfModal("exame")}
-                  >
-                    <i className="fas fa-vial"></i> Exames
-                  </button>
-                  <button
-                    className={styles.actionButton}
-                    onClick={() => setIsVacinaModalOpen(true)}
-                  >
-                    <i className="fas fa-syringe"></i> Vacinas
-                  </button>
+                  <button className={styles.actionButton} onClick={() => handleOpenHistory("prescricoes")}><FaFilePrescription /> Prescrição</button>
+                  <button className={styles.actionButton} onClick={() => handleOpenHistory("exames")}><FaVial /> Exames</button>
+                  <button className={styles.actionButton} onClick={() => handleOpenHistory("vacinas")}><FaSyringe /> Vacinas</button>
                 </div>
                 <div className={styles.footerControls}>
-                  <button className={styles.cancelButton} onClick={onClose}>
-                    Cancelar
-                  </button>
-
-                  <button
-                    className={styles.saveButton}
-                    onClick={handleSaveConsulta}
-                    disabled={isSaving} 
-                  >
-                    {isSaving ? "Salvando..." : "Salvar"}
-                  </button>
+                  <button className={styles.cancelButton} onClick={onClose}>Cancelar</button>
+                  <button className={styles.saveButton} onClick={handleSaveConsulta} disabled={isSaving}><FaSave /> {isSaving ? "Salvando..." : "Salvar Consulta"}</button>
                 </div>
-              </div>
+              </footer>
             </>
           )}
         </div>

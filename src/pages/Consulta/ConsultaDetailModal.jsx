@@ -1,23 +1,13 @@
 import React from "react";
-// ✅ PASSO 1: Alterado para usar o CSS do NovaConsultaModal
-import styles from "./NovaConsultaModal.module.css";
+import styles from "./NovaConsultaModal.module.css"; // Reutilizando o mesmo estilo
 import api from "../../services/api";
+import {
+  FaPaw, FaVenusMars, FaBirthdayCake, FaTag, FaBookMedical, FaStethoscope,
+  FaTimes, FaFilePrescription, FaVial
+} from 'react-icons/fa'; // Importando ícones
 
 function ConsultaDetailModal({ isOpen, onClose, consulta }) {
   if (!isOpen || !consulta) return null;
-
-  // ✅ MANTIDO: Funções de formatação e impressão
-  const formatDate = (dateString) => {
-    if (!dateString) return "—";
-    try {
-      return new Intl.DateTimeFormat("pt-BR", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }).format(new Date(dateString));
-    } catch {
-      return "—";
-    }
-  };
 
   const formatDateOnly = (dateString) => {
     if (!dateString) return "—";
@@ -26,9 +16,10 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
     );
   };
 
-  const calculateAge = (dateString) => {
-    if (!dateString) return "—";
-    const ageInMilliseconds = new Date() - new Date(dateString);
+  const calculateAge = (birthDate, consultDate) => {
+    if (!birthDate || !consultDate) return "—";
+    const ageInMilliseconds = new Date(consultDate) - new Date(birthDate);
+    if (ageInMilliseconds < 0) return "Data inválida";
     const ageInYears = ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
     const years = Math.floor(ageInYears);
     const months = Math.floor((ageInYears - years) * 12);
@@ -38,11 +29,11 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
     return `${months} mes(es)`;
   };
 
-  const handleImprimir = async (tipo, id) => {
+  const handleImprimir = async (tipo, idConsulta) => {
     const endpoint =
       tipo === "prescricao"
-        ? `/prescricoes/${id}/imprimir`
-        : `/exames/${id}/imprimir`;
+        ? `/consultas/${idConsulta}/prescricoes/imprimir`
+        : `/consultas/${idConsulta}/exames/imprimir`;
 
     try {
       const response = await api.get(endpoint, true, "blob");
@@ -51,185 +42,107 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
       window.open(fileURL, "_blank");
     } catch (error) {
       console.error(`Erro ao imprimir ${tipo}:`, error);
-      alert(`Não foi possível gerar o PDF da ${tipo}.`);
+      alert(`Não foi possível gerar o PDF de ${tipo}.`);
     }
   };
 
   const c = consulta;
+  const anamneseDaConsulta = c.anamnese?.[0];
 
   return (
-    // ✅ PASSO 2: Reestruturação completa do JSX
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Cabeçalho Principal */}
-        <div className={styles.header}>
-          <h2>Detalhes da Consulta</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            &times;
-          </button>
-        </div>
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContent}>
+        {/* === CABEÇALHO PADRONIZADO === */}
+        <header className={styles.header}>
+          <div className={styles.headerTopRow}>
+            <h2><FaStethoscope /> Detalhes da Consulta ({formatDateOnly(c.data)})</h2>
+            <button className={styles.closeButton} onClick={onClose}><FaTimes /></button>
+          </div>
 
-        {/* Header do Animal */}
-        <div className={styles.animalHeader}>
-          <div className={styles.animalInfo}>
-            <i className="fas fa-paw"></i>
-            <h3>{c.animal?.nome || "Animal"}</h3>
+          <div className={styles.headerAnimalInfo}>
+            <div className={styles.animalAvatar}><FaPaw /></div>
+            <div className={styles.animalBrief}>
+              <h3 className={styles.animalName}>{c.animal?.nome || "Animal"}</h3>
+              <p className={styles.tutorName}>Tutor: {c.animal?.tutor?.nome || "—"}</p>
+            </div>
+            <div className={styles.animalDetails}>
+              <span><FaTag /> {c.animal?.raca?.especie?.nome || "—"} / {c.animal?.raca?.nome || "—"}</span>
+              <span><FaVenusMars /> {c.animal?.sexo === "F" ? "Fêmea" : "Macho"}</span>
+              <span><FaBirthdayCake /> {calculateAge(c.animal?.data_nasc, c.data)}</span>
+            </div>
+            <div className={styles.vetInfo} style={{marginLeft: 'auto', color: '#555'}}>
+              <strong>Veterinário:</strong> {c.veterinario?.nome || "—"}
+            </div>
           </div>
-          <div className={styles.tutorInfo}>
-            <p>
-              <strong>Tutor:</strong> {c.animal?.tutor?.nome || "—"}
-            </p>
-            <p>
-              <strong>CPF:</strong> {c.animal?.tutor?.cpf || "—"}
-            </p>
-            <p>
-              <strong>Telefone:</strong> {c.animal?.tutor?.telefone || "—"}
-            </p>
-          </div>
-          <div className={styles.animalActions}>
-            {/* Pode adicionar botões aqui se quiser, como um de "Ver Histórico" */}
-          </div>
-        </div>
+        </header>
 
-        {/* Corpo Principal (2 colunas) */}
-        <div className={styles.mainBody}>
-          {/* Painel Esquerdo - Anamnese */}
-          <div className={styles.leftPanel}>
-            <div className={styles.card}>
-              <h4>🩺 Anamnese do Animal</h4>
-              <div className={styles.anamneseGrid}>
-                <div>
-                  <label>Espécie</label>
-                  <p>{c.animal?.raca?.especie?.nome || "—"}</p>
-                </div>
-                <div>
-                  <label>Raça</label>
-                  <p>{c.animal?.raca?.nome || "—"}</p>
-                </div>
-                <div>
-                  <label>Sexo</label>
-                  <p>{c.animal?.sexo === "F" ? "Fêmea" : "Macho"}</p>
-                </div>
-                <div>
-                  <label>Porte</label>
-                  <p>{c.animal?.porte || "—"}</p>
-                </div>
-                <div>
-                  <label>Temperamento</label>
-                  <p>{c.animal?.temperamento || "—"}</p>
-                </div>
-                <div>
-                  <label>Idade</label>
-                  <p>{calculateAge(c.animal?.data_nasc)}</p>
-                </div>
-                <div>
-                  <label>Nascimento</label>
-                  <p>{formatDateOnly(c.animal?.data_nasc)}</p>
-                </div>
-                <div>
-                  <label>Castrado</label>
-                  <p>{c.animal?.castrado ? "Sim" : "Não"}</p>
-                </div>
+        {/* === CORPO PRINCIPAL PADRONIZADO === */}
+        <main className={styles.mainBody}>
+          {/* --- COLUNA ESQUERDA (ANAMNESE) --- */}
+          <aside className={styles.leftColumn}>
+            <div className={styles.anamnesisCard}>
+              <div className={styles.cardHeader}>
+                <h3><FaBookMedical /> Anamnese da Consulta</h3>
               </div>
-              <div className={styles.fullWidth}>
-                <label>Alergias</label>
-                <p>{c.animal?.alergias || "Nenhuma"}</p>
+              <div className={styles.formGroupInline}>
+                <label htmlFor="castrado">Castrado?</label>
+                <p className={styles.displayData}>{anamneseDaConsulta?.castrado ? "Sim" : "Não"}</p>
               </div>
-              <div className={styles.fullWidth}>
+              <div className={styles.formGroup}>
+                <label>Alergias Registradas</label>
+                <p className={styles.displayData}>{anamneseDaConsulta?.alergias || "Nenhuma"}</p>
+              </div>
+              <div className={styles.formGroup}>
                 <label>Observações</label>
-                <p>{c.animal?.observacoes || "Nenhuma"}</p>
+                <p className={styles.displayData}>{anamneseDaConsulta?.obs || "Nenhuma"}</p>
               </div>
             </div>
-          </div>
+          </aside>
 
-          {/* Painel Direito - Dados da Consulta */}
-          <div className={styles.rightPanel}>
-            {/* ✅ PASSO 3: Campos de exibição com 'readOnly' */}
-            <div className={styles.vitalsGrid}>
-              <div>
-                <label>Peso</label>
-                <input type="text" readOnly value={c.peso ?? "—"} />
-              </div>
-              <div>
-                <label>Temperatura</label>
-                <input type="text" readOnly value={c.temperatura ?? "—"} />
-              </div>
-              <div>
-                <label>TPC</label>
-                <input type="text" readOnly value={c.tpc ?? "—"} />
-              </div>
-              <div>
-                <label>Mucosas</label>
-                <input type="text" readOnly value={c.mucosas ?? "—"} />
-              </div>
-              <div>
-                <label>Frequência Cardíaca</label>
-                <input type="text" readOnly value={c.freq ?? "—"} />
-              </div>
-              <div>
-                <label>Frequência Respiratória</label>
-                <input type="text" readOnly value={c.resp ?? "—"} />
+          {/* --- COLUNA DIREITA (CONSULTA) --- */}
+          <section className={styles.rightColumn}>
+            <div className={styles.sectionCard}>
+              <h4 className={styles.cardTitle}>Sinais Vitais</h4>
+              <div className={styles.vitalsGrid}>
+                <div className={styles.formGroup}><label>Peso (Kg)</label><p className={styles.displayData}>{c.peso ?? "—"}</p></div>
+                <div className={styles.formGroup}><label>Temperatura (°C)</label><p className={styles.displayData}>{c.temperatura ?? "—"}</p></div>
+                <div className={styles.formGroup}><label>TPC (seg)</label><p className={styles.displayData}>{c.tpc ?? "—"}</p></div>
+                <div className={styles.formGroup}><label>Mucosas</label><p className={styles.displayData}>{c.mucosas ?? "—"}</p></div>
+                <div className={styles.formGroup}><label>Freq. Cardíaca</label><p className={styles.displayData}>{c.freq ?? "—"}</p></div>
+                <div className={styles.formGroup}><label>Freq. Resp.</label><p className={styles.displayData}>{c.resp ?? "—"}</p></div>
               </div>
             </div>
-            <div className={styles.formGroup}>
-              <label>Queixa principal</label>
-              <textarea
-                readOnly
-                value={c.queixa || "Nenhuma queixa registrada."}
-              ></textarea>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Suspeita Clínica</label>
-              <textarea
-                readOnly
-                value={c.suspeita || "Nenhuma suspeita registrada."}
-              ></textarea>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Diagnóstico</label>
-              <textarea
-                readOnly
-                value={c.diagnostico || "Nenhum diagnóstico registrado."}
-              ></textarea>
-            </div>
-            <div className={styles.formGroup}>
-              <label>Tratamento</label>
-              <textarea
-                readOnly
-                value={c.tratamento || "Nenhum tratamento registrado."}
-              ></textarea>
-            </div>
-          </div>
-        </div>
 
-        {/* Rodapé com Ações */}
-        <div className={styles.footer}>
+            <div className={styles.sectionCard}>
+              <h4 className={styles.cardTitle}>Avaliação Clínica</h4>
+              <div className={styles.formGroup}><label>Queixa Principal</label><p className={styles.displayData}>{c.queixa || "—"}</p></div>
+              <div className={styles.formGroup}><label>Suspeita Clínica</label><p className={styles.displayData}>{c.suspeita || "—"}</p></div>
+              <div className={styles.formGroup}><label>Diagnóstico</label><p className={styles.displayData}>{c.diagnostico || "—"}</p></div>
+              <div className={styles.formGroup}><label>Tratamento</label><p className={styles.displayData}>{c.tratamento || "—"}</p></div>
+            </div>
+          </section>
+        </main>
+
+        {/* === RODAPÉ PADRONIZADO === */}
+        <footer className={styles.footer}>
           <div className={styles.footerActions}>
             {c.prescricao && c.prescricao.length > 0 && (
-              <button
-                className={styles.actionButton}
-                onClick={() =>
-                  handleImprimir("prescricao", c.prescricao[0].id_prescricao)
-                }
-              >
-                <i className="fas fa-file-prescription"></i> Imprimir Prescrição
+              <button className={styles.actionButton} onClick={() => handleImprimir("prescricao", c.id_consulta)}>
+                <FaFilePrescription /> Imprimir Prescrição
               </button>
             )}
             {c.exame && c.exame.length > 0 && (
-              <button
-                className={styles.actionButton}
-                onClick={() => handleImprimir("exame", c.exame[0].id_exame)}
-              >
-                <i className="fas fa-vial"></i> Imprimir Exames
+              <button className={styles.actionButton} onClick={() => handleImprimir("exame", c.id_consulta)}>
+                <FaVial /> Imprimir Exames
               </button>
             )}
           </div>
           <div className={styles.footerControls}>
-            <button className={styles.saveButton} onClick={onClose}>
+            <button className={styles.cancelButton} onClick={onClose}>
               Fechar
             </button>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );

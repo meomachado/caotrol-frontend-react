@@ -99,11 +99,13 @@
   align-items: center;
 }
 
-.inputIconWrapper i {
+/* VERSÃO CORRIGIDA ✅ */
+.inputIconWrapper svg {
   position: absolute;
   left: 15px;
   color: #95a5a6;
   transition: color 0.3s ease;
+  z-index: 1; /* Garante que o ícone fique sobre o input */
 }
 
 .formGroup input,

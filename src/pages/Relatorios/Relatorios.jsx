@@ -1,14 +1,13 @@
-// pages/Relatorios/Relatorios.jsx
+// src/pages/Relatorios/Relatorios.jsx
 import React, { useState } from 'react';
 import api from '../../services/api';
 import styles from './Relatorios.module.css';
+// ✅ Ícones importados
+import { FaChartBar, FaCalendarAlt, FaFileAlt } from 'react-icons/fa';
 
 function Relatorios() {
-  // Estados para os filtros de data
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
-
-  // Estados para controlar o resultado e a interface
   const [resultado, setResultado] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,8 +18,8 @@ function Relatorios() {
       return;
     }
     if (new Date(dataInicio) > new Date(dataFim)) {
-        setError('A data de início não pode ser posterior à data de fim.');
-        return;
+      setError('A data de início não pode ser posterior à data de fim.');
+      return;
     }
 
     setLoading(true);
@@ -28,16 +27,14 @@ function Relatorios() {
     setResultado(null);
 
     try {
-      // Monta os parâmetros para a URL
       const params = new URLSearchParams({ dataInicio, dataFim }).toString();
       const response = await api.getRelatorioConsultas(params);
       setResultado(response);
     } catch (err) {
-      // O back-end retorna 403 (Forbidden) se o usuário não for admin
       if (err.message.includes('403')) {
-          setError('Acesso negado. Apenas administradores podem gerar relatórios.');
+        setError('Acesso negado. Apenas administradores podem gerar relatórios.');
       } else {
-          setError(err.message || 'Ocorreu um erro ao gerar o relatório.');
+        setError(err.message || 'Ocorreu um erro ao gerar o relatório.');
       }
       console.error(err);
     } finally {
@@ -46,13 +43,21 @@ function Relatorios() {
   };
 
   return (
-    <div className={styles.relatoriosContainer}>
-      <div className={styles.header}>
-        <h1>Relatórios</h1>
+    <div className={styles.pageContainer}>
+      {/* ✅ HEADER PADRONIZADO */}
+      <div className={styles.pageHeader}>
+        <div>
+          <h1>Relatórios</h1>
+          <p className={styles.pageSubtitle}>Gere e visualize relatórios do sistema</p>
+        </div>
       </div>
 
-      <div className={styles.card}>
-        <h3 className={styles.sectionTitle}>Consultas por Período</h3>
+      {/* ✅ CARD DE CONTEÚDO PRINCIPAL */}
+      <div className={styles.contentCard}>
+        <div className={styles.cardHeader}>
+          <FaChartBar />
+          <h3>Consultas por Período</h3>
+        </div>
         <p className={styles.description}>
           Selecione um intervalo de datas para ver o total de consultas finalizadas.
         </p>
@@ -60,21 +65,27 @@ function Relatorios() {
         <div className={styles.filtersBar}>
           <div className={styles.filterGroup}>
             <label htmlFor="data-inicio">Data de Início</label>
-            <input 
-              type="date" 
-              id="data-inicio"
-              value={dataInicio} 
-              onChange={(e) => setDataInicio(e.target.value)} 
-            />
+            <div className={styles.inputIconWrapper}>
+              <FaCalendarAlt />
+              <input 
+                type="date" 
+                id="data-inicio"
+                value={dataInicio} 
+                onChange={(e) => setDataInicio(e.target.value)} 
+              />
+            </div>
           </div>
           <div className={styles.filterGroup}>
             <label htmlFor="data-fim">Data de Fim</label>
-            <input 
-              type="date" 
-              id="data-fim"
-              value={dataFim} 
-              onChange={(e) => setDataFim(e.target.value)} 
-            />
+            <div className={styles.inputIconWrapper}>
+              <FaCalendarAlt />
+              <input 
+                type="date" 
+                id="data-fim"
+                value={dataFim} 
+                onChange={(e) => setDataFim(e.target.value)} 
+              />
+            </div>
           </div>
           <button 
             onClick={handleGerarRelatorio} 
@@ -90,17 +101,21 @@ function Relatorios() {
         
         {resultado && (
           <div className={styles.resultCard}>
-            <h4>Resultado</h4>
-            <p>
-              No período de 
-              <strong> {new Intl.DateTimeFormat('pt-BR').format(new Date(resultado.periodo.de))} </strong> 
-              a <strong> {new Intl.DateTimeFormat('pt-BR').format(new Date(resultado.periodo.ate))}</strong>, 
-              foram realizadas:
-            </p>
-            <div className={styles.totalConsultas}>
-              {resultado.totalConsultas}
+            <div className={styles.resultIcon}>
+              <FaFileAlt />
             </div>
-            <span>consulta(s) finalizada(s).</span>
+            <div className={styles.resultContent}>
+              <p>
+                No período de 
+                <strong> {new Intl.DateTimeFormat('pt-BR', {timeZone: 'UTC'}).format(new Date(resultado.periodo.de))} </strong> 
+                a <strong> {new Intl.DateTimeFormat('pt-BR', {timeZone: 'UTC'}).format(new Date(resultado.periodo.ate))}</strong>, 
+                foram realizadas:
+              </p>
+              <div className={styles.totalConsultas}>
+                {resultado.totalConsultas}
+              </div>
+              <span>consulta(s) finalizada(s).</span>
+            </div>
           </div>
         )}
       </div>

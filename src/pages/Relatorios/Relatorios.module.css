@@ -1,114 +1,178 @@
-/* pages/Relatorios/Relatorios.module.css */
-.relatoriosContainer {
+/* src/pages/Relatorios/Relatorios.module.css */
+
+.pageContainer {
   width: 100%;
 }
 
-.header {
-  margin-bottom: 25px;
+/* === HEADER PADRONIZADO === */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 }
 
-.header h1 {
-  font-size: 2.5em;
+.pageHeader h1 {
+  font-size: 2.2rem;
   color: #2c3e50;
+  margin: 0;
+  line-height: 1.1;
 }
 
-.card {
+.pageSubtitle {
+  color: #7f8c8d;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* === CARD DE CONTEÚDO === */
+.contentCard {
   background-color: #ffffff;
   border-radius: 12px;
-  padding: 25px 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  padding: 24px 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-.sectionTitle {
-  font-size: 1.5em;
-  color: #34495e;
-  margin: 0 0 10px 0;
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+.cardHeader h3 {
+  margin: 0;
+  font-size: 1em;
 }
 
 .description {
   color: #7f8c8d;
-  margin-bottom: 25px;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
 }
 
+/* === FILTROS === */
 .filtersBar {
   display: flex;
-  align-items: flex-end; /* Alinha os itens na base */
+  align-items: flex-end;
+  flex-wrap: wrap;
   gap: 20px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #e9ecef;
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-grow: 1;
 }
 
 .filterGroup label {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.9em;
+  color: #34495e;
+}
+
+.inputIconWrapper {
+  position: relative;
+}
+
+.inputIconWrapper svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
   font-size: 0.9em;
 }
 
 .filterGroup input {
-  padding: 10px;
+  padding: 10px 15px 10px 35px; /* Espaço para o ícone */
   border-radius: 8px;
-  border: 1px solid #bdc3c7;
+  border: 1px solid #dcdcdc;
   font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+.filterGroup input:focus {
+  border-color: #27ae60;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
 }
 
 .generateButton {
-  background-color: #2980b9;
+  background-color: #27ae60; /* ✅ COR VERDE APLICADA */
   color: white;
   padding: 10px 25px;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 1em;
   border: none;
   cursor: pointer;
-  height: 43px; /* Mesma altura do input */
+  height: 44px; /* Mesma altura do input */
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+}
+
+.generateButton:hover {
+  background-color: #219d55;
+  transform: translateY(-2px);
 }
 
 .generateButton:disabled {
-  background-color: #95a5a6;
+  background-color: #bdc3c7;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+/* === RESULTADO E ERRO === */
 .errorMessage {
-  margin-top: 20px;
-  color: #e74c3c;
+  margin-top: 2rem;
+  color: #c0392b;
   background-color: #fbeae9;
   padding: 15px;
   border-radius: 8px;
   text-align: center;
+  font-weight: 500;
 }
 
 .resultCard {
-  margin-top: 25px;
-  background-color: #f9fafb;
-  border: 1px solid #e9ecef;
-  border-left: 5px solid #2980b9;
-  padding: 20px;
-  border-radius: 8px;
+  margin-top: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
-.resultCard h4 {
-  margin: 0 0 15px 0;
-  font-size: 1.2em;
+.resultIcon {
+  font-size: 2.5rem;
+  color: #27ae60;
+  flex-shrink: 0;
 }
 
-.resultCard p {
-    font-size: 1.1em;
+.resultContent p {
+  font-size: 1rem;
+  color: #34495e;
+  margin: 0;
+}
+.resultContent strong {
+  color: #2c3e50;
 }
 
 .totalConsultas {
-  font-size: 4em;
-  font-weight: bold;
-  color: #2980b9;
-  text-align: center;
-  margin: 10px 0;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #27ae60; /* ✅ COR VERDE APLICADA */
+  margin: 4px 0;
+  line-height: 1;
 }
 
-.resultCard span {
-    display: block;
-    text-align: center;
-    color: #7f8c8d;
+.resultContent span {
+  color: #7f8c8d;
+  font-size: 0.9rem;
 }

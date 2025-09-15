@@ -1,14 +1,39 @@
 // pages/Vacinas/VacinaModal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import styles from './VacinaModal.module.css';
 
-function VacinaModal({ isOpen, onClose, onSave, animalId }) {
+function VacinaModal({ isOpen, onClose, onSave, animalId, initialData }) {
   const [nome, setNome] = useState('');
+  const [dose, setDose] = useState('');
   const [dataAplic, setDataAplic] = useState(new Date().toISOString().split('T')[0]);
   const [dataProx, setDataProx] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && animalId) {
+      if (initialData?.nome) {
+        // Extrai o nome base da vacina, ex: "V10" de "V10 (1ª dose)"
+        const nomeBase = initialData.nome.split(' (')[0];
+        
+        // Busca o histórico para sugerir a próxima dose
+        api.getVacinasByAnimal(animalId).then(historico => {
+            const dosesAnteriores = historico.filter(v => v.nome.startsWith(nomeBase)).length;
+            setNome(nomeBase);
+            setDose(`${dosesAnteriores + 1}ª dose`);
+        });
+
+      } else {
+        setNome('');
+        setDose('1ª dose');
+      }
+      // Reseta os outros campos
+      setDataAplic(new Date().toISOString().split('T')[0]);
+      setDataProx('');
+      setError('');
+    }
+  }, [isOpen, animalId, initialData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,14 +45,17 @@ function VacinaModal({ isOpen, onClose, onSave, animalId }) {
     setError('');
 
     try {
+      // Concatena o nome da vacina com a dose se a dose estiver preenchida
+      const nomeCompleto = dose ? `${nome} (${dose})` : nome;
+
       const vacinaData = {
-        nome,
+        nome: nomeCompleto,
         data_aplic: new Date(dataAplic).toISOString(),
         data_prox: dataProx ? new Date(dataProx).toISOString() : null,
       };
-      // A API está pronta para receber o POST nesta rota
+      
       await api.post(`/animais/${animalId}/vacinas`, vacinaData);
-      onSave(); // Avisa o componente pai que a vacina foi salva com sucesso
+      onSave();
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao registrar a vacina.');
     } finally {
@@ -45,6 +73,10 @@ function VacinaModal({ isOpen, onClose, onSave, animalId }) {
           <div className={styles.formGroup}>
             <label>Nome da Vacina</label>
             <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Dose</label>
+            <input type="text" value={dose} onChange={(e) => setDose(e.target.value)} placeholder="Ex: 1ª dose, Reforço anual" />
           </div>
           <div className={styles.formGroup}>
             <label>Data da Aplicação</label>

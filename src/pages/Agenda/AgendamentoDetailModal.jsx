@@ -1,5 +1,3 @@
-// pages/Agenda/AgendamentoDetailModal.jsx
-
 import React, { useState } from "react";
 import api from "../../services/api";
 import styles from "./AgendamentoModal.module.css";
@@ -76,33 +74,38 @@ function AgendamentoDetailModal({
         </div>
         
         <div className={styles.formBody}>
-          <div className={styles.detailGroup}><label>Animal</label><p>{eventInfo.title}</p></div>
-          <div className={styles.detailGroup}><label>Horário</label><p>{formatTime(eventInfo.start)}</p></div>
-          <div className={styles.detailGroup}><label>Veterinário</label><p>{eventInfo.extendedProps.veterinario}</p></div>
-          <div className={styles.detailGroup}>
-            <label>Status</label>
-            <div className={styles.statusDisplay}>
-              <span className={styles.statusBadge} style={{ backgroundColor: statusInfo.color }}>
-                {statusInfo.text}
-              </span>
+          <div className={styles.card}>
+            <h3 className={styles.sectionTitle}>Detalhes</h3>
+            <div className={styles.detailGroup}><label>Animal</label><p>{eventInfo.title}</p></div>
+            <div className={styles.detailGroup}><label>Horário</label><p>{formatTime(eventInfo.start)}</p></div>
+            <div className={styles.detailGroup}><label>Veterinário</label><p>{eventInfo.extendedProps.veterinario}</p></div>
+            <div className={styles.detailGroup}>
+              <label>Status</label>
+              <div className={styles.statusDisplay}>
+                <span className={styles.statusBadge} style={{ backgroundColor: statusInfo.color }}>
+                  {statusInfo.text}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {error && <p className={styles.errorMessage}>{error}</p>}
-
         <div className={styles.modalFooter}>
-          <button onClick={onClose} className={styles.cancelButton}>Fechar</button>
-          
-          <div className={styles.actionButtonsContainer}>
-            {canConfirm && <button onClick={() => handleAction('confirmarAgendamento')} className={styles.actionButtonConfirm} disabled={isSubmitting}>Confirmar</button>}
-            {canMarkAbsence && <button onClick={() => handleAction('marcarFaltaAgendamento')} className={styles.actionButtonAbsence} disabled={isSubmitting}>Marcar Falta</button>}
+          <div className={styles.errorContainer}>
+            {error && <p className={styles.errorMessage}>{error}</p>}
+          </div>
+          <div className={styles.buttonGroup}>
+            <button onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}>Fechar</button>
             
-            <button onClick={handleStartConsultationClick} className={styles.actionButtonStart} disabled={isSubmitting || isConsultationStarted}>
+            {canConfirm && <button onClick={() => handleAction('confirmarAgendamento')} className={`${styles.btn} ${styles.btnSave}`} disabled={isSubmitting}>Confirmar</button>}
+            
+            {canMarkAbsence && <button onClick={() => handleAction('marcarFaltaAgendamento')} className={`${styles.btn} ${styles.btnAbsence}`} disabled={isSubmitting}>Marcar Falta</button>}
+            
+            <button onClick={handleStartConsultationClick} className={`${styles.btn} ${styles.btnStart}`} disabled={isSubmitting || isConsultationStarted}>
               {isConsultationStarted ? 'Consulta Realizada' : 'Iniciar Consulta'}
             </button>
             
-            {canCancel && <button onClick={() => handleAction('cancelarAgendamento')} className={styles.actionButtonCancel} disabled={isSubmitting}>Cancelar Agendamento</button>}
+            {canCancel && <button onClick={() => handleAction('cancelarAgendamento')} className={`${styles.btn} ${styles.btnDanger}`} disabled={isSubmitting}>Cancelar Agendamento</button>}
           </div>
         </div>
       </div>

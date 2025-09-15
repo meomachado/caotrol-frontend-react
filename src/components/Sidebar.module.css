@@ -1,18 +1,22 @@
 /* src/components/Sidebar.module.css */
 
 /* Container principal da sidebar */
+/* src/components/Sidebar.module.css */
 .sidebarContainer {
-    width: 250px;
-    background-color: #cdcdcd; /* Seu cinza claro */
-    height: 100vh; /* Altura total da tela */
-    position: fixed; /* Fixa a sidebar na lateral */
-    top: 0;
-    left: 0;
-    padding: 20px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
-    display: flex;
-    flex-direction: column;
-  }
+  width: 250px;
+  background-color: #cdcdcd; /* Seu cinza claro */
+  height: 100vh;
+  position: fixed; /* CORRETO - Mantém a sidebar fixa */
+  top: 0;
+  left: 0;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000; /* Garante que a sidebar fique na camada de cima */
+}
+
+/* O resto do seu CSS do Sidebar continua igual... */
   
   .sidebarLogo img {
     display: block; /* Garante que a imagem seja um bloco para centralizar */

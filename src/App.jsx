@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -17,9 +16,10 @@ import Consulta from "./pages/Consulta/Consultas";
 import AnimalDetailPage from './pages/Animais/AnimalDetailPage'; 
 import Relatorios from './pages/Relatorios/Relatorios';
 import Usuarios from './pages/Usuarios/Usuarios';
-// REMOVIDO: import Veterinarios from './pages/Veterinarios/Veterinarios'; 
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword'; 
+import VerifyEmail from './pages/VerifyEmail';
+import TutorDetailPage from './pages/Tutores/TutorDetailPage'; 
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
@@ -35,6 +35,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/recuperar-senha" element={<ForgotPassword />} />
         <Route path="/resetar-senha/:token" element={<ResetPassword />} />
+        <Route path="/verificar-email/:token" element={<VerifyEmail />} />
 
         {/* Rota raiz padrão */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -52,13 +53,14 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="animais" element={<Animais />} />
+          <Route path="animais/:id" element={<AnimalDetailPage />} />
           <Route path="tutores" element={<Tutores />} />
+          {/* ✅ ROTA MOVIDA PARA O LUGAR CORRETO */}
+          <Route path="tutores/:id" element={<TutorDetailPage />} />
           <Route path="agenda" element={<Agenda />} />
           <Route path="consultas" element={<Consulta />} />
-          <Route path="animais/:id" element={<AnimalDetailPage />} />
           <Route path="relatorios" element={<Relatorios />} />
           <Route path="usuarios" element={<Usuarios />} />
-          {/* REMOVIDO: <Route path="veterinarios" element={<Veterinarios />} /> */}
         </Route>
 
         {/* Rota para páginas não encontradas */}

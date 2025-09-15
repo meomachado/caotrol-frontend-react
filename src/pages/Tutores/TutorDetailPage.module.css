@@ -1,0 +1,231 @@
+/* pages/Tutores/TutorDetailPage.module.css */
+
+.detailPage {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100%;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 1.8em;
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .header h1 strong {
+    font-weight: 700;
+  }
+  
+  .headerActions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .backButton, .editButton, .deleteButton {
+    padding: 8px 18px;
+    font-size: 0.9em;
+    gap: 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    border-style: solid;
+    border-width: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  
+  .backButton {
+    background-color: #ffffff;
+    color: #34495e;
+    border-color: #dfe6e9;
+  }
+  
+  .backButton:hover {
+    background-color: #ecf0f1;
+  }
+  
+  .editButton {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+  }
+  
+  .editButton:hover {
+    background-color: #2980b9;
+  }
+  
+  .deleteButton {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #c0392b;
+  }
+  
+  .deleteButton:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Resto dos estilos para a página de detalhes */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .tutorInfoCard, .animaisCard {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+  }
+  
+  .sectionTitle {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #27ae60;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .detailGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .detailItem {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .detailItem.fullWidth {
+    grid-column: 1 / -1;
+  }
+  
+  .detailItem label {
+    font-size: 0.75em;
+    font-weight: 500;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  
+  .detailItem p {
+    margin: 0;
+    font-size: 0.95em;
+    color: #34495e;
+  }
+  
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .addAnimalButton {
+    background-color: #27ae60;
+    color: white;
+    padding: 7px 14px;
+    font-size: 0.85em;
+    gap: 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  
+  .addAnimalButton:hover {
+    background-color: #2ecc71;
+  }
+  
+  .animalList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .animalItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+  }
+  
+  .animalInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .animalAvatar {
+    font-size: 1.5em;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #eaf6ef;
+    color: #27ae60;
+  }
+  
+  .animalInfo h4 {
+    margin: 0;
+    font-size: 1em;
+    color: #2c3e50;
+  }
+  
+  .animalInfo p {
+    margin: 0;
+    font-size: 0.85em;
+    color: #7f8c8d;
+  }
+  
+  .detailsButton {
+    padding: 6px 14px;
+    font-size: 0.85em;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .detailsButton:hover {
+    background-color: #2980b9;
+  }
+  
+  .statusMessage, .noData {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 20px;
+  }
+  
+  .error {
+    color: #e74c3c;
+  }
+  
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
