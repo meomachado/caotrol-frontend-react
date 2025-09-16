@@ -440,3 +440,11 @@
   font-weight: 500;
   flex-shrink: 0;
 }
+/* No seu arquivo NovaConsultaModal.module.css */
+
+.errorInput {
+  color: #e53e3e; /* Cor vermelha vibrante */
+  font-size: 0.8rem; /* Tamanho da fonte menor */
+  margin-top: 4px; /* Espaço entre o campo e o erro */
+  font-weight: 500; /* Deixa o texto um pouco mais encorpado */
+}

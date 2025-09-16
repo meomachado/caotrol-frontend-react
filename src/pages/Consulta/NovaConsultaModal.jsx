@@ -100,6 +100,77 @@ function NovaConsultaModal({
     setHistoryModalState({ isOpen: false, type: null });
     setIsVacinaModalOpen(true);
   };
+ // ✅ CORREÇÃO: Movido para dentro do componente
+ const [validationErrors, setValidationErrors] = useState({});
+
+ // ✅ CORREÇÃO: Movido para dentro do componente
+ const validateForm = () => {
+   const errors = {};
+   const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
+
+   const validateNumber = (value, name, min, max, allowDecimal = true) => {
+     if (value === "") return;
+     const numValue = allowDecimal ? parseFloat(value) : parseInt(value, 10);
+
+     if (isNaN(numValue)) {
+       errors[name] = "Deve ser um número.";
+       return;
+     }
+     if (numValue < min || numValue > max) {
+       errors[name] = `Valor fora da faixa normal (${min} - ${max}).`;
+     }
+   };
+
+   validateNumber(peso, "peso", 0.1, 150);
+   validateNumber(temperatura, "temperatura", 35.0, 42.0);
+   validateNumber(tpc, "tpc", 0, 5, false);
+   validateNumber(freqCardiaca, "freqCardiaca", 40, 250, false);
+   validateNumber(freqResp, "freqResp", 5, 80, false);
+
+   setValidationErrors(errors);
+   return Object.keys(errors).length === 0;
+ };
+
+ // ✅ CORREÇÃO: useEffect único e com a sintaxe correta
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+
+ useEffect(() => {
+   if (isOpen) {
+     validateForm();
+   }
+ }, [formData, isOpen]); // Dependências corretas
+
+  useEffect(() => {
+    // A validação completa só é necessária quando a modal está aberta
+    if (isOpen) {
+        const errors = {};
+        const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
+
+        // Função auxiliar para validar números
+        const validateNumber = (value, name, min, max, allowDecimal = true) => {
+            if (value === "") return; // Campo pode ser vazio
+            const numValue = allowDecimal ? parseFloat(value) : parseInt(value, 10);
+            
+            if (isNaN(numValue)) {
+                errors[name] = "Deve ser um número.";
+                return;
+            }
+            if (numValue < min || numValue > max) {
+                errors[name] = `Insira um valor entre: ${min} - ${max}.`;
+            }
+        };
+
+        // Validações para cada campo
+        validateNumber(peso, "peso", 0.1, 150);
+        validateNumber(temperatura, "temperatura", 35.0, 42.0);
+        validateNumber(tpc, "tpc", 0, 5, false);
+        validateNumber(freqCardiaca, "freqCardiaca", 40, 250, false);
+        validateNumber(freqResp, "freqResp", 5, 80, false);
+
+        setValidationErrors(errors);
+    }
+},
+ [formData, isOpen]);
 
   useEffect(() => {
     if (isOpen && animalId) {
@@ -176,10 +247,17 @@ function NovaConsultaModal({
   };
 
   const handleSaveConsulta = async () => {
+    // Agora a validação é feita em tempo real
+    if (Object.keys(validationErrors).length > 0) {
+      alert("Por favor, corrija os erros nos campos antes de salvar.");
+      return;
+    }
+
     if (!formData.queixaPrincipal) {
       alert("O campo 'Queixa principal' é obrigatório para salvar.");
       return;
     }
+
     setIsSaving(true);
     setError("");
 
@@ -486,6 +564,9 @@ function NovaConsultaModal({
                           value={formData.peso}
                           onChange={handleChange}
                         />
+                        {validationErrors.peso && (
+            <p className={styles.errorInput}>{validationErrors.peso}</p>
+        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>Temperatura (°C)</label>
@@ -495,6 +576,9 @@ function NovaConsultaModal({
                           value={formData.temperatura}
                           onChange={handleChange}
                         />
+                        {validationErrors.temperatura && (
+            <p className={styles.errorInput}>{validationErrors.temperatura}</p>
+        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>TPC (seg)</label>
@@ -504,6 +588,9 @@ function NovaConsultaModal({
                           value={formData.tpc}
                           onChange={handleChange}
                         />
+                         {validationErrors.tpc && (
+            <p className={styles.errorInput}>{validationErrors.tpc}</p>
+        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>Mucosas</label>
@@ -522,6 +609,9 @@ function NovaConsultaModal({
                           value={formData.freqCardiaca}
                           onChange={handleChange}
                         />
+                         {validationErrors.freqCardiaca && (
+            <p className={styles.errorInput}>{validationErrors.freqCardiaca}</p>
+        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>Freq. Resp.</label>
@@ -531,6 +621,9 @@ function NovaConsultaModal({
                           value={formData.freqResp}
                           onChange={handleChange}
                         />
+                        {validationErrors.freqResp && (
+            <p className={styles.errorInput}>{validationErrors.freqResp}</p>
+        )}
                       </div>
                     </div>
                   </div>
