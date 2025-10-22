@@ -9,7 +9,7 @@ const formatDate = (dateString) => {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(dateString));
 };
 
-function HistoryModal({ isOpen, onClose, animalId, type, onAddNew, onAddDose }) {
+function HistoryModal({ isOpen, onClose, animalId, type, onAddNew, onAddDose, refreshTrigger }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,6 +31,8 @@ function HistoryModal({ isOpen, onClose, animalId, type, onAddNew, onAddDose }) 
             response = await api.getPrescricoesByAnimal(animalId);
           }
           setHistory(response || []);
+
+          console.log('[HistoryModal] Dados recebidos da API:', response);
         } catch (err) {
           setError(`Não foi possível carregar o histórico de ${type}.`);
         } finally {
@@ -39,7 +41,7 @@ function HistoryModal({ isOpen, onClose, animalId, type, onAddNew, onAddDose }) 
       };
       fetchHistory();
     }
-  }, [isOpen, animalId, type]);
+  }, [isOpen, animalId, type, refreshTrigger]);
 
   const renderContent = () => {
     if (loading) return <p>Carregando histórico...</p>;
@@ -49,9 +51,14 @@ function HistoryModal({ isOpen, onClose, animalId, type, onAddNew, onAddDose }) 
     switch (type) {
       case 'vacinas': { // ✅ Início do bloco
         // Agrupa as vacinas por nome base para exibir apenas a mais recente de cada tipo
-        const groupedVaccines = history.reduce((acc, current) => {
+       const groupedVaccines = history.reduce((acc, current) => {
           const name = current.nome.split(' (')[0];
-          if (!acc[name] || new Date(current.data_aplic) > new Date(acc[name].data_aplic)) {
+          const existing = acc[name];
+
+          // A nova vacina é considerada "mais recente" se:
+          // 1. A data dela for maior que a existente.
+          // 2. OU se as datas forem as mesmas, mas o ID dela for maior.
+          if (!existing || new Date(current.data_aplic) > new Date(existing.data_aplic) || (new Date(current.data_aplic).getTime() === new Date(existing.data_aplic).getTime() && current.id_vacina > existing.id_vacina)) {
             acc[name] = current;
           }
           return acc;

@@ -94,6 +94,8 @@ function NovaConsultaModal({
     isOpen: false,
     type: null,
   });
+  // Adicione esta linha junto com os outros useStates
+  const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
 
   const handleAddDose = (vacina) => {
     setInitialVacinaData({ nome: vacina.nome });
@@ -317,8 +319,16 @@ function NovaConsultaModal({
   };
 
   const handleVacinaSave = () => {
-    setIsVacinaModalOpen(false);
+    setIsVacinaModalOpen(false); // Fecha o modal de vacina
+    
+    // Força o HistoryModal a recarregar, incrementando o gatilho
+    setHistoryRefreshTrigger(prev => prev + 1);
+    
+    // Podemos manter ou remover o alert, como preferir
     alert("Vacina registrada com sucesso!");
+    
+    // Reabre o histórico de vacinas para o usuário ver a atualização
+    setHistoryModalState({ isOpen: true, type: 'vacinas' });
   };
 
   const formatDate = (dateString) => {
@@ -421,6 +431,7 @@ function NovaConsultaModal({
         type={historyModalState.type}
         onAddNew={handleAddNewFromHistory}
         onAddDose={handleAddDose}
+        refreshTrigger={historyRefreshTrigger}
       />
       <PdfGeneratorModal
         isOpen={pdfModalState.isOpen}
