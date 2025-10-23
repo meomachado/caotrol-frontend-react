@@ -38,7 +38,7 @@ function PdfGeneratorModal({ isOpen, onClose, onGeneratePdf, title, label, initi
             Cancelar
           </button>
           <button onClick={handleGenerateClick} className={styles.generateButton}>
-            Gerar PDF
+            Salvar
           </button>
         </div>
       </div>
