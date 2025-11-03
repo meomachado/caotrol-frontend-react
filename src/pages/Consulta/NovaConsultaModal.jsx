@@ -100,7 +100,7 @@ function NovaConsultaModal({
     isOpen: false,
     type: null,
   });
-<<<<<<< HEAD
+
   const [validationErrors, setValidationErrors] = useState({});
 
   // --- NOVOS ESTADOS DE AJUDA ---
@@ -125,10 +125,10 @@ function NovaConsultaModal({
     }
   };
   // ----------------------------
-=======
+
   // Adicione esta linha junto com os outros useStates
   const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
->>>>>>> ede233b4a52ed9396eab1319237d2f396bd8d115
+
 
   const handleAddDose = (vacina) => {
     setInitialVacinaData({ nome: vacina.nome });
