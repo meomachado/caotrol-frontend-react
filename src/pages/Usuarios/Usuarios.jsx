@@ -3,7 +3,12 @@ import api from '../../services/api';
 import styles from './Usuarios.module.css';
 import UsuarioModal from './UsuarioModal';
 import VeterinarioModal from '../Veterinarios/VeterinarioModal';
-import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt, FaTrash } from "react-icons/fa";
+
+// --- NOVAS IMPORTAÇÕES ---
+import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt, FaTrash, FaQuestionCircle } from "react-icons/fa";
+import HelpModal from '../Help/HelpModal';
+import helpButtonStyles from '../Help/HelpButton.module.css';
+// -------------------------
 
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -22,6 +27,29 @@ function Usuarios() {
   const [activeTab, setActiveTab] = useState('usuarios');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // --- NOVOS ESTADOS DE AJUDA ---
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
+
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'usuarios-gestao'
+      const data = await api.getHelpContent('usuarios-gestao'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ----------------------------
 
   const fetchUsuarios = useCallback(async (page) => {
     setLoading(true);
@@ -63,6 +91,7 @@ function Usuarios() {
     }
   }, [activeTab, userCurrentPage, vetCurrentPage, fetchUsuarios, fetchVeterinarios]);
 
+  // ... (Suas outras funções: handleEditUser, handleDeleteVet, etc.) ...
   const handleEditUser = (user) => {
     setEditingUser(user);
     setIsUsuarioModalOpen(true);
@@ -97,7 +126,6 @@ function Usuarios() {
     }
   };
 
-  // Funções de exclusão/desativação
   const handleDeleteUser = async (id, login) => {
     if (window.confirm(`Tem certeza que deseja desativar o usuário "${login}"?`)) {
       try {
@@ -179,6 +207,7 @@ function Usuarios() {
   };
   
   const renderPagination = () => {
+    // ... (Sua função renderPagination existente) ...
     const currentPage = activeTab === 'usuarios' ? userCurrentPage : vetCurrentPage;
     const totalPages = activeTab === 'usuarios' ? userTotalPages : vetTotalPages;
     const setCurrentPage = activeTab === 'usuarios' ? setUserCurrentPage : setVetCurrentPage;
@@ -199,56 +228,78 @@ function Usuarios() {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <UsuarioModal 
-        isOpen={isUsuarioModalOpen}
-        onClose={handleCloseModals}
-        onSave={handleSave}
-        initialData={editingUser}
-      />
-      <VeterinarioModal
-        isOpen={isVetModalOpen}
-        onClose={handleCloseModals}
-        onSave={handleSave}
-        initialData={editingVet}
+    <> {/* Adicionado Fragment */}
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
       />
 
-      <div className={styles.pageHeader}>
-        <div>
-          <h1>Gerenciamento de Acessos</h1>
-          <p className={styles.pageSubtitle}>Gerencie os usuários e perfis de veterinários do sistema</p>
+      <div className={styles.pageContainer}>
+        <UsuarioModal 
+          isOpen={isUsuarioModalOpen}
+          onClose={handleCloseModals}
+          onSave={handleSave}
+          initialData={editingUser}
+        />
+        <VeterinarioModal
+          isOpen={isVetModalOpen}
+          onClose={handleCloseModals}
+          onSave={handleSave}
+          initialData={editingVet}
+        />
+
+        {/* HEADER MODIFICADO */}
+        <div className={styles.pageHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div>
+              <h1>Gerenciamento de Acessos</h1>
+              <p className={styles.pageSubtitle}>Gerencie os usuários e perfis de veterinários do sistema</p>
+            </div>
+            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
+            </button>
+          </div>
+          <div className={styles.headerActions}>
+            <button className={styles.actionButtonSecondary} onClick={handleNewVet}>
+              <FaUserMd /> Novo Perfil Vet
+            </button>
+            <button className={styles.actionButtonPrimary} onClick={handleNewUser}>
+              <FaUserPlus /> Novo Usuário
+            </button>
+          </div>
         </div>
-        <div className={styles.headerActions}>
-          <button className={styles.actionButtonSecondary} onClick={handleNewVet}>
-            <FaUserMd /> Novo Perfil Vet
-          </button>
-          <button className={styles.actionButtonPrimary} onClick={handleNewUser}>
-            <FaUserPlus /> Novo Usuário
-          </button>
+
+        {/* ... (Resto do seu JSX: contentCard, tabs, etc.) ... */}
+        <div className={styles.contentCard}>
+          <div className={styles.tabs}>
+            <button 
+              className={activeTab === 'usuarios' ? styles.activeTab : ''} 
+              onClick={() => setActiveTab('usuarios')}>
+              <FaUsers /> Usuários do Sistema
+            </button>
+            <button 
+              className={activeTab === 'veterinarios' ? styles.activeTab : ''} 
+              onClick={() => setActiveTab('veterinarios')}>
+              <FaUserMd /> Perfis de Veterinário
+            </button>
+          </div>
+          
+          <div className={styles.listGrid}>
+            {renderContent()}
+          </div>
+
+          {renderPagination()}
         </div>
       </div>
-
-      <div className={styles.contentCard}>
-        <div className={styles.tabs}>
-          <button 
-            className={activeTab === 'usuarios' ? styles.activeTab : ''} 
-            onClick={() => setActiveTab('usuarios')}>
-            <FaUsers /> Usuários do Sistema
-          </button>
-          <button 
-            className={activeTab === 'veterinarios' ? styles.activeTab : ''} 
-            onClick={() => setActiveTab('veterinarios')}>
-            <FaUserMd /> Perfis de Veterinário
-          </button>
-        </div>
-        
-        <div className={styles.listGrid}>
-          {renderContent()}
-        </div>
-
-        {renderPagination()}
-      </div>
-    </div>
+    </>
   );
 }
 

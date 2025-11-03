@@ -4,6 +4,12 @@ import styles from "./NovaConsultaModal.module.css";
 import VacinaModal from "../Vacinas/VacinaModal";
 import PdfGeneratorModal from "../Documentos/PdfGeneratorModal";
 import HistoryModal from "./HistoryModal";
+
+// --- NOVAS IMPORTAÇÕES ---
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css";
+// -------------------------
+
 import {
   FaPaw,
   FaVenusMars,
@@ -20,10 +26,10 @@ import {
   FaSyringe,
   FaNotesMedical,
   FaPlus,
+  FaQuestionCircle // <-- ÍCONE ADICIONADO
 } from "react-icons/fa";
 
 // --- COMPONENTE INTERNO MOVido PARA FORA ---
-// Isso melhora a performance, pois o componente não é recriado a cada renderização.
 function AutoResizeTextarea(props) {
   const textareaRef = useRef(null);
 
@@ -94,17 +100,38 @@ function NovaConsultaModal({
     isOpen: false,
     type: null,
   });
+  const [validationErrors, setValidationErrors] = useState({});
+
+  // --- NOVOS ESTADOS DE AJUDA ---
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
+
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'consulta-nova'
+      const data = await api.getHelpContent('consulta-nova'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ----------------------------
 
   const handleAddDose = (vacina) => {
     setInitialVacinaData({ nome: vacina.nome });
     setHistoryModalState({ isOpen: false, type: null });
     setIsVacinaModalOpen(true);
   };
- // ✅ CORREÇÃO: Movido para dentro do componente
- const [validationErrors, setValidationErrors] = useState({});
-
- // ✅ CORREÇÃO: Movido para dentro do componente
- const validateForm = () => {
+ 
+  const validateForm = () => {
    const errors = {};
    const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
 
@@ -129,16 +156,13 @@ function NovaConsultaModal({
 
    setValidationErrors(errors);
    return Object.keys(errors).length === 0;
- };
+  };
 
- // ✅ CORREÇÃO: useEffect único e com a sintaxe correta
- // eslint-disable-next-line react-hooks/exhaustive-deps
-
- useEffect(() => {
+  useEffect(() => {
    if (isOpen) {
      validateForm();
    }
- }, [formData, isOpen]); // Dependências corretas
+  }, [formData, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // A validação completa só é necessária quando a modal está aberta
@@ -169,8 +193,7 @@ function NovaConsultaModal({
 
         setValidationErrors(errors);
     }
-},
- [formData, isOpen]);
+  }, [formData, isOpen]);
 
   useEffect(() => {
     if (isOpen && animalId) {
@@ -201,10 +224,11 @@ function NovaConsultaModal({
               obs: ultimaAnamnese.obs || "",
             });
           } else {
+            // Se não há anamnese, busca do cadastro do animal (se houver)
             setAnamnesisData({
-              castrado: animalResponse.castrado,
-              alergias: animalResponse.alergias || "",
-              obs: animalResponse.observacoes || "",
+              castrado: animalResponse.castrado, // Assumindo que animal tem 'castrado'
+              alergias: animalResponse.alergias || "", // Assumindo que animal tem 'alergias'
+              obs: animalResponse.observacoes || "", // Assumindo que animal tem 'observacoes'
             });
           }
         } catch (err) {
@@ -405,6 +429,13 @@ function NovaConsultaModal({
 
   return (
     <>
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
+
       {animal && (
         <VacinaModal
           isOpen={isVacinaModalOpen}
@@ -442,9 +473,21 @@ function NovaConsultaModal({
         <div className={styles.modalContent}>
           <header className={styles.header}>
             <div className={styles.headerTopRow}>
-              <h2>
+              
+              {/* TÍTULO MODIFICADO */}
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <FaStethoscope /> Nova Consulta
+                {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+                <button 
+                  className={helpButtonStyles.helpIcon} 
+                  onClick={handleOpenHelp}
+                  disabled={helpLoading}
+                  title="Ajuda sobre este formulário"
+                >
+                  <FaQuestionCircle />
+                </button>
               </h2>
+              
               <button className={styles.closeButton} onClick={onClose}>
                 <FaTimes />
               </button>
@@ -565,8 +608,8 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                         {validationErrors.peso && (
-            <p className={styles.errorInput}>{validationErrors.peso}</p>
-        )}
+                          <p className={styles.errorInput}>{validationErrors.peso}</p>
+                        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>Temperatura (°C)</label>
@@ -577,8 +620,8 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                         {validationErrors.temperatura && (
-            <p className={styles.errorInput}>{validationErrors.temperatura}</p>
-        )}
+                          <p className={styles.errorInput}>{validationErrors.temperatura}</p>
+                        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>TPC (seg)</label>
@@ -589,8 +632,8 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                          {validationErrors.tpc && (
-            <p className={styles.errorInput}>{validationErrors.tpc}</p>
-        )}
+                          <p className={styles.errorInput}>{validationErrors.tpc}</p>
+                        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>Mucosas</label>
@@ -610,8 +653,8 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                          {validationErrors.freqCardiaca && (
-            <p className={styles.errorInput}>{validationErrors.freqCardiaca}</p>
-        )}
+                          <p className={styles.errorInput}>{validationErrors.freqCardiaca}</p>
+                        )}
                       </div>
                       <div className={styles.formGroup}>
                         <label>Freq. Resp.</label>
@@ -622,8 +665,8 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                         {validationErrors.freqResp && (
-            <p className={styles.errorInput}>{validationErrors.freqResp}</p>
-        )}
+                          <p className={styles.errorInput}>{validationErrors.freqResp}</p>
+                        )}
                       </div>
                     </div>
                   </div>

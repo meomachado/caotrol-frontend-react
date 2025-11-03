@@ -71,6 +71,11 @@ const api = {
         }
     },
 
+    getHelpContent: (pageKey) => {
+        // A rota de ajuda é pública, então passamos 'false' para 'requiresAuth'
+        return api.get(`/help/${pageKey}`, false);
+    },
+
     get: (endpoint, requiresAuth = true, responseType = "json") =>
         api.request(endpoint, "GET", null, requiresAuth, responseType),
     post: (endpoint, body, requiresAuth = true, responseType = "json") =>

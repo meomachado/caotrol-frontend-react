@@ -7,10 +7,15 @@ import SelecaoAnimalModal from "./SelecaoAnimalModal";
 import NovaConsultaModal from "./NovaConsultaModal";
 import TutorModal from "../Tutores/TutorModal";
 import AnimalModal from "../Animais/AnimalModal";
-// ✅ Ícones do React-Icons importados
-import { FaPlus, FaSearch, FaEye } from "react-icons/fa";
+
+// --- ÍCONES E IMPORTAÇÕES DE AJUDA ---
+import { FaPlus, FaSearch, FaEye, FaQuestionCircle } from "react-icons/fa";
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css";
+// ------------------------------------
 
 function Consultas() {
+  // --- TODOS OS ESTADOS DEFINIDOS NO TOPO ---
   const [consultas, setConsultas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,6 +36,28 @@ function Consultas() {
   const [tutorRecemCriado, setTutorRecemCriado] = useState(null);
   const [tutorParaNovoAnimal, setTutorParaNovoAnimal] = useState(null);
 
+  // --- ESTADOS DE AJUDA ---
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // -------------------------
+
+  // --- FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      const data = await api.getHelpContent('consultas-lista');
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ------------------------
+
   const fetchConsultas = useCallback(async (page) => {
     setLoading(true);
     try {
@@ -46,7 +73,7 @@ function Consultas() {
     } finally {
       setLoading(false);
     }
-  }, [busca, dataInicio, dataFim, ordenacao]);
+  }, [busca, dataInicio, dataFim, ordenacao]); // Agora 'busca' e outros estados são definidos acima
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -113,7 +140,7 @@ function Consultas() {
   
   const handleOpenDetailModal = async (idConsulta) => {
     try {
-      const response = await api.get(`/consultas/${idConsulta}`);
+      const response = await api.getConsultaById(idConsulta); // Usando a função correta da API
       setSelectedConsulta(response);
       setIsDetailModalOpen(true);
     } catch (err) {
@@ -130,98 +157,118 @@ function Consultas() {
   };
   
   return (
-    <div className={styles.pageContainer}>
-      {/* --- RENDERIZAÇÃO DE TODOS OS MODAIS --- */}
-      <ConsultaDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} consulta={selectedConsulta} />
-      <SelecaoAnimalModal isOpen={isSelecaoOpen} onClose={() => setIsSelecaoOpen(false)} onAnimalSelecionado={handleAnimalSelecionado} onAddNewTutor={handleAbrirModalNovoTutor} onAddNewAnimal={handleAbrirModalNovoAnimal} newlyCreatedTutor={tutorRecemCriado} newlyCreatedAnimal={animalRecemCriado}/>
-      <TutorModal isOpen={isTutorModalOpen} onClose={handleFecharModalTutor} onSave={handleSalvarTutor}/>
-      <AnimalModal isOpen={isAnimalModalOpen} onClose={() => {setIsAnimalModalOpen(false); setIsSelecaoOpen(true)}} onSave={handleSalvarAnimal} tutorToPreselect={tutorParaNovoAnimal}/>
-      <NovaConsultaModal isOpen={isNovaConsultaOpen} onClose={handleFecharModalNovaConsulta} onSave={handleFecharModalNovaConsulta} animalId={animalIdParaConsulta} />
-      
-      {/* ✅ Cabeçalho e Subtítulo padronizados */}
-      <div className={styles.pageHeader}>
-        <div>
-            <h1>Consultas</h1>
-            <p className={styles.pageSubtitle}>Gerencie o histórico de atendimentos</p>
-        </div>
-        <button className={styles.actionButtonPrimary} onClick={handleAbrirFluxoNovaConsulta}>
-          <FaPlus /> Nova Consulta
-        </button>
-      </div>
+    <> {/* Adicionado Fragment */}
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
 
-      {/* ✅ Barra de filtros e busca unificada */}
-      <div className={styles.filterContainer}>
-        <div className={styles.searchGroup}>
-            <FaSearch className={styles.searchIcon} />
-            <input 
-              type="text" 
-              placeholder="Buscar por animal, tutor ou CPF..." 
-              className={styles.searchInput} 
-              value={busca} 
-              onChange={(e) => setBusca(e.target.value)} 
-            />
+      <div className={styles.pageContainer}>
+        {/* --- RENDERIZAÇÃO DE TODOS OS MODAIS --- */}
+        <ConsultaDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} consulta={selectedConsulta} />
+        <SelecaoAnimalModal isOpen={isSelecaoOpen} onClose={() => setIsSelecaoOpen(false)} onAnimalSelecionado={handleAnimalSelecionado} onAddNewTutor={handleAbrirModalNovoTutor} onAddNewAnimal={handleAbrirModalNovoAnimal} newlyCreatedTutor={tutorRecemCriado} newlyCreatedAnimal={animalRecemCriado}/>
+        <TutorModal isOpen={isTutorModalOpen} onClose={handleFecharModalTutor} onSave={handleSalvarTutor}/>
+        <AnimalModal isOpen={isAnimalModalOpen} onClose={() => {setIsAnimalModalOpen(false); setIsSelecaoOpen(true)}} onSave={handleSalvarAnimal} tutorToPreselect={tutorParaNovoAnimal}/>
+        <NovaConsultaModal isOpen={isNovaConsultaOpen} onClose={handleFecharModalNovaConsulta} onSave={handleFecharModalNovaConsulta} animalId={animalIdParaConsulta} />
+        
+        {/* HEADER MODIFICADO */}
+        <div className={styles.pageHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div>
+                <h1>Consultas</h1>
+                <p className={styles.pageSubtitle}>Gerencie o histórico de atendimentos</p>
+            </div>
+            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
+            </button>
+          </div>
+          <button className={styles.actionButtonPrimary} onClick={handleAbrirFluxoNovaConsulta}>
+            <FaPlus /> Nova Consulta
+          </button>
         </div>
-        <div className={styles.filterGroup}>
-            <label>De:</label>
-            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
-        </div>
-        <div className={styles.filterGroup}>
-            <label>Até:</label>
-            <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
-        </div>
-        <div className={styles.filterGroup}>
-            <label>Ordenar por:</label>
-            <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)}>
-                <option value="desc">Mais recentes</option>
-                <option value="data_asc">Mais antigas</option>
-            </select>
-        </div>
-      </div>
 
-      {/* --- TABELA DE CONSULTAS --- */}
-      <div className={styles.tableContainer}>
-        <table className={styles.consultasTable}>
-          <thead>
-            <tr>
-              <th>Data / Hora</th>
-              <th>Animal</th>
-              <th>Tutor</th>
-              <th>Veterinário</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && (<tr><td colSpan="5" className={styles.loadingState}>Carregando...</td></tr>)}
-            {error && (<tr><td colSpan="5" className={styles.errorState}>{error}</td></tr>)}
-            {!loading && !error && consultas.length === 0 && (<tr><td colSpan="5" className={styles.noData}>Nenhuma consulta encontrada.</td></tr>)}
-            {!loading && !error && consultas.map((c) => (
-              <tr key={c.id_consulta}>
-                <td>{formatDate(c.data)}</td>
-                <td>{c.animal?.nome || "N/A"}</td>
-                <td>{c.animal?.tutor?.nome || "N/A"}</td>
-                <td>{c.veterinario?.nome || "N/A"}</td>
-                <td>
-                  <div className={styles.actionButtons}>
-                    <button onClick={() => handleOpenDetailModal(c.id_consulta)} title="Visualizar consulta">
-                      <FaEye />
-                    </button>
-                  </div>
-                </td>
+        {/* ✅ Barra de filtros e busca unificada */}
+        <div className={styles.filterContainer}>
+          <div className={styles.searchGroup}>
+              <FaSearch className={styles.searchIcon} />
+              <input 
+                type="text" 
+                placeholder="Buscar por animal, tutor ou CPF..." 
+                className={styles.searchInput} 
+                value={busca} 
+                onChange={(e) => setBusca(e.target.value)} 
+              />
+          </div>
+          <div className={styles.filterGroup}>
+              <label>De:</label>
+              <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+          </div>
+          <div className={styles.filterGroup}>
+              <label>Até:</label>
+              <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+          </div>
+          <div className={styles.filterGroup}>
+              <label>Ordenar por:</label>
+              <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)}>
+                  <option value="desc">Mais recentes</option>
+                  <option value="data_asc">Mais antigas</option>
+              </select>
+          </div>
+        </div>
+
+        {/* --- TABELA DE CONSULTAS --- */}
+        <div className={styles.tableContainer}>
+          <table className={styles.consultasTable}>
+            <thead>
+              <tr>
+                <th>Data / Hora</th>
+                <th>Animal</th>
+                <th>Tutor</th>
+                <th>Veterinário</th>
+                <th>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* --- CONTROLES DE PAGINAÇÃO --- */}
-      {totalPages > 0 && (
-        <div className={styles.paginationControls}>
-            <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
-            <span>Página {currentPage} de {totalPages}</span>
-            <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+            </thead>
+            <tbody>
+              {loading && (<tr><td colSpan="5" className={styles.loadingState}>Carregando...</td></tr>)}
+              {error && (<tr><td colSpan="5" className={styles.errorState}>{error}</td></tr>)}
+              {!loading && !error && consultas.length === 0 && (<tr><td colSpan="5" className={styles.noData}>Nenhuma consulta encontrada.</td></tr>)}
+              {!loading && !error && consultas.map((c) => (
+                <tr key={c.id_consulta}>
+                  <td>{formatDate(c.data)}</td>
+                  <td>{c.animal?.nome || "N/A"}</td>
+                  <td>{c.animal?.tutor?.nome || "N/A"}</td>
+                  <td>{c.veterinario?.nome || "N/A"}</td>
+                  <td>
+                    <div className={styles.actionButtons}>
+                      <button onClick={() => handleOpenDetailModal(c.id_consulta)} title="Visualizar consulta">
+                        <FaEye />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
-    </div>
+
+        {/* --- CONTROLES DE PAGINAÇÃO --- */}
+        {totalPages > 0 && (
+          <div className={styles.paginationControls}>
+              <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
+              <span>Página {currentPage} de {totalPages}</span>
+              <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 

@@ -8,7 +8,10 @@ import api from "../../services/api";
 import AgendamentoModal from "./AgendamentoModal";
 import AgendamentoDetailModal from "./AgendamentoDetailModal";
 import NovaConsultaModal from "../Consulta/NovaConsultaModal";
-
+import { FaQuestionCircle } from "react-icons/fa";
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css";
+// -------------------------
 function Agenda() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -18,6 +21,26 @@ function Agenda() {
   const [isNovaConsultaOpen, setIsNovaConsultaOpen] = useState(false);
   const [animalIdParaConsulta, setAnimalIdParaConsulta] = useState(null);
   const [agendamentoIdParaConsulta, setAgendamentoIdParaConsulta] = useState(null);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
+
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'agenda'
+      const data = await api.getHelpContent('agenda'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      // Aqui você pode ter um 'setError' se tiver um estado de erro
+    } finally {
+      setHelpLoading(false);
+    }
+  };
 
   const fetchEvents = async (fetchInfo) => {
     try {
@@ -85,6 +108,13 @@ function Agenda() {
   };
 
   return (
+    <> {/* Adicionado Fragment */}
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
     <div className={styles.agendaContainer}>
       <AgendamentoModal
         isOpen={isModalOpen}
@@ -106,17 +136,26 @@ function Agenda() {
         animalId={animalIdParaConsulta}
         agendamentoId={agendamentoIdParaConsulta}
       />
-      <div className={styles.pageHeader}>
-        <div>
-          <h1>Agenda de Consultas</h1>
+    <div className={styles.pageHeader}>
+          {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <h1>Agenda de Consultas</h1>
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
+            </button>
+          </div>
+          <button
+            className={styles.actionButtonPrimary}
+            onClick={handleOpenCreateModal}
+          >
+            <i className="fas fa-plus"></i> Novo Agendamento
+          </button>
         </div>
-        <button
-          className={styles.actionButtonPrimary}
-          onClick={handleOpenCreateModal}
-        >
-          <i className="fas fa-plus"></i> Novo Agendamento
-        </button>
-      </div>
       <div className={styles.calendarWrapper}>
         <FullCalendar
           ref={calendarRef}
@@ -154,6 +193,7 @@ function Agenda() {
         />
       </div>
     </div>
+    </>
   );
 }
 

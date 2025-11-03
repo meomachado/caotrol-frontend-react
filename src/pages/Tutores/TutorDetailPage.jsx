@@ -5,7 +5,12 @@ import styles from './TutorDetailPage.module.css';
 import EspecieIcon from '../Animais/EspecieIcon';
 import AnimalModal from '../Animais/AnimalModal';
 import TutorModal from './TutorModal';
-import { FaPlus, FaPencilAlt, FaTrashAlt, FaArrowLeft } from 'react-icons/fa';
+
+// --- NOVAS IMPORTAÇÕES ---
+import { FaPlus, FaPencilAlt, FaTrashAlt, FaArrowLeft, FaQuestionCircle } from 'react-icons/fa';
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css";
+// -------------------------
 
 function TutorDetailPage() {
   const { id } = useParams();
@@ -17,6 +22,12 @@ function TutorDetailPage() {
   const [error, setError] = useState('');
   const [isAnimalModalOpen, setIsAnimalModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // --- NOVOS ESTADOS DE AJUDA ---
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
 
   const fetchData = useCallback(async () => {
     try {
@@ -43,6 +54,23 @@ function TutorDetailPage() {
     fetchData();
   }, [fetchData]);
 
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'tutor-detalhes'
+      const data = await api.getHelpContent('tutor-detalhes'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ----------------------------
+
   const handleDelete = async () => {
     if (window.confirm("Tem certeza que deseja excluir este tutor e todos os seus animais? Esta ação não pode ser desfeita.")) {
       try {
@@ -65,6 +93,7 @@ function TutorDetailPage() {
     fetchData(); 
   };
 
+  // ... (Suas funções de formatação: formatDate, formatCPF, formatTelefone) ...
   const formatDate = (dateString) => {
     if (!dateString) return '—';
     return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(dateString));
@@ -77,82 +106,104 @@ function TutorDetailPage() {
   if (!tutor) return <div className={styles.statusMessage}>Tutor não encontrado.</div>;
 
   return (
-    <div className={styles.detailPage}>
-      <TutorModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={handleSaveTutor}
-        tutorToEdit={tutor}
-      />
-      <AnimalModal
-        isOpen={isAnimalModalOpen}
-        onClose={() => setIsAnimalModalOpen(false)}
-        onSave={handleSaveAnimal}
-        tutorToPreselect={tutor}
+    <> {/* Adicionado Fragment */}
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
       />
 
-      <div className={styles.header}>
-        <h1>Ficha de <strong>{tutor.nome}</strong></h1>
-        <div className={styles.headerActions}>
-          <button onClick={() => navigate("/tutores")} className={styles.actionButtonNeutral}>
-            <FaArrowLeft /> Voltar
-          </button>
-          <button onClick={() => setIsEditModalOpen(true)} className={styles.actionButtonPrimary}>
-            <FaPencilAlt /> Editar Tutor
-          </button>
-          <button onClick={handleDelete} className={styles.actionButtonDanger}>
-            <FaTrashAlt /> Excluir Tutor
-          </button>
-        </div>
-      </div>
+      <div className={styles.detailPage}>
+        <TutorModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveTutor}
+          tutorToEdit={tutor}
+        />
+        <AnimalModal
+          isOpen={isAnimalModalOpen}
+          onClose={() => setIsAnimalModalOpen(false)}
+          onSave={handleSaveAnimal}
+          tutorToPreselect={tutor}
+        />
 
-      <div className={styles.layout}>
-        <div className={styles.tutorInfoCard}>
-          <h3 className={styles.sectionTitle}>Dados Pessoais</h3>
-          <div className={styles.detailGrid}>
-            <div className={styles.detailItem}><label>CPF</label><p>{formatCPF(tutor.cpf)}</p></div>
-            <div className={styles.detailItem}><label>Telefone</label><p>{formatTelefone(tutor.telefone)}</p></div>
-            <div className={styles.detailItem}><label>Nascimento</label><p>{formatDate(tutor.data_nasc)}</p></div>
-          </div>
-          <h3 className={styles.sectionTitle}>Endereço</h3>
-          <div className={styles.detailGrid}>
-            <div className={styles.detailItem}><label>CEP</label><p>{tutor.cep || '—'}</p></div>
-            <div className={styles.detailItem}><label>Cidade/UF</label><p>{tutor.cidade ? `${tutor.cidade.nome} - ${tutor.cidade.estado.uf}` : '—'}</p></div>
-            <div className={`${styles.detailItem} ${styles.fullWidth}`}><label>Logradouro</label><p>{`${tutor.logradouro || ''}, ${tutor.num || 'S/N'}`}</p></div>
-            <div className={`${styles.detailItem} ${styles.fullWidth}`}><label>Bairro</label><p>{tutor.bairro || '—'}</p></div>
-          </div>
-        </div>
-
-        <div className={styles.animaisCard}>
-          <div className={styles.cardHeader}>
-            <h3 className={styles.sectionTitle}>Animais</h3>
-            <button onClick={() => setIsAnimalModalOpen(true)} className={styles.actionButtonPrimary}>
-              <FaPlus /> Adicionar Animal
+        {/* HEADER MODIFICADO */}
+        <div className={styles.header}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <h1>Ficha de <strong>{tutor.nome}</strong></h1>
+            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
             </button>
           </div>
-          <div className={styles.animalList}>
-            {animais.length > 0 ? (
-              animais.map(animal => (
-                <div key={animal.id_animal} className={styles.animalItem}>
-                  <div className={styles.animalInfo}>
-                    <div className={styles.animalAvatar}><EspecieIcon especie={animal.raca.especie.nome} /></div>
-                    <div>
-                      <h4>{animal.nome}</h4>
-                      <p>{animal.raca.nome}</p>
+          <div className={styles.headerActions}>
+            <button onClick={() => navigate("/tutores")} className={styles.actionButtonNeutral}>
+              <FaArrowLeft /> Voltar
+            </button>
+            <button onClick={() => setIsEditModalOpen(true)} className={styles.actionButtonPrimary}>
+              <FaPencilAlt /> Editar Tutor
+            </button>
+            <button onClick={handleDelete} className={styles.actionButtonDanger}>
+              <FaTrashAlt /> Excluir Tutor
+            </button>
+          </div>
+        </div>
+
+        {/* ... (Resto do seu JSX: layout, tutorInfoCard, animaisCard) ... */}
+        <div className={styles.layout}>
+          <div className={styles.tutorInfoCard}>
+            <h3 className={styles.sectionTitle}>Dados Pessoais</h3>
+            <div className={styles.detailGrid}>
+              <div className={styles.detailItem}><label>CPF</label><p>{formatCPF(tutor.cpf)}</p></div>
+              <div className={styles.detailItem}><label>Telefone</label><p>{formatTelefone(tutor.telefone)}</p></div>
+              <div className={styles.detailItem}><label>Nascimento</label><p>{formatDate(tutor.data_nasc)}</p></div>
+            </div>
+            <h3 className={styles.sectionTitle}>Endereço</h3>
+            <div className={styles.detailGrid}>
+              <div className={styles.detailItem}><label>CEP</label><p>{tutor.cep || '—'}</p></div>
+              <div className={styles.detailItem}><label>Cidade/UF</label><p>{tutor.cidade ? `${tutor.cidade.nome} - ${tutor.cidade.estado.uf}` : '—'}</p></div>
+              <div className={`${styles.detailItem} ${styles.fullWidth}`}><label>Logradouro</label><p>{`${tutor.logradouro || ''}, ${tutor.num || 'S/N'}`}</p></div>
+              <div className={`${styles.detailItem} ${styles.fullWidth}`}><label>Bairro</label><p>{tutor.bairro || '—'}</p></div>
+            </div>
+          </div>
+
+          <div className={styles.animaisCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.sectionTitle}>Animais</h3>
+              <button onClick={() => setIsAnimalModalOpen(true)} className={styles.actionButtonPrimary}>
+                <FaPlus /> Adicionar Animal
+              </button>
+            </div>
+            <div className={styles.animalList}>
+              {animais.length > 0 ? (
+                animais.map(animal => (
+                  <div key={animal.id_animal} className={styles.animalItem}>
+                    <div className={styles.animalInfo}>
+                      <div className={styles.animalAvatar}><EspecieIcon especie={animal.raca.especie.nome} /></div>
+                      <div>
+                        <h4>{animal.nome}</h4>
+                        <p>{animal.raca.nome}</p>
+                      </div>
                     </div>
+                    <button onClick={() => navigate(`/animais/${animal.id_animal}`)} className={styles.actionButtonSecondary}>
+                      Ver Prontuário
+                    </button>
                   </div>
-                  <button onClick={() => navigate(`/animais/${animal.id_animal}`)} className={styles.actionButtonSecondary}>
-                    Ver Prontuário
-                  </button>
-                </div>
-              ))
-            ) : (
-              <p className={styles.noData}>Nenhum animal cadastrado para este tutor.</p>
-            )}
+                ))
+              ) : (
+                <p className={styles.noData}>Nenhum animal cadastrado para este tutor.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

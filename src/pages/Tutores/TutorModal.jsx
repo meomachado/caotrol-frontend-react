@@ -3,6 +3,12 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../services/api";
 import styles from "./TutorModal.module.css";
 
+// --- NOVAS IMPORTAÇÕES ---
+import { FaQuestionCircle } from "react-icons/fa";
+import HelpModal from "../Help/HelpModal"; // Corrigido para ../
+import helpButtonStyles from "../Help/HelpButton.module.css"; // Corrigido para ../
+// -------------------------
+
 function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     // --- ESTADOS DO FORMULÁRIO ---
     const [nome, setNome] = useState("");
@@ -27,6 +33,12 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [validation, setValidation] = useState({ cpf: true, telefone: true });
 
+    // --- NOVOS ESTADOS DE AJUDA (NO LUGAR CERTO) ---
+    const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+    const [helpContent, setHelpContent] = useState(null);
+    const [helpLoading, setHelpLoading] = useState(false);
+    // ---------------------------------------------
+
     // --- REFS PARA UX ---
     const nomeInputRef = useRef(null);
     const cidadeWrapperRef = useRef(null);
@@ -42,7 +54,7 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
             setValidation((v) => ({ ...v, telefone: value.length >= 14 }));
         }
     };
-
+    
     // --- FUNÇÕES DE MÁSCARA ---
     const formatTelefone = (value) => {
         if (!value) return "";
@@ -72,11 +84,9 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
         validateField(name, formatCPF(value));
     };
 
-    // ✅ --- FUNÇÃO QUE ESTAVA FALTANDO ---
     const handleEstadoChange = async (e) => {
         const novoEstadoId = e.target.value;
         setIdEstado(novoEstadoId);
-        // Limpa a cidade para uma nova seleção
         setIdCidade("");
         setFiltroCidade("");
         setCidades([]);
@@ -167,7 +177,7 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
             setIdEstado("");
             setFiltroCidade("");
             try {
-                const endereco = await api.get(`/enderecos/cep/${formattedCep}`);
+                const endereco = await api.getEnderecoByCep(formattedCep); // Corrigido para usar a função da API
                 setRua(endereco.logradouro || "");
                 setBairro(endereco.bairro || "");
                 const estadoEncontrado = estados.find(
@@ -175,9 +185,7 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
                 );
                 if (estadoEncontrado) {
                     setIdEstado(estadoEncontrado.id_estado);
-                    const cidadesDoEstado = await api.get(
-                        `/estados/${estadoEncontrado.id_estado}/cidades`
-                    );
+                    const cidadesDoEstado = await api.getCidadesByEstado(estadoEncontrado.id_estado); // Corrigido
                     setCidades(cidadesDoEstado || []);
                     const cidadeEncontrada = cidadesDoEstado.find(
                         (c) => c.nome.toLowerCase() === endereco.cidade.toLowerCase()
@@ -231,9 +239,9 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
         try {
             let savedTutor;
             if (tutorToEdit) {
-                savedTutor = await api.put(`/tutores/${tutorToEdit.id_tutor}`, tutorData);
+                savedTutor = await api.updateTutor(tutorToEdit.id_tutor, tutorData); // Corrigido
             } else {
-                savedTutor = await api.post("/tutores", tutorData);
+                savedTutor = await api.createTutor(tutorData); // Corrigido
             }
             onSave(action, savedTutor); // Envia a ação e os dados do tutor
         } catch (err) {
@@ -243,8 +251,24 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
         }
     };
 
-    if (!isOpen) return null;
+    // --- NOVA FUNÇÃO DE AJUDA ---
+    const handleOpenHelp = async () => {
+        setHelpLoading(true);
+        try {
+          // Usando a "pageKey" 'novo-tutor'
+          const data = await api.getHelpContent('novo-tutor'); 
+          setHelpContent(data);
+          setIsHelpModalOpen(true);
+        } catch (err) {
+          console.error("Erro ao buscar ajuda:", err);
+          setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+        } finally {
+          setHelpLoading(false);
+        }
+    };
+    // ----------------------------
 
+    if (!isOpen) return null;
 
     const cidadesFiltradas = filtroCidade
         ? cidades.filter((cidade) =>
@@ -260,224 +284,249 @@ function TutorModal({ isOpen, onClose, onSave, tutorToEdit }) {
     };
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                    <h2>{tutorToEdit ? "Editar Tutor" : "Novo Tutor"}</h2>
-                </div>
+        <> {/* Adicionado Fragment */}
+            {/* MODAL DE AJUDA */}
+            <HelpModal 
+              isOpen={isHelpModalOpen}
+              onClose={() => setIsHelpModalOpen(false)}
+              content={helpContent}
+            />
 
-                <form
-                    id="tutor-form"
-                    className={styles.formBody}
-                >
-                    <div className={styles.panel}>
-                        <div className={styles.card}>
-                            <h3 className={styles.sectionTitle}>Dados Pessoais</h3>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="nome">Nome Completo</label>
-                                <div className={styles.inputIconWrapper}>
-                                    <i className="fas fa-user"></i>
-                                    <input
-                                        id="nome"
-                                        type="text"
-                                        value={nome}
-                                        onChange={(e) => setNome(e.target.value)}
-                                        ref={nomeInputRef}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="cpf">CPF</label>
-                                <div
-                                    className={`${styles.inputIconWrapper} ${
-                                        !validation.cpf ? styles.invalid : ""
-                                    }`}
-                                >
-                                    <i className="fas fa-id-card"></i>
-                                    <input
-                                        id="cpf"
-                                        name="cpf"
-                                        type="text"
-                                        value={cpf}
-                                        onChange={handleCpfChange}
-                                        onBlur={(e) => validateField(e.target.name, e.target.value)}
-                                        maxLength="14"
-                                        placeholder="000.000.000-00"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="telefone">Telefone</label>
-                                <div
-                                    className={`${styles.inputIconWrapper} ${
-                                        !validation.telefone ? styles.invalid : ""
-                                    }`}
-                                >
-                                    <i className="fas fa-phone"></i>
-                                    <input
-                                        id="telefone"
-                                        name="telefone"
-                                        type="text"
-                                        value={telefone}
-                                        onChange={handleTelefoneChange}
-                                        onBlur={(e) => validateField(e.target.name, e.target.value)}
-                                        maxLength="15"
-                                        placeholder="(XX) XXXXX-XXXX"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="dataNasc">Data de Nascimento</label>
-                                <div className={styles.inputIconWrapper}>
-                                    <i className="fas fa-calendar-alt"></i>
-                                    <input
-                                        id="dataNasc"
-                                        type="date"
-                                        value={dataNasc}
-                                        onChange={(e) => setDataNasc(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
+            <div className={styles.modalOverlay} onClick={onClose}>
+                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                    
+                    {/* HEADER MODIFICADO */}
+                    <div className={styles.modalHeader}>
+                        <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {tutorToEdit ? "Editar Tutor" : "Novo Tutor"}
+                            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+                            <button 
+                              className={helpButtonStyles.helpIcon} 
+                              onClick={handleOpenHelp}
+                              disabled={helpLoading}
+                              title="Ajuda sobre este formulário"
+                            >
+                              <FaQuestionCircle />
+                            </button>
+                        </h2>
                     </div>
 
-                    <div className={styles.panel}>
-                        <div className={styles.card}>
-                            <h3 className={styles.sectionTitle}>Endereço</h3>
-
-                            <div className={styles.locationGrid}>
+                    <form
+                        id="tutor-form"
+                        className={styles.formBody}
+                    >
+                        {/* ... (Resto do seu JSX: painel de dados pessoais) ... */}
+                        <div className={styles.panel}>
+                            <div className={styles.card}>
+                                <h3 className={styles.sectionTitle}>Dados Pessoais</h3>
                                 <div className={styles.formGroup}>
-                                    <label htmlFor="cep">CEP</label>
-                                    <div
-                                        className={`${styles.inputIconWrapper} ${styles.cepContainer}`}
-                                    >
-                                        <i className="fas fa-map-marker-alt"></i>
+                                    <label htmlFor="nome">Nome Completo</label>
+                                    <div className={styles.inputIconWrapper}>
+                                        <i className="fas fa-user"></i>
                                         <input
-                                            id="cep"
+                                            id="nome"
                                             type="text"
-                                            value={cep}
-                                            onChange={(e) => handleCepChange(e.target.value)}
-                                            placeholder="00000-000"
-                                            maxLength={8}
+                                            value={nome}
+                                            onChange={(e) => setNome(e.target.value)}
+                                            ref={nomeInputRef}
+                                            required
                                         />
-                                        {loadingCep && <div className={styles.spinner}></div>}
                                     </div>
                                 </div>
                                 <div className={styles.formGroup}>
-                                    <label htmlFor="estado">Estado</label>
-                                    <select
-                                        id="estado"
-                                        value={idEstado}
-                                        onChange={handleEstadoChange}
+                                    <label htmlFor="cpf">CPF</label>
+                                    <div
+                                        className={`${styles.inputIconWrapper} ${
+                                            !validation.cpf ? styles.invalid : ""
+                                        }`}
                                     >
-                                        <option value="">Selecione...</option>
-                                        {estados.map((e) => (
-                                            <option key={e.id_estado} value={e.id_estado}>
-                                                {e.nome}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className={styles.formGroup} ref={cidadeWrapperRef}>
-                                <label htmlFor="cidade">Cidade</label>
-                                <div className={styles.cidadeInputContainer}>
-                                    <input
-                                        id="cidade"
-                                        type="text"
-                                        placeholder="Digite para buscar..."
-                                        value={filtroCidade}
-                                        onChange={(e) => setFiltroCidade(e.target.value)}
-                                        onFocus={() => setMostrarSugestoes(true)}
-                                        onKeyDown={handleCidadeKeyDown}
-                                        disabled={!idEstado}
-                                    />
-                                    {mostrarSugestoes && cidadesFiltradas.length > 0 && (
-                                        <ul className={styles.sugestoesLista}>
-                                            {cidadesFiltradas.map((cidade, index) => (
-                                                <li
-                                                    key={cidade.id_cidade}
-                                                    onClick={() => handleCidadeSelect(cidade)}
-                                                    className={`${styles.sugestoesItem} ${
-                                                        index === highlightedIndex ? styles.highlighted : ""
-                                                    }`}
-                                                >
-                                                    {cidade.nome}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className={styles.addressGrid}>
-                                <div
-                                    className={styles.formGroup}
-                                    style={{ gridColumn: "1 / -1" }}
-                                >
-                                    <label htmlFor="rua">Rua</label>
-                                    {loadingCep ? (
-                                        <div className={styles.skeleton}></div>
-                                    ) : (
+                                        <i className="fas fa-id-card"></i>
                                         <input
-                                            id="rua"
+                                            id="cpf"
+                                            name="cpf"
                                             type="text"
-                                            value={rua}
-                                            onChange={(e) => setRua(e.target.value)}
+                                            value={cpf}
+                                            onChange={handleCpfChange}
+                                            onBlur={(e) => validateField(e.target.name, e.target.value)}
+                                            maxLength="14"
+                                            placeholder="000.000.000-00"
+                                            required
                                         />
-                                    )}
+                                    </div>
                                 </div>
                                 <div className={styles.formGroup}>
-                                    <label htmlFor="bairro">Bairro</label>
-                                    {loadingCep ? (
-                                        <div className={styles.skeleton}></div>
-                                    ) : (
+                                    <label htmlFor="telefone">Telefone</label>
+                                    <div
+                                        className={`${styles.inputIconWrapper} ${
+                                            !validation.telefone ? styles.invalid : ""
+                                        }`}
+                                    >
+                                        <i className="fas fa-phone"></i>
                                         <input
-                                            id="bairro"
+                                            id="telefone"
+                                            name="telefone"
                                             type="text"
-                                            value={bairro}
-                                            onChange={(e) => setBairro(e.target.value)}
+                                            value={telefone}
+                                            onChange={handleTelefoneChange}
+                                            onBlur={(e) => validateField(e.target.name, e.target.value)}
+                                            maxLength="15"
+                                            placeholder="(XX) XXXXX-XXXX"
+                                            required
                                         />
-                                    )}
+                                    </div>
                                 </div>
                                 <div className={styles.formGroup}>
-                                    <label htmlFor="num">Número</label>
-                                    <input
-                                        id="num"
-                                        type="text"
-                                        value={num}
-                                        onChange={(e) => setNum(e.target.value)}
-                                    />
+                                    <label htmlFor="dataNasc">Data de Nascimento</label>
+                                    <div className={styles.inputIconWrapper}>
+                                        <i className="fas fa-calendar-alt"></i>
+                                        <input
+                                            id="dataNasc"
+                                            type="date"
+                                            value={dataNasc}
+                                            onChange={(e) => setDataNasc(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </form>
 
-                <div className={styles.modalFooter}>
-                    <div className={styles.errorContainer}>
-                        {error && <p className={styles.errorMessage}>{error}</p>}
-                    </div>
-                    <div className={styles.buttonGroup}>
-                        <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}>
-                            <i className="fas fa-times"></i> Cancelar
-                        </button>
-                        <button type="button" onClick={() => handleSubmit('saveAndClose')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
-                            <i className="fas fa-save"></i> {isSaving ? "Salvando..." : "Salvar e Fechar"}
-                        </button>
-                        {!tutorToEdit && (
-                            <button type="button" onClick={() => handleSubmit('saveAndAddAnimal')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
-                                {isSaving ? "Salvando..." : "Salvar e Adicionar Animal"} <i className="fas fa-paw"></i>
+                        {/* ... (Resto do seu JSX: painel de endereço) ... */}
+                        <div className={styles.panel}>
+                            <div className={styles.card}>
+                                <h3 className={styles.sectionTitle}>Endereço</h3>
+
+                                <div className={styles.locationGrid}>
+                                    <div className={styles.formGroup}>
+                                        <label htmlFor="cep">CEP</label>
+                                        <div
+                                            className={`${styles.inputIconWrapper} ${styles.cepContainer}`}
+                                        >
+                                            <i className="fas fa-map-marker-alt"></i>
+                                            <input
+                                                id="cep"
+                                                type="text"
+                                                value={cep}
+                                                onChange={(e) => handleCepChange(e.target.value)}
+                                                placeholder="00000-000"
+                                                maxLength={8}
+                                            />
+                                            {loadingCep && <div className={styles.spinner}></div>}
+                                        </div>
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label htmlFor="estado">Estado</label>
+                                        <select
+                                            id="estado"
+                                            value={idEstado}
+                                            onChange={handleEstadoChange}
+                                        >
+                                            <option value="">Selecione...</option>
+                                            {estados.map((e) => (
+                                                <option key={e.id_estado} value={e.id_estado}>
+                                                    {e.nome}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className={styles.formGroup} ref={cidadeWrapperRef}>
+                                    <label htmlFor="cidade">Cidade</label>
+                                    <div className={styles.cidadeInputContainer}>
+                                        <input
+                                            id="cidade"
+                                            type="text"
+                                            placeholder="Digite para buscar..."
+                                            value={filtroCidade}
+                                            onChange={(e) => setFiltroCidade(e.target.value)}
+                                            onFocus={() => setMostrarSugestoes(true)}
+                                            onKeyDown={handleCidadeKeyDown}
+                                            disabled={!idEstado}
+                                        />
+                                        {mostrarSugestoes && cidadesFiltradas.length > 0 && (
+                                            <ul className={styles.sugestoesLista}>
+                                                {cidadesFiltradas.map((cidade, index) => (
+                                                    <li
+                                                        key={cidade.id_cidade}
+                                                        onClick={() => handleCidadeSelect(cidade)}
+                                                        className={`${styles.sugestoesItem} ${
+                                                            index === highlightedIndex ? styles.highlighted : ""
+                                                        }`}
+                                                    >
+                                                        {cidade.nome}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className={styles.addressGrid}>
+                                    <div
+                                        className={styles.formGroup}
+                                        style={{ gridColumn: "1 / -1" }}
+                                    >
+                                        <label htmlFor="rua">Rua</label>
+                                        {loadingCep ? (
+                                            <div className={styles.skeleton}></div>
+                                        ) : (
+                                            <input
+                                                id="rua"
+                                                type="text"
+                                                value={rua}
+                                                onChange={(e) => setRua(e.target.value)}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label htmlFor="bairro">Bairro</label>
+                                        {loadingCep ? (
+                                            <div className={styles.skeleton}></div>
+                                        ) : (
+                                            <input
+                                                id="bairro"
+                                                type="text"
+                                                value={bairro}
+                                                onChange={(e) => setBairro(e.target.value)}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label htmlFor="num">Número</label>
+                                        <input
+                                            id="num"
+                                            type="text"
+                                            value={num}
+                                            onChange={(e) => setNum(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    {/* --- FOOTER CORRIGIDO (type="button") --- */}
+                    <div className={styles.modalFooter}>
+                        <div className={styles.errorContainer}>
+                            {error && <p className={styles.errorMessage}>{error}</p>}
+                        </div>
+                        <div className={styles.buttonGroup}>
+                            <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}>
+                                <i className="fas fa-times"></i> Cancelar
                             </button>
-                        )}
+                            <button type="button" onClick={() => handleSubmit('saveAndClose')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
+                                <i className="fas fa-save"></i> {isSaving ? "Salvando..." : "Salvar e Fechar"}
+                            </button>
+                            {!tutorToEdit && (
+                                <button type="button" onClick={() => handleSubmit('saveAndAddAnimal')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
+                                    {isSaving ? "Salvando..." : "Salvar e Adicionar Animal"} <i className="fas fa-paw"></i>
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </> 
     );
 }
 

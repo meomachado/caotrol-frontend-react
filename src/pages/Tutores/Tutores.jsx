@@ -5,8 +5,11 @@ import styles from "./Tutores.module.css";
 import TutorModal from "./TutorModal";
 import AnimalModal from "../Animais/AnimalModal";
 import { useNavigate } from "react-router-dom";
-// ✅ Ícones do React-Icons
-import { FaPlus, FaSearch } from "react-icons/fa";
+// --- NOVAS IMPORTAÇÕES ---
+import { FaPlus, FaSearch, FaQuestionCircle } from "react-icons/fa";
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css";
+
 
 function Tutores() {
   const [tutores, setTutores] = useState([]);
@@ -20,6 +23,28 @@ function Tutores() {
   const [totalPages, setTotalPages] = useState(0);
   const [ordenarPor, setOrdenarPor] = useState("id_desc");
   const navigate = useNavigate();
+
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
+
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'tutores-lista'
+      const data = await api.getHelpContent('tutores-lista'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ----------------------------
 
   const fetchTutores = useCallback(async (page) => {
     try {
@@ -93,20 +118,39 @@ function Tutores() {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <TutorModal isOpen={isTutorModalOpen} onClose={() => setIsTutorModalOpen(false)} onSave={handleSaveTutor} />
-      <AnimalModal isOpen={isAnimalModalOpen} onClose={() => setIsAnimalModalOpen(false)} onSave={handleSaveAnimal} tutorToPreselect={tutorParaNovoAnimal} />
-      
-      {/* ✅ HEADER PADRONIZADO */}
-      <div className={styles.pageHeader}>
-        <div>
-            <h1>Tutores</h1>
-            <p className={styles.pageSubtitle}>Liste, busque e gerencie os tutores</p>
+    <> {/* Adicionado Fragment */}
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
+
+      <div className={styles.pageContainer}>
+        <TutorModal isOpen={isTutorModalOpen} onClose={() => setIsTutorModalOpen(false)} onSave={handleSaveTutor} />
+        <AnimalModal isOpen={isAnimalModalOpen} onClose={() => setIsAnimalModalOpen(false)} onSave={handleSaveAnimal} tutorToPreselect={tutorParaNovoAnimal} />
+        
+        {/* HEADER MODIFICADO */}
+        <div className={styles.pageHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div>
+                <h1>Tutores</h1>
+                <p className={styles.pageSubtitle}>Liste, busque e gerencie os tutores</p>
+            </div>
+            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
+            </button>
+          </div>
+          <button className={styles.actionButtonPrimary} onClick={handleOpenCreateModal}>
+            <FaPlus /> Novo Tutor
+          </button>
         </div>
-        <button className={styles.actionButtonPrimary} onClick={handleOpenCreateModal}>
-          <FaPlus /> Novo Tutor
-        </button>
-      </div>
 
       {/* ✅ FILTROS UNIFICADOS */}
       <div className={styles.filterContainer}>
@@ -142,6 +186,7 @@ function Tutores() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

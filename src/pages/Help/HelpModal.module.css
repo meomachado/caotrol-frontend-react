@@ -1,0 +1,108 @@
+/* pages/Help/HelpModal.module.css */
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+  }
+  
+  .modalContent {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  /* --- Cabeçalho --- */
+  .modalHeader {
+    padding: 20px 25px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modalHeader h2 {
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #7f8c8d;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .closeButton:hover {
+    color: #e74c3c;
+  }
+  
+  /* --- Corpo --- */
+  .modalBody {
+    padding: 25px;
+    overflow-y: auto;
+    background-color: #f9fafb;
+  }
+  
+  .helpSection {
+    margin-bottom: 25px;
+  }
+  .helpSection:last-child {
+    margin-bottom: 0;
+  }
+  
+  .sectionTitle {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #27ae60;
+    margin: 0 0 8px 0;
+  }
+  
+  .sectionText {
+    margin: 0;
+    font-size: 0.95em;
+    color: #34495e;
+    line-height: 1.6;
+    white-space: pre-wrap; /* Preserva quebras de linha do JSON */
+  }
+  
+  /* --- Rodapé --- */
+  .modalFooter {
+    padding: 15px 25px;
+    display: flex;
+    justify-content: flex-end;
+    background-color: #f0f2f5;
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .footerCloseButton {
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95em;
+    background-color: #7f8c8d;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .footerCloseButton:hover {
+    background-color: #95a5a6;
+  }

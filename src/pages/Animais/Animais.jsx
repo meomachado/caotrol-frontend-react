@@ -4,8 +4,14 @@ import api from "../../services/api";
 import styles from "./Animais.module.css";
 import AnimalModal from "./AnimalModal";
 import { useNavigate } from 'react-router-dom';
-// ✅ Ícones importados, incluindo os de espécies
-import { FaPlus, FaSearch, FaDog, FaCat, FaPaw } from "react-icons/fa";
+
+// --- ÍCONES MODIFICADOS ---
+import { FaPlus, FaSearch, FaDog, FaCat, FaPaw, FaQuestionCircle } from "react-icons/fa";
+
+// --- NOVAS IMPORTAÇÕES ---
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css";
+// -------------------------
 
 function Animais() {
   const [animais, setAnimais] = useState([]);
@@ -18,6 +24,29 @@ function Animais() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [ordenarPor, setOrdenarPor] = useState("id_desc");
+
+  // --- NOVOS ESTADOS DE AJUDA ---
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
+
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'animais-lista'
+      const data = await api.getHelpContent('animais-lista'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ----------------------------
 
   const fetchAnimais = useCallback(async (page) => {
     try {
@@ -58,7 +87,6 @@ function Animais() {
     fetchAnimais(currentPage);
   };
 
-  // ✅ Função para escolher o ícone da espécie
   const getSpeciesIcon = (speciesName) => {
     const name = speciesName?.toLowerCase() || '';
     if (name.includes('canina')) {
@@ -67,18 +95,18 @@ function Animais() {
     if (name.includes('felina')) {
       return <FaCat />;
     }
-    return <FaPaw />; // Ícone padrão
+    return <FaPaw />;
   };
 
   const renderAnimalList = () => {
     if (loading) return <div className={styles.loadingState}>Carregando animais...</div>;
+    // Corrigido: Mostrar o erro no local certo
     if (error) return <div className={styles.errorState}>{error}</div>;
     if (animais.length === 0) return <div className={styles.noData}>Nenhum animal encontrado.</div>;
 
     return animais.map((animal) => (
       <div key={animal.id_animal} className={styles.animalItem}>
         <div className={styles.animalInfoWrapper}>
-          {/* ✅ Avatar com ícone dinâmico */}
           <div className={styles.animalAvatar}>
             {getSpeciesIcon(animal.raca?.especie?.nome)}
           </div>
@@ -97,55 +125,75 @@ function Animais() {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      {isModalOpen && <AnimalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} animalToEdit={editingAnimal} />}
-    
-      {/* ✅ HEADER PADRONIZADO */}
-      <div className={styles.pageHeader}>
-        <div>
-          <h1>Animais</h1>
-          <p className={styles.pageSubtitle}>Gerencie os pacientes da clínica</p>
-        </div>
-        <button className={styles.actionButtonPrimary} onClick={handleOpenCreateModal}>
-          <FaPlus /> Novo Animal
-        </button>
-      </div>
+    <> {/* Adicionado Fragment */}
+      {/* MODAL DE AJUDA */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
 
-      {/* ✅ FILTROS UNIFICADOS */}
-      <div className={styles.filterContainer}>
-        <div className={styles.searchGroup}>
-          <FaSearch className={styles.searchIcon} />
-          <input 
-            type="text" 
-            placeholder="Buscar por nome do animal ou tutor..." 
-            className={styles.searchInput} 
-            value={busca} 
-            onChange={(e) => setBusca(e.target.value)} 
-          />
+      <div className={styles.pageContainer}>
+        {isModalOpen && <AnimalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} animalToEdit={editingAnimal} />}
+      
+        {/* HEADER MODIFICADO */}
+        <div className={styles.pageHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div>
+              <h1>Animais</h1>
+              <p className={styles.pageSubtitle}>Gerencie os pacientes da clínica</p>
+            </div>
+            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
+            </button>
+          </div>
+          <button className={styles.actionButtonPrimary} onClick={handleOpenCreateModal}>
+            <FaPlus /> Novo Animal
+          </button>
         </div>
-        <div className={styles.filterGroup}>
-          <label htmlFor="sort">Ordenar por:</label>
-          <select id="sort" value={ordenarPor} onChange={(e) => setOrdenarPor(e.target.value)}>
-            <option value="id_desc">Mais Recentes</option>
-            <option value="id_asc">Mais Antigos</option>
-            <option value="nome_asc">Nome (A-Z)</option>
-            <option value="nome_desc">Nome (Z-A)</option>
-          </select>
-        </div>
-      </div>
 
-      <div className={styles.animalList}>
-        {renderAnimalList()}
-      </div>
-
-      {totalPages > 0 && (
-        <div className={styles.paginationControls}>
-          <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
-          <span>Página {currentPage} de {totalPages}</span>
-          <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+        {/* ... (Resto do seu JSX: filterContainer, animalList, etc.) ... */}
+        <div className={styles.filterContainer}>
+          <div className={styles.searchGroup}>
+            <FaSearch className={styles.searchIcon} />
+            <input 
+              type="text" 
+              placeholder="Buscar por nome do animal ou tutor..." 
+              className={styles.searchInput} 
+              value={busca} 
+              onChange={(e) => setBusca(e.target.value)} 
+            />
+          </div>
+          <div className={styles.filterGroup}>
+            <label htmlFor="sort">Ordenar por:</label>
+            <select id="sort" value={ordenarPor} onChange={(e) => setOrdenarPor(e.target.value)}>
+              <option value="id_desc">Mais Recentes</option>
+              <option value="id_asc">Mais Antigos</option>
+              <option value="nome_asc">Nome (A-Z)</option>
+              <option value="nome_desc">Nome (Z-A)</option>
+            </select>
+          </div>
         </div>
-      )}
-    </div>
+
+        <div className={styles.animalList}>
+          {renderAnimalList()}
+        </div>
+
+        {totalPages > 0 && (
+          <div className={styles.paginationControls}>
+            <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Anterior</button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Próxima</button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 

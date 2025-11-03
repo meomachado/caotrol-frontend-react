@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import styles from "./Dashboard.module.css";
-// ✅ Ícones importados para os cards e o header
-import { FaCalendarAlt, FaCalendarCheck, FaClipboardList, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-
+import { FaCalendarAlt, FaCalendarCheck, FaClipboardList, FaCheckCircle, FaTimesCircle, FaQuestionCircle } from 'react-icons/fa';
+import HelpModal from "./Help/HelpModal";
+import helpButtonStyles from "./Help/HelpButton.module.css";
 function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,6 +13,9 @@ function Dashboard() {
   const [veterinarios, setVeterinarios] = useState([]);
   const [filtroVetId, setFiltroVetId] = useState("todos"); // 'todos' como padrão
   const [userType, setUserType] = useState("");
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
 
   useEffect(() => {
     const tipo = localStorage.getItem("user_type");
@@ -27,7 +30,19 @@ function Dashboard() {
         );
     }
   }, []);
-
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'dashboard'
+      const data = await api.getHelpContent('dashboard'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -76,15 +91,34 @@ function Dashboard() {
   }
 
   return (
-    <div className={styles.dashboardPage}>
-      {/* ✅ HEADER E SUBTÍTULO UNIFICADOS */}
-      <div className={styles.pageHeader}>
-        <div>
-          <h1>Início</h1>
-          <p className={styles.pageSubtitle}>
-            <FaCalendarAlt /> {getCurrentDate()}
-          </p>
-        </div>
+    <> {/* Adicionado Fragment */}
+      {/* O Modal de Ajuda fica aqui */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
+
+      <div className={styles.dashboardPage}>
+        <div className={styles.pageHeader}>
+          {/* Div para agrupar título e botão */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div>
+              <h1>Início</h1>
+              <p className={styles.pageSubtitle}>
+                <FaCalendarAlt /> {getCurrentDate()}
+              </p>
+            </div>
+            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+            <button 
+              className={helpButtonStyles.helpIcon} 
+              onClick={handleOpenHelp}
+              disabled={helpLoading}
+              title="Ajuda"
+            >
+              <FaQuestionCircle />
+            </button>
+          </div>
         
         {(userType === "admin" || userType === "padrao") && (
           <div className={styles.filterContainer}>
@@ -185,6 +219,7 @@ function Dashboard() {
         </>
       )}
     </div>
+    </>
   );
 }
 

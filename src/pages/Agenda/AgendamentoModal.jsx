@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import styles from "./AgendamentoModal.module.css";
-
+import { FaQuestionCircle } from "react-icons/fa";
+import HelpModal from "../Help/HelpModal";
+import helpButtonStyles from "../Help/HelpButton.module.css"; 
 function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   // Estados para listas de dados
   const [animais, setAnimais] = useState([]);
@@ -20,6 +22,29 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   const [tutorSearchTerm, setTutorSearchTerm] = useState("");
   const [searchedTutores, setSearchedTutores] = useState([]);
   const [showTutorResults, setShowTutorResults] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------------
+
+  // ... (seus 'useEffect' e 'handleSubmit') ...
+
+  // --- FUNÇÃO PARA ABRIR A AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" correta
+      const data = await api.getHelpContent('agendamento-novo'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      // Podemos usar o 'setError' do próprio modal
+      setError("Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
   
   // Efeito para buscar veterinários e resetar o estado do modal
   useEffect(() => {
@@ -103,10 +128,27 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   if (!isOpen) return null;
 
   return (
+    <> {/* Adicionado Fragment */}
+      {/* O Modal de Ajuda fica aqui */}
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-            <h2>Novo Agendamento</h2>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              Novo Agendamento
+              <button 
+                className={helpButtonStyles.helpIcon} 
+                onClick={handleOpenHelp}
+                disabled={helpLoading}
+                title="Ajuda sobre este formulário"
+              >
+                <FaQuestionCircle />
+              </button>
+            </h2>
         </div>
         
         <form id="agendamento-form" onSubmit={handleSubmit} className={styles.formBody}>
@@ -197,6 +239,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
