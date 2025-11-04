@@ -3,6 +3,12 @@ import api from "../../services/api";
 import styles from "./AnimalModal.module.css";
 import toast from 'react-hot-toast';
 
+// --- NOVAS IMPORTAÇÕES ---
+import { FaQuestionCircle } from "react-icons/fa";
+import HelpModal from "../Help/HelpModal"; // (../ sobe um nível)
+import helpButtonStyles from "../Help/HelpButton.module.css"; // (../ sobe um nível)
+// -------------------------
+
 function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }) {
   // --- ESTADOS DO FORMULÁRIO ---
   const [nome, setNome] = useState("");
@@ -29,7 +35,30 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
   const [showRacaResults, setShowRacaResults] = useState(false);
   const nomeInputRef = useRef(null);
 
+  // --- NOVOS ESTADOS DE AJUDA ---
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpContent, setHelpContent] = useState(null);
+  const [helpLoading, setHelpLoading] = useState(false);
+  // ------------------------------
+
   const isFormInvalid = !nome || !dataNasc || !idTutor || !idEspecie || !idRaca;
+
+  // --- NOVA FUNÇÃO DE AJUDA ---
+  const handleOpenHelp = async () => {
+    setHelpLoading(true);
+    try {
+      // Usando a "pageKey" 'novo-animal'
+      const data = await api.getHelpContent('novo-animal'); 
+      setHelpContent(data);
+      setIsHelpModalOpen(true);
+    } catch (err) {
+      console.error("Erro ao buscar ajuda:", err);
+      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+    } finally {
+      setHelpLoading(false);
+    }
+  };
+  // ----------------------------
 
   useEffect(() => {
     if (isOpen) {
@@ -106,7 +135,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
         .catch(() => setSearchedTutores([]));
     }, 400);
     return () => clearTimeout(delayDebounceFn);
-  }, [tutorSearchTerm]);
+  }, [tutorSearchTerm]); // Removido 'searchedTutores' da dependência
 
   const handleSave = async (action) => {
     if (isFormInvalid) {
@@ -162,82 +191,113 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
   const racasFiltradas = racaSearchTerm ? racasDisponiveis.filter((raca) => raca.nome.toLowerCase().includes(racaSearchTerm.toLowerCase())) : racasDisponiveis;
 
   return (
+    <> 
+   <div style={{ position: 'relative', zIndex: 2010 }}> 
+      <HelpModal 
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        content={helpContent}
+      />
+    </div>
+
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}><h2>{animalToEdit ? "Editar Animal" : "Novo Animal"}</h2></div>
-        <form id="animal-form" className={styles.formBody}>
-          <div className={styles.panel}>
-            <div className={styles.card}>
-              <h3 className={styles.sectionTitle}>Identificação</h3>
-              <div className={styles.formGroup}><label>Nome do Animal <span style={{ color: "red" }}>*</span></label><div className={styles.inputIconWrapper}><i className="fas fa-paw"></i><input type="text" value={nome} onChange={(e) => setNome(e.target.value)} ref={nomeInputRef} required /></div></div>
-              <div className={styles.formGroup}>
-                <label>Tutor <span style={{ color: "red" }}>*</span></label>
-                <div className={styles.inputIconWrapper}>
-                  <i className="fas fa-user"></i>
-                  <input 
-                    type="text" 
-                    placeholder="Buscar por nome ou CPF..." 
-                    value={tutorSearchTerm} 
-                    onChange={(e) => { 
-                      setTutorSearchTerm(e.target.value); 
-                      setShowTutorResults(true);
-                    }} 
-                    onFocus={() => setShowTutorResults(true)} 
-                    onBlur={() => setTimeout(() => setShowTutorResults(false), 200)} 
-                    required disabled={!!tutorToPreselect} 
-                  />
-                </div>
-                {showTutorResults && searchedTutores.length > 0 && (
-                  <ul className={styles.autocompleteList}>
-                    {searchedTutores.map((tutor) => (
-                      <li key={tutor.id_tutor} onMouseDown={() => { 
-                        setIdTutor(tutor.id_tutor); 
-                        setTutorSearchTerm(`${tutor.nome} - ${tutor.cpf}`); 
-                        setShowTutorResults(false); 
-                      }}>
-                        {tutor.nome} - {tutor.cpf}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <div className={styles.formGroup}><label>Espécie <span style={{ color: 'red' }}>*</span></label><select value={idEspecie} onChange={(e) => { setIdEspecie(e.target.value); setIdRaca(""); setRacaSearchTerm(""); }} required><option value="">Selecione...</option>{especies.map((especie) => (<option key={especie.id_especie} value={especie.id_especie}>{especie.nome}</option>))}</select></div>
-              <div className={styles.formGroup}><label>Raça <span style={{ color: 'red' }}>*</span></label><div className={styles.inputIconWrapper}><i className="fas fa-dog"></i><input type="text" placeholder="Digite para buscar a raça..." value={racaSearchTerm} onChange={(e) => { setRacaSearchTerm(e.target.value); setIdRaca(""); }} onFocus={() => setShowRacaResults(true)} onBlur={() => setTimeout(() => setShowRacaResults(false), 200)} disabled={!idEspecie} required /></div>{showRacaResults && racasFiltradas.length > 0 && (<ul className={styles.autocompleteList}>{racasFiltradas.map((raca) => (<li key={raca.id_raca} onMouseDown={() => { setIdRaca(raca.id_raca); setRacaSearchTerm(raca.nome); setShowRacaResults(false); }}>{raca.nome}</li>))}</ul>)}</div>
-            </div>
-          </div>
-          <div className={styles.panel}>
-            <div className={styles.card}>
-              <h3 className={styles.sectionTitle}>Características</h3>
-              <div className={styles.formGroup}><label>Sexo <span style={{ color: 'red' }}>*</span></label><select value={sexo} onChange={(e) => setSexo(e.target.value)}><option value="M">Macho</option><option value="F">Fêmea</option></select></div>
-              <div className={styles.formGroup}><label>Data de Nascimento <span style={{ color: 'red' }}>*</span></label><div className={styles.inputIconWrapper}><i className="fas fa-calendar-alt"></i><input type="date" value={dataNasc} onChange={(e) => setDataNasc(e.target.value)} /></div></div>
-              <div className={styles.formGroup}><label>Porte</label><select value={porte} onChange={(e) => setPorte(e.target.value)}><option value="">Não informado</option><option value="pequeno">Pequeno</option><option value="medio">Médio</option><option value="grande">Grande</option></select></div>
-              <div className={styles.formGroup}><label>Temperamento</label><select value={temperamento} onChange={(e) => setTemperamento(e.target.value)}><option value="">Não informado</option><option value="tranquilo">Tranquilo</option><option value="agressivo">Agressivo</option><option value="medroso">Medroso</option></select></div>
-            </div>
-          </div>
-        </form>
-        <div className={styles.modalFooter}>
-          <div className={styles.errorContainer}>{error ? <p className={styles.errorMessage}>{error}</p> : <p style={{ fontSize: '0.9em', color: '#6c757d', margin: 0 }}>Campos com <span style={{ color: 'red' }}>*</span> são obrigatórios.</p>}</div>
-          <div className={styles.buttonGroup}>
-            <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}><i className="fas fa-times"></i> Cancelar</button>
-            
-            {animalToEdit ? (
-              <button type="button" onClick={() => handleSave('saveAndClose')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
-                <i className="fas fa-check"></i> {isSaving ? "Salvando..." : "Salvar Alterações"}
+        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+          
+          {/* HEADER MODIFICADO */}
+          <div className={styles.modalHeader}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {animalToEdit ? "Editar Animal" : "Novo Animal"}
+              {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
+              <button 
+                className={helpButtonStyles.helpIcon} 
+                onClick={handleOpenHelp}
+                disabled={helpLoading}
+                title="Ajuda sobre este formulário"
+              >
+                <FaQuestionCircle />
               </button>
-            ) : (
-              <>
+            </h2>
+          </div>
+
+          <form id="animal-form" className={styles.formBody}>
+            {/* ... (Resto do seu JSX: painel de identificação) ... */}
+            <div className={styles.panel}>
+              <div className={styles.card}>
+                <h3 className={styles.sectionTitle}>Identificação</h3>
+                <div className={styles.formGroup}><label>Nome do Animal <span style={{ color: "red" }}>*</span></label><div className={styles.inputIconWrapper}><i className="fas fa-paw"></i><input type="text" value={nome} onChange={(e) => setNome(e.target.value)} ref={nomeInputRef} required /></div></div>
+                <div className={styles.formGroup}>
+                  <label>Tutor <span style={{ color: "red" }}>*</span></label>
+                  <div className={styles.inputIconWrapper}>
+                    <i className="fas fa-user"></i>
+                    <input 
+                      type="text" 
+                      placeholder="Buscar por nome ou CPF..." 
+                      value={tutorSearchTerm} 
+                      onChange={(e) => { 
+                        setTutorSearchTerm(e.target.value); 
+                        setShowTutorResults(true);
+                      }} 
+                      onFocus={() => setShowTutorResults(true)} 
+                      onBlur={() => setTimeout(() => setShowTutorResults(false), 200)} 
+                      required disabled={!!tutorToPreselect} 
+                    />
+                  </div>
+                  {showTutorResults && searchedTutores.length > 0 && (
+                    <ul className={styles.autocompleteList}>
+                      {searchedTutores.map((tutor) => (
+                        <li key={tutor.id_tutor} onMouseDown={() => { 
+                          setIdTutor(tutor.id_tutor); 
+                          setTutorSearchTerm(`${tutor.nome} - ${tutor.cpf}`); 
+                          setShowTutorResults(false); 
+                        }}>
+                          {tutor.nome} - {tutor.cpf}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className={styles.formGroup}><label>Espécie <span style={{ color: 'red' }}>*</span></label><select value={idEspecie} onChange={(e) => { setIdEspecie(e.target.value); setIdRaca(""); setRacaSearchTerm(""); }} required><option value="">Selecione...</option>{especies.map((especie) => (<option key={especie.id_especie} value={especie.id_especie}>{especie.nome}</option>))}</select></div>
+                <div className={styles.formGroup}><label>Raça <span style={{ color: 'red' }}>*</span></label><div className={styles.inputIconWrapper}><i className="fas fa-dog"></i><input type="text" placeholder="Digite para buscar a raça..." value={racaSearchTerm} onChange={(e) => { setRacaSearchTerm(e.target.value); setIdRaca(""); }} onFocus={() => setShowRacaResults(true)} onBlur={() => setTimeout(() => setShowRacaResults(false), 200)} disabled={!idEspecie} required /></div>{showRacaResults && racasFiltradas.length > 0 && (<ul className={styles.autocompleteList}>{racasFiltradas.map((raca) => (<li key={raca.id_raca} onMouseDown={() => { setIdRaca(raca.id_raca); setRacaSearchTerm(raca.nome); setShowRacaResults(false); }}>{raca.nome}</li>))}</ul>)}</div>
+              </div>
+            </div>
+            
+            {/* ... (Resto do seu JSX: painel de características) ... */}
+            <div className={styles.panel}>
+              <div className={styles.card}>
+                <h3 className={styles.sectionTitle}>Características</h3>
+                <div className={styles.formGroup}><label>Sexo <span style={{ color: 'red' }}>*</span></label><select value={sexo} onChange={(e) => setSexo(e.target.value)}><option value="M">Macho</option><option value="F">Fêmea</option></select></div>
+                <div className={styles.formGroup}><label>Data de Nascimento <span style={{ color: 'red' }}>*</span></label><div className={styles.inputIconWrapper}><i className="fas fa-calendar-alt"></i><input type="date" value={dataNasc} onChange={(e) => setDataNasc(e.target.value)} /></div></div>
+                <div className={styles.formGroup}><label>Porte</label><select value={porte} onChange={(e) => setPorte(e.target.value)}><option value="">Não informado</option><option value="pequeno">Pequeno</option><option value="medio">Médio</option><option value="grande">Grande</option></select></div>
+                <div className={styles.formGroup}><label>Temperamento</label><select value={temperamento} onChange={(e) => setTemperamento(e.target.value)}><option value="">Não informado</option><option value="tranquilo">Tranquilo</option><option value="agressivo">Agressivo</option><option value="medroso">Medroso</option></select></div>
+              </div>
+            </div>
+          </form>
+
+          {/* ... (Resto do seu JSX: modalFooter) ... */}
+          <div className={styles.modalFooter}>
+            <div className={styles.errorContainer}>{error ? <p className={styles.errorMessage}>{error}</p> : <p style={{ fontSize: '0.9em', color: '#6c757d', margin: 0 }}>Campos com <span style={{ color: 'red' }}>*</span> são obrigatórios.</p>}</div>
+            <div className={styles.buttonGroup}>
+              <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnCancel}`}><i className="fas fa-times"></i> Cancelar</button>
+              
+              {animalToEdit ? (
                 <button type="button" onClick={() => handleSave('saveAndClose')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
-                  <i className="fas fa-check"></i> {isSaving ? "Salvando..." : "Salvar e Concluir"}
+                  <i className="fas fa-check"></i> {isSaving ? "Salvando..." : "Salvar Alterações"}
                 </button>
-                <button type="button" onClick={() => handleSave('saveAndAddAnother')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
-                  {isSaving ? "Salvando..." : "Salvar e Adicionar Outro"} <i className="fas fa-plus"></i>
-                </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button type="button" onClick={() => handleSave('saveAndClose')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
+                    <i className="fas fa-check"></i> {isSaving ? "Salvando..." : "Salvar e Concluir"}
+                  </button>
+                  <button type="button" onClick={() => handleSave('saveAndAddAnother')} className={`${styles.btn} ${styles.btnSave}`} disabled={isFormInvalid || isSaving}>
+                    {isSaving ? "Salvando..." : "Salvar e Adicionar Outro"} <i className="fas fa-plus"></i>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
