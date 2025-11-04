@@ -4,6 +4,7 @@ import styles from "./NovaConsultaModal.module.css";
 import VacinaModal from "../Vacinas/VacinaModal";
 import PdfGeneratorModal from "../Documentos/PdfGeneratorModal";
 import HistoryModal from "./HistoryModal";
+import toast from 'react-hot-toast';
 
 // --- NOVAS IMPORTAÇÕES ---
 import HelpModal from "../Help/HelpModal";
@@ -119,7 +120,7 @@ function NovaConsultaModal({
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+      toast.error(err.message || "Não foi possível carregar o tópico de ajuda."); // <-- TROCA
     } finally {
       setHelpLoading(false);
     }
@@ -278,12 +279,12 @@ function NovaConsultaModal({
   const handleSaveConsulta = async () => {
     // Agora a validação é feita em tempo real
     if (Object.keys(validationErrors).length > 0) {
-      alert("Por favor, corrija os erros nos campos antes de salvar.");
+      toast.error("Por favor, corrija os erros nos campos antes de salvar.");
       return;
     }
 
     if (!formData.queixaPrincipal) {
-      alert("O campo 'Queixa principal' é obrigatório para salvar.");
+      toast.error("O campo 'Queixa principal' é obrigatório para salvar.");
       return;
     }
 
@@ -333,12 +334,10 @@ function NovaConsultaModal({
         await api.createConsulta(payload);
       }
 
-      alert("Consulta salva com sucesso!");
+      toast.success("Consulta salva com sucesso!");
       onSave();
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Ocorreu um erro ao salvar a consulta."
-      );
+      toast.error(err.response?.data?.message || "Ocorreu um erro ao salvar a consulta.");
       console.error("Erro ao salvar consulta:", err);
     } finally {
       setIsSaving(false);
@@ -351,8 +350,8 @@ function NovaConsultaModal({
     // Força o HistoryModal a recarregar, incrementando o gatilho
     setHistoryRefreshTrigger(prev => prev + 1);
     
-    // Podemos manter ou remover o alert, como preferir
-    alert("Vacina registrada com sucesso!");
+    
+    toast.success("Vacina registrada com sucesso!");
     
     // Reabre o histórico de vacinas para o usuário ver a atualização
     setHistoryModalState({ isOpen: true, type: 'vacinas' });
@@ -420,7 +419,7 @@ function NovaConsultaModal({
       setPdfModalState({ isOpen: false, type: null });
     } catch (error) {
       console.error(`Erro ao gerar PDF de ${type}:`, error);
-      alert(`Não foi possível gerar o PDF de ${type}.`);
+      toast.error(`Não foi possível gerar o PDF de ${type}.`);
     }
   };
 

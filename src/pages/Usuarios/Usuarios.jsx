@@ -3,13 +3,16 @@ import api from '../../services/api';
 import styles from './Usuarios.module.css';
 import UsuarioModal from './UsuarioModal';
 import VeterinarioModal from '../Veterinarios/VeterinarioModal';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 // --- NOVAS IMPORTAÇÕES ---
 import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt, FaTrash, FaQuestionCircle } from "react-icons/fa";
 import HelpModal from '../Help/HelpModal';
 import helpButtonStyles from '../Help/HelpButton.module.css';
 // -------------------------
-
+const MySwal = withReactContent(Swal);
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [userCurrentPage, setUserCurrentPage] = useState(1);
@@ -44,7 +47,7 @@ function Usuarios() {
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+      toast.error(err.message || "Não foi possível carregar o tópico de ajuda.");
     } finally {
       setHelpLoading(false);
     }
@@ -127,28 +130,50 @@ function Usuarios() {
   };
 
   const handleDeleteUser = async (id, login) => {
-    if (window.confirm(`Tem certeza que deseja desativar o usuário "${login}"?`)) {
-      try {
-        await api.deleteUsuario(id);
-        alert('Usuário desativado com sucesso!');
-        fetchUsuarios(userCurrentPage);
-      } catch (err) {
-        alert(err.response?.data?.message || 'Erro ao desativar usuário.');
-      }
-    }
-  };
+      MySwal.fire({
+       title: 'Desativar Usuário?',
+       text: `Tem certeza que deseja desativar o usuário "${login}"?`,
+       icon: 'warning',
+       showCancelButton: true,
+       confirmButtonColor: '#d33',
+       cancelButtonColor: '#6c757d',
+       confirmButtonText: 'Sim, desativar',
+       cancelButtonText: 'Cancelar'
+      }).then(async (result) => {
+       if (result.isConfirmed) {
+        try {
+         await api.deleteUsuario(id);
+         toast.success('Usuário desativado com sucesso!');
+         fetchUsuarios(userCurrentPage);
+        } catch (err) {
+         toast.error(err.response?.data?.message || 'Erro ao desativar usuário.');
+        }
+       }
+      });
+     };
 
-  const handleDeleteVet = async (id, nome) => {
-    if (window.confirm(`Tem certeza que deseja excluir o perfil do veterinário(a) "${nome}"? Esta ação é irreversível e só é possível se não houver vínculos.`)) {
-      try {
-        await api.deleteVeterinario(id);
-        alert('Perfil de veterinário excluído com sucesso!');
-        fetchVeterinarios(vetCurrentPage);
-      } catch (err) {
-        alert(err.response?.data?.message || 'Erro ao excluir perfil de veterinário.');
-      }
-    }
-  };
+     const handleDeleteVet = async (id, nome) => {
+        MySwal.fire({
+         title: 'Excluir Perfil?',
+         text: `Deseja mesmo excluir o perfil de "${nome}"? Esta ação é irreversível.`,
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonColor: '#d33',
+         cancelButtonColor: '#6c757d',
+         confirmButtonText: 'Sim, excluir',
+         cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+         if (result.isConfirmed) {
+          try {
+           await api.deleteVeterinario(id);
+           toast.success('Perfil de veterinário excluído com sucesso!');
+           fetchVeterinarios(vetCurrentPage);
+          } catch (err) {
+           toast.error(err.response?.data?.message || 'Erro ao excluir perfil de veterinário.');
+          }
+         }
+        });
+       };
 
 
   const renderContent = () => {

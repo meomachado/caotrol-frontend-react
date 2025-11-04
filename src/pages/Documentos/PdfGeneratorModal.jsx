@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './PdfGeneratorModal.module.css';
+import toast from 'react-hot-toast';
 
 function PdfGeneratorModal({ isOpen, onClose, onGeneratePdf, title, label, initialText }) {
   const [text, setText] = useState('');
@@ -12,7 +13,7 @@ function PdfGeneratorModal({ isOpen, onClose, onGeneratePdf, title, label, initi
 
   const handleGenerateClick = () => {
     if (!text.trim()) {
-      alert('O campo de texto não pode estar vazio.');
+      toast.error('O campo de texto não pode estar vazio.');
       return;
     }
     onGeneratePdf(text); // Envia o texto para a função que gera o PDF

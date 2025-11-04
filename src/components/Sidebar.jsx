@@ -7,7 +7,12 @@ function Sidebar() {
   return (
     <div className={styles.sidebarContainer}>
       <div className={styles.sidebarLogo}>
-        <img src={logoImage} alt="Lauro Vet Logo" />
+        <a href="/dashboard" target="_self" rel="noopener noreferrer">
+        
+        <img src={logoImage} alt="Lauro Vet Logo"
+        />
+        </a>
+        
       </div>
       <nav className={styles.sidebarNav}>
         <ul>

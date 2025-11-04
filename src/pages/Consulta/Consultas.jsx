@@ -7,6 +7,7 @@ import SelecaoAnimalModal from "./SelecaoAnimalModal";
 import NovaConsultaModal from "./NovaConsultaModal";
 import TutorModal from "../Tutores/TutorModal";
 import AnimalModal from "../Animais/AnimalModal";
+import toast from 'react-hot-toast';
 
 // --- ÍCONES E IMPORTAÇÕES DE AJUDA ---
 import { FaPlus, FaSearch, FaEye, FaQuestionCircle } from "react-icons/fa";
@@ -50,9 +51,10 @@ function Consultas() {
       setHelpContent(data);
       setIsHelpModalOpen(true);
     } catch (err) {
-      console.error("Erro ao buscar ajuda:", err);
-      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
-    } finally {
+         console.error("Erro ao buscar ajuda:", err);
+         toast.error(err.message || "Não foi possível carregar o tópico de ajuda.");
+        } finally {
+      // ...
       setHelpLoading(false);
     }
   };
@@ -85,7 +87,7 @@ function Consultas() {
   const handleAbrirFluxoNovaConsulta = () => {
     const userType = localStorage.getItem('user_type');
     if (userType !== 'veterinario') {
-      alert('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
+      toast.error('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
       return;
     }
     setTutorRecemCriado(null);
@@ -144,7 +146,7 @@ function Consultas() {
       setSelectedConsulta(response);
       setIsDetailModalOpen(true);
     } catch (err) {
-      setError("Erro ao carregar detalhes da consulta.");
+      toast.error("Erro ao carregar detalhes da consulta.");
     }
   };
   

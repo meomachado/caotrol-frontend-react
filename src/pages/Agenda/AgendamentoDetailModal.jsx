@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import api from "../../services/api";
 import styles from "./AgendamentoModal.module.css";
+import toast from 'react-hot-toast';
 
 const getStatusInfo = (status, isRealizada) => {
   if (isRealizada) return { text: 'Finalizada', color: '#6c757d' };
@@ -45,7 +46,7 @@ function AgendamentoDetailModal({
   const handleStartConsultationClick = () => {
     const userType = localStorage.getItem('user_type');
     if (userType !== 'veterinario') {
-      alert('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
+      toast.error('Acesso negado. Apenas veterinários podem iniciar uma consulta.');
       return;
     }
     const idAnimal = eventInfo.extendedProps.id_animal;

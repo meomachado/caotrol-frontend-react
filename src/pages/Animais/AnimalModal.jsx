@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "../../services/api";
 import styles from "./AnimalModal.module.css";
+import toast from 'react-hot-toast';
 
 function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }) {
   // --- ESTADOS DO FORMULÁRIO ---
@@ -134,7 +135,7 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
         : await api.createAnimal(animalData);
 
       if (action === 'saveAndAddAnother') {
-        alert('Animal salvo com sucesso! Cadastre o próximo.');
+        toast.success('Animal salvo com sucesso! Cadastre o próximo.');
         setNome('');
         setDataNasc('');
         setSexo('M');
@@ -145,10 +146,11 @@ function AnimalModal({ isOpen, onClose, onSave, animalToEdit, tutorToPreselect }
         setRacaSearchTerm('');
         nomeInputRef.current?.focus();
       } else {
+        toast.success('Animal salvo com sucesso!');
         onSave(savedAnimal);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Erro ao salvar o animal.");
+      toast.error(err.response?.data?.message || "Erro ao salvar o animal.");
     } finally {
       setIsSaving(false);
     }

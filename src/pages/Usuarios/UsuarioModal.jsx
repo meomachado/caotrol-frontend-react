@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import styles from "./SharedModal.module.css";
 import { FaUserCircle, FaShieldAlt, FaUser, FaEnvelope, FaKey, FaTimes, FaCheck } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 function UsuarioModal({ isOpen, onClose, onSave, initialData }) {
   const [login, setLogin] = useState("");
@@ -78,17 +79,18 @@ function UsuarioModal({ isOpen, onClose, onSave, initialData }) {
       
       if (isEditing) {
         await api.updateUsuario(initialData.id_usuario, payload);
+        toast.success("Usuário atualizado com sucesso!");
       } else {
         if (tipo === 'veterinario') {
           payload.id_veterinario = parseInt(idVeterinario);
         }
         await api.registrarUsuario(payload);
-        // Alerta adicionado para novos usuários
-        alert("Usuário criado com sucesso! Um e-mail de confirmação foi enviado.");
+       
+        toast.success("Usuário criado com sucesso! Um e-mail de confirmação foi enviado."); // <-- TROCA 1
       }
       onSave();
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Erro ao salvar usuário.");
+      toast.error(err.response?.data?.message || err.message || "Erro ao salvar usuário.");
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import styles from "./Tutores.module.css";
 import TutorModal from "./TutorModal";
 import AnimalModal from "../Animais/AnimalModal";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 // --- NOVAS IMPORTAÇÕES ---
 import { FaPlus, FaSearch, FaQuestionCircle } from "react-icons/fa";
 import HelpModal from "../Help/HelpModal";
@@ -39,7 +40,7 @@ function Tutores() {
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+      toast.error(err.message || "Não foi possível carregar o tópico de ajuda.");
     } finally {
       setHelpLoading(false);
     }
@@ -90,7 +91,7 @@ function Tutores() {
   const handleSaveAnimal = () => {
     setIsAnimalModalOpen(false);
     setTutorParaNovoAnimal(null);
-    alert("Animal cadastrado com sucesso!");
+    
   };
 
   const formatCPF = (value) => {

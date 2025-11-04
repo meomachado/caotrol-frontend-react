@@ -5,6 +5,9 @@ import styles from "./AnimalDetailPage.module.css";
 import ResultadoExameModal from "./ResultadoExameModal";
 import VacinaModal from "../Vacinas/VacinaModal";
 import AnimalModal from "./AnimalModal";
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';      // <-- 1. IMPORTE O SWEETALERT
+import withReactContent from 'sweetalert2-react-content';
 
 // --- ÍCONES (COM ADIÇÃO DO HELP) ---
 import {
@@ -33,6 +36,7 @@ import {
 import HelpModal from "../Help/HelpModal";
 import helpButtonStyles from "../Help/HelpButton.module.css";
 // -------------------------
+const MySwal = withReactContent(Swal);
 
 
 function AnimalDetailPage() {
@@ -106,7 +110,7 @@ function AnimalDetailPage() {
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+      toast.error(err.message || "Não foi possível carregar o tópico de ajuda.");
     } finally {
       setHelpLoading(false);
     }
@@ -114,21 +118,30 @@ function AnimalDetailPage() {
   // ----------------------------
 
   const handleDelete = async () => {
-    if (
-      window.confirm(
-        "Tem certeza que deseja excluir este animal? Esta ação não pode ser desfeita."
-      )
-    ) {
-      try {
-        await api.delete(`/animais/${id}`);
-        alert("Animal excluído com sucesso!");
-        navigate("/animais");
-      } catch (err) {
-        setError(err.message || "Ocorreu um erro ao excluir o animal.");
-      }
-    }
-  };
-
+      MySwal.fire({
+       title: 'Tem certeza?',
+       text: "Deseja mesmo excluir este animal? Esta ação não pode ser desfeita.",
+       icon: 'warning',
+       showCancelButton: true,
+       confirmButtonColor: '#d33', // Vermelho para o botão de "sim"
+       cancelButtonColor: '#6c757d', // Cinza para o "cancelar"
+       confirmButtonText: 'Sim, excluir!',
+       cancelButtonText: 'Cancelar'
+      }).then(async (result) => {
+       
+       // Se o usuário clicou no botão "Sim, excluir!"
+       if (result.isConfirmed) {
+        try {
+         await api.delete(`/animais/${id}`);
+         toast.success("Animal excluído com sucesso!");
+         navigate("/animais");
+        } catch (err) {
+         // TROCADO: setError por toast.error, como fizemos nos outros
+         toast.error(err.message || "Ocorreu um erro ao excluir o animal.");
+        }
+       }
+      });
+     };
   const handleOpenExameModal = (exame) => {
     setSelectedExame(exame);
     setIsExameModalOpen(true);

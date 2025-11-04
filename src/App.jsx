@@ -1,4 +1,5 @@
 import React from "react";
+import { Toaster } from "react-hot-toast";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,22 +14,49 @@ import Tutores from "./pages/Tutores/Tutores";
 import Animais from "./pages/Animais/Animais";
 import Agenda from "./pages/Agenda/Agenda";
 import Consulta from "./pages/Consulta/Consultas";
-import AnimalDetailPage from './pages/Animais/AnimalDetailPage'; 
-import Usuarios from './pages/Usuarios/Usuarios';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword'; 
-import VerifyEmail from './pages/VerifyEmail';
-import TutorDetailPage from './pages/Tutores/TutorDetailPage'; 
+import AnimalDetailPage from "./pages/Animais/AnimalDetailPage";
+import Usuarios from "./pages/Usuarios/Usuarios";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import TutorDetailPage from "./pages/Tutores/TutorDetailPage";
 
 // Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("jwt_token"); 
+  const isAuthenticated = localStorage.getItem("jwt_token");
   return isAuthenticated ? children : <Navigate to="/login" replace />;
-}; 
+};
 
 function App() {
   return (
     <Router>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000, // Duração padrão
+
+          // Estilos padrão para TODOS os toasts
+          style: {
+            padding: "12px",
+          },
+
+          // ---- ESTILOS ESPECÍFICOS PARA ERRO ----
+          error: {
+            duration: 4000, // Erros ficam mais tempo
+            style: {
+              border: "2px solid #dc3545",
+              padding: "16px",
+              color: "#721c24", // Um vermelho mais escuro pro texto
+              background: "#f8d7da", // Um fundo vermelho-rosado
+              fontWeight: "500",
+            },
+            iconTheme: {
+              primary: "#dc3545",
+              secondary: "#FFF",
+            },
+          },
+        }}
+      />
       <Routes>
         {/* --- ROTAS PÚBLICAS --- */}
         <Route path="/login" element={<Login />} />
@@ -38,12 +66,12 @@ function App() {
 
         {/* Rota raiz padrão */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
+
         {/* --- ROTAS PROTEGIDAS --- */}
         <Route
-          path="/" 
-          element={ 
-            <PrivateRoute> 
+          path="/"
+          element={
+            <PrivateRoute>
               <MainLayout />
             </PrivateRoute>
           }

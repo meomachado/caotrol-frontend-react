@@ -5,12 +5,16 @@ import styles from './TutorDetailPage.module.css';
 import EspecieIcon from '../Animais/EspecieIcon';
 import AnimalModal from '../Animais/AnimalModal';
 import TutorModal from './TutorModal';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';      // <-- 1. IMPORTE O SWEETALERT
+import withReactContent from 'sweetalert2-react-content';
 
 // --- NOVAS IMPORTAÇÕES ---
 import { FaPlus, FaPencilAlt, FaTrashAlt, FaArrowLeft, FaQuestionCircle } from 'react-icons/fa';
 import HelpModal from "../Help/HelpModal";
 import helpButtonStyles from "../Help/HelpButton.module.css";
 // -------------------------
+const MySwal = withReactContent(Swal);
 
 function TutorDetailPage() {
   const { id } = useParams();
@@ -64,7 +68,7 @@ function TutorDetailPage() {
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      setError(err.message || "Não foi possível carregar o tópico de ajuda.");
+      toast.error(err.message || "Não foi possível carregar o tópico de ajuda.");
     } finally {
       setHelpLoading(false);
     }
@@ -72,17 +76,34 @@ function TutorDetailPage() {
   // ----------------------------
 
   const handleDelete = async () => {
-    if (window.confirm("Tem certeza que deseja excluir este tutor e todos os seus animais? Esta ação não pode ser desfeita.")) {
-      try {
-        await api.deleteTutor(id);
-        alert('Tutor excluído com sucesso.');
-        navigate('/tutores');
-      } catch (err) {
-        setError(err.message || 'Erro ao excluir o tutor.');
-      }
-    }
-  };
-  
+    MySwal.fire({
+         title: 'Tem certeza?',
+         text: "Esta ação não pode ser desfeita!",
+         icon: 'warning', // <-- ícone de aviso
+         showCancelButton: true,
+         confirmButtonColor: '#3085d6',
+         cancelButtonColor: '#d33',
+         confirmButtonText: 'Sim, excluir!',
+         cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+         
+         // Se o usuário clicou em "Sim, excluir!"
+         if (result.isConfirmed) {
+          try {
+           await api.deleteTutor(id);
+           
+           // Aqui usamos o toast.success que já configuramos!
+           toast.success('Tutor excluído com sucesso.');
+           navigate('/tutores');
+      
+          } catch (err) {
+           // E aqui o toast.error!
+           toast.error(err.message || 'Erro ao excluir o tutor.');
+          }
+         }
+        });
+       };
+
   const handleSaveAnimal = () => {
     setIsAnimalModalOpen(false);
     fetchData();

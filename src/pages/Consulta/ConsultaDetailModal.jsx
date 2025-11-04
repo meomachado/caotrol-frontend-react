@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./NovaConsultaModal.module.css"; // Reutilizando o mesmo estilo
 import api from "../../services/api";
+import toast from 'react-hot-toast';
 import {
   FaPaw, FaVenusMars, FaBirthdayCake, FaTag, FaBookMedical, FaStethoscope,
   FaTimes, FaFilePrescription, FaVial
@@ -42,7 +43,7 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
       window.open(fileURL, "_blank");
     } catch (error) {
       console.error(`Erro ao imprimir ${tipo}:`, error);
-      alert(`Não foi possível gerar o PDF de ${tipo}.`);
+      toast.error(`Não foi possível gerar o PDF de ${tipo}.`);
     }
   };
 
