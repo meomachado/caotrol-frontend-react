@@ -225,3 +225,35 @@
   font-weight: 500;
   color: #34495e;
 }
+
+/* ... (Mantenha o CSS anterior até chegar em actionButtons) */
+
+/* REMOVA ou COMENTE a classe .actionButtons antiga se não for usar mais */
+
+/* NOVO BOTÃO DE DETALHES NA TABELA */
+.btnDetails {
+  background-color: #eaf4fc; /* Fundo azul bem clarinho */
+  color: #2980b9; /* Texto azul */
+  border: 1px solid #aed6f1;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btnDetails:hover {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(52, 152, 219, 0.2);
+}
+
+.btnDetails:active {
+  transform: translateY(0);
+}

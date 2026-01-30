@@ -228,37 +228,40 @@ function Consultas() {
 
         {/* --- TABELA DE CONSULTAS --- */}
         <div className={styles.tableContainer}>
-          <table className={styles.consultasTable}>
-            <thead>
-              <tr>
-                <th>Data / Hora</th>
-                <th>Animal</th>
-                <th>Tutor</th>
-                <th>Veterinário</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
+        <table className={styles.consultasTable}>
+  <thead>
+    <tr>
+      <th>Data / Hora</th>
+      <th>Animal</th>
+      <th>Tutor</th>
+      <th>Veterinário</th>
+      <th style={{ textAlign: "center" }}>Ações</th> {/* Centralizei o cabeçalho */}
+    </tr>
+  </thead>
+  <tbody>
               {loading && (<tr><td colSpan="5" className={styles.loadingState}>Carregando...</td></tr>)}
               {error && (<tr><td colSpan="5" className={styles.errorState}>{error}</td></tr>)}
               {!loading && !error && consultas.length === 0 && (<tr><td colSpan="5" className={styles.noData}>Nenhuma consulta encontrada.</td></tr>)}
-              {!loading && !error && consultas.map((c) => (
-                <tr key={c.id_consulta}>
-                  <td>{formatDate(c.data)}</td>
-                  <td>{c.animal?.nome || "N/A"}</td>
-                  <td>{c.animal?.tutor?.nome || "N/A"}</td>
-                  <td>{c.veterinario?.nome || "N/A"}</td>
-                  <td>
-                    <div className={styles.actionButtons}>
-                      <button onClick={() => handleOpenDetailModal(c.id_consulta)} title="Visualizar consulta">
-                        <FaEye />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+             {!loading && !error && consultas.map((c) => (
+      <tr key={c.id_consulta}>
+        <td>{formatDate(c.data)}</td>
+        <td>{c.animal?.nome || "N/A"}</td>
+        <td>{c.animal?.tutor?.nome || "N/A"}</td>
+        <td>{c.veterinario?.nome || "N/A"}</td>
+        <td style={{ textAlign: "center" }}>
+          {/* BOTÃO MUDADO AQUI: De ícone para Botão Explícito */}
+          <button 
+            className={styles.btnDetails} 
+            onClick={() => handleOpenDetailModal(c.id_consulta)} 
+            title="Ver detalhes completos"
+          >
+            <FaEye /> Ver Detalhes
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         </div>
 
         {/* --- CONTROLES DE PAGINAÇÃO --- */}

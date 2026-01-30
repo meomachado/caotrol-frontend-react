@@ -4,7 +4,11 @@ import styles from "./NovaConsultaModal.module.css";
 import VacinaModal from "../Vacinas/VacinaModal";
 import PdfGeneratorModal from "../Documentos/PdfGeneratorModal";
 import HistoryModal from "./HistoryModal";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 // --- NOVAS IMPORTAÇÕES ---
 import HelpModal from "../Help/HelpModal";
@@ -27,7 +31,7 @@ import {
   FaSyringe,
   FaNotesMedical,
   FaPlus,
-  FaQuestionCircle // <-- ÍCONE ADICIONADO
+  FaQuestionCircle, // <-- ÍCONE ADICIONADO
 } from "react-icons/fa";
 
 // --- COMPONENTE INTERNO MOVido PARA FORA ---
@@ -104,6 +108,34 @@ function NovaConsultaModal({
 
   const [validationErrors, setValidationErrors] = useState({});
 
+  // --- FUNÇÃO DE CANCELAMENTO SEGURO ---
+  const handleCancel = () => {
+    // Verifica se tem algo preenchido nos campos de Prescrição ou Exame
+    const hasUnsavedData =
+      (formData.prescricao && formData.prescricao.trim() !== "") ||
+      (formData.exame && formData.exame.trim() !== "");
+
+    if (hasUnsavedData) {
+      MySwal.fire({
+        title: "Tem certeza?",
+        text: "Você adicionou Prescrições ou Exames a esta consulta. Se cancelar agora, esses dados serão perdidos.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Sim, descartar tudo",
+        cancelButtonText: "Não, voltar",
+        reverseButtons: true, // Inverte a ordem para deixar o "Voltar" na direita (opcional)
+      }).then((result) => {
+        if (result.isConfirmed) {
+          onClose(); // Fecha o modal e perde os dados (comportamento padrão)
+        }
+      });
+    } else {
+      // Se não tiver nada pendente, fecha direto
+      onClose();
+    }
+  };
   // --- NOVOS ESTADOS DE AJUDA ---
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [helpContent, setHelpContent] = useState(null);
@@ -115,12 +147,14 @@ function NovaConsultaModal({
     setHelpLoading(true);
     try {
       // Usando a "pageKey" 'consulta-nova'
-      const data = await api.getHelpContent('consulta-nova'); 
+      const data = await api.getHelpContent("consulta-nova");
       setHelpContent(data);
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      toast.error(err.message || "Não foi possível carregar o tópico de ajuda."); // <-- TROCA
+      toast.error(
+        err.message || "Não foi possível carregar o tópico de ajuda.",
+      ); // <-- TROCA
     } finally {
       setHelpLoading(false);
     }
@@ -130,74 +164,73 @@ function NovaConsultaModal({
   // Adicione esta linha junto com os outros useStates
   const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
 
-
   const handleAddDose = (vacina) => {
     setInitialVacinaData({ nome: vacina.nome });
     setHistoryModalState({ isOpen: false, type: null });
     setIsVacinaModalOpen(true);
   };
- 
+
   const validateForm = () => {
-   const errors = {};
-   const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
+    const errors = {};
+    const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
 
-   const validateNumber = (value, name, min, max, allowDecimal = true) => {
-     if (value === "") return;
-     const numValue = allowDecimal ? parseFloat(value) : parseInt(value, 10);
+    const validateNumber = (value, name, min, max, allowDecimal = true) => {
+      if (value === "") return;
+      const numValue = allowDecimal ? parseFloat(value) : parseInt(value, 10);
 
-     if (isNaN(numValue)) {
-       errors[name] = "Deve ser um número.";
-       return;
-     }
-     if (numValue < min || numValue > max) {
-       errors[name] = `Valor fora da faixa normal (${min} - ${max}).`;
-     }
-   };
+      if (isNaN(numValue)) {
+        errors[name] = "Deve ser um número.";
+        return;
+      }
+      if (numValue < min || numValue > max) {
+        errors[name] = `Valor fora da faixa normal (${min} - ${max}).`;
+      }
+    };
 
-   validateNumber(peso, "peso", 0.1, 150);
-   validateNumber(temperatura, "temperatura", 35.0, 42.0);
-   validateNumber(tpc, "tpc", 0, 5, false);
-   validateNumber(freqCardiaca, "freqCardiaca", 40, 250, false);
-   validateNumber(freqResp, "freqResp", 5, 80, false);
+    validateNumber(peso, "peso", 0.1, 150);
+    validateNumber(temperatura, "temperatura", 35.0, 42.0);
+    validateNumber(tpc, "tpc", 0, 5, false);
+    validateNumber(freqCardiaca, "freqCardiaca", 40, 250, false);
+    validateNumber(freqResp, "freqResp", 5, 80, false);
 
-   setValidationErrors(errors);
-   return Object.keys(errors).length === 0;
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   useEffect(() => {
-   if (isOpen) {
-     validateForm();
-   }
+    if (isOpen) {
+      validateForm();
+    }
   }, [formData, isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // A validação completa só é necessária quando a modal está aberta
     if (isOpen) {
-        const errors = {};
-        const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
+      const errors = {};
+      const { peso, temperatura, tpc, freqCardiaca, freqResp } = formData;
 
-        // Função auxiliar para validar números
-        const validateNumber = (value, name, min, max, allowDecimal = true) => {
-            if (value === "") return; // Campo pode ser vazio
-            const numValue = allowDecimal ? parseFloat(value) : parseInt(value, 10);
-            
-            if (isNaN(numValue)) {
-                errors[name] = "Deve ser um número.";
-                return;
-            }
-            if (numValue < min || numValue > max) {
-                errors[name] = `Insira um valor entre: ${min} - ${max}.`;
-            }
-        };
+      // Função auxiliar para validar números
+      const validateNumber = (value, name, min, max, allowDecimal = true) => {
+        if (value === "") return; // Campo pode ser vazio
+        const numValue = allowDecimal ? parseFloat(value) : parseInt(value, 10);
 
-        // Validações para cada campo
-        validateNumber(peso, "peso", 0.1, 150);
-        validateNumber(temperatura, "temperatura", 35.0, 42.0);
-        validateNumber(tpc, "tpc", 0, 5, false);
-        validateNumber(freqCardiaca, "freqCardiaca", 40, 250, false);
-        validateNumber(freqResp, "freqResp", 5, 80, false);
+        if (isNaN(numValue)) {
+          errors[name] = "Deve ser um número.";
+          return;
+        }
+        if (numValue < min || numValue > max) {
+          errors[name] = `Insira um valor entre: ${min} - ${max}.`;
+        }
+      };
 
-        setValidationErrors(errors);
+      // Validações para cada campo
+      validateNumber(peso, "peso", 0.1, 150);
+      validateNumber(temperatura, "temperatura", 35.0, 42.0);
+      validateNumber(tpc, "tpc", 0, 5, false);
+      validateNumber(freqCardiaca, "freqCardiaca", 40, 250, false);
+      validateNumber(freqResp, "freqResp", 5, 80, false);
+
+      setValidationErrors(errors);
     }
   }, [formData, isOpen]);
 
@@ -321,7 +354,7 @@ function NovaConsultaModal({
       if (agendamentoId) {
         await api.createConsultaFromAgendamento(
           agendamentoId,
-          dadosConsultaParaApi
+          dadosConsultaParaApi,
         );
       } else {
         const payload = {
@@ -337,7 +370,9 @@ function NovaConsultaModal({
       toast.success("Consulta salva com sucesso!");
       onSave();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Ocorreu um erro ao salvar a consulta.");
+      toast.error(
+        err.response?.data?.message || "Ocorreu um erro ao salvar a consulta.",
+      );
       console.error("Erro ao salvar consulta:", err);
     } finally {
       setIsSaving(false);
@@ -346,21 +381,20 @@ function NovaConsultaModal({
 
   const handleVacinaSave = () => {
     setIsVacinaModalOpen(false); // Fecha o modal de vacina
-    
+
     // Força o HistoryModal a recarregar, incrementando o gatilho
-    setHistoryRefreshTrigger(prev => prev + 1);
-    
-    
+    setHistoryRefreshTrigger((prev) => prev + 1);
+
     toast.success("Vacina registrada com sucesso!");
-    
+
     // Reabre o histórico de vacinas para o usuário ver a atualização
-    setHistoryModalState({ isOpen: true, type: 'vacinas' });
+    setHistoryModalState({ isOpen: true, type: "vacinas" });
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "—";
     return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
-      new Date(dateString)
+      new Date(dateString),
     );
   };
 
@@ -442,7 +476,7 @@ function NovaConsultaModal({
   return (
     <>
       {/* MODAL DE AJUDA */}
-      <HelpModal 
+      <HelpModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
         content={helpContent}
@@ -486,13 +520,14 @@ function NovaConsultaModal({
         <div className={styles.modalContent}>
           <header className={styles.header}>
             <div className={styles.headerTopRow}>
-              
               {/* TÍTULO MODIFICADO */}
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
                 <FaStethoscope /> Nova Consulta
                 {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
-                <button 
-                  className={helpButtonStyles.helpIcon} 
+                <button
+                  className={helpButtonStyles.helpIcon}
                   onClick={handleOpenHelp}
                   disabled={helpLoading}
                   title="Ajuda sobre este formulário"
@@ -500,8 +535,7 @@ function NovaConsultaModal({
                   <FaQuestionCircle />
                 </button>
               </h2>
-              
-              <button className={styles.closeButton} onClick={onClose}>
+<button className={styles.closeButton} onClick={handleCancel}>
                 <FaTimes />
               </button>
             </div>
@@ -621,7 +655,9 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                         {validationErrors.peso && (
-                          <p className={styles.errorInput}>{validationErrors.peso}</p>
+                          <p className={styles.errorInput}>
+                            {validationErrors.peso}
+                          </p>
                         )}
                       </div>
                       <div className={styles.formGroup}>
@@ -633,7 +669,9 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                         {validationErrors.temperatura && (
-                          <p className={styles.errorInput}>{validationErrors.temperatura}</p>
+                          <p className={styles.errorInput}>
+                            {validationErrors.temperatura}
+                          </p>
                         )}
                       </div>
                       <div className={styles.formGroup}>
@@ -644,8 +682,10 @@ function NovaConsultaModal({
                           value={formData.tpc}
                           onChange={handleChange}
                         />
-                         {validationErrors.tpc && (
-                          <p className={styles.errorInput}>{validationErrors.tpc}</p>
+                        {validationErrors.tpc && (
+                          <p className={styles.errorInput}>
+                            {validationErrors.tpc}
+                          </p>
                         )}
                       </div>
                       <div className={styles.formGroup}>
@@ -665,8 +705,10 @@ function NovaConsultaModal({
                           value={formData.freqCardiaca}
                           onChange={handleChange}
                         />
-                         {validationErrors.freqCardiaca && (
-                          <p className={styles.errorInput}>{validationErrors.freqCardiaca}</p>
+                        {validationErrors.freqCardiaca && (
+                          <p className={styles.errorInput}>
+                            {validationErrors.freqCardiaca}
+                          </p>
                         )}
                       </div>
                       <div className={styles.formGroup}>
@@ -678,7 +720,9 @@ function NovaConsultaModal({
                           onChange={handleChange}
                         />
                         {validationErrors.freqResp && (
-                          <p className={styles.errorInput}>{validationErrors.freqResp}</p>
+                          <p className={styles.errorInput}>
+                            {validationErrors.freqResp}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -744,7 +788,7 @@ function NovaConsultaModal({
                 <div className={styles.footerControls}>
                   <button
                     className={styles.actionButtonNeutral}
-                    onClick={onClose}
+                    onClick={handleCancel} // <--- FICOU ASSIM
                   >
                     Cancelar
                   </button>

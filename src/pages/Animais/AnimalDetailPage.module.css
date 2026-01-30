@@ -28,9 +28,7 @@
   align-items: center;
 }
 
-/* * ESTILOS PADRONIZADOS PARA BOTÕES
- * Baseados na classe .actionButtonPrimary
- */
+/* * ESTILOS PADRONIZADOS PARA BOTÕES */
 .actionButtonPrimary,
 .actionButtonDanger,
 .actionButtonNeutral,
@@ -48,10 +46,9 @@
   gap: 8px;
   transition: all 0.2s ease, transform 0.1s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  white-space: nowrap; /* Impede que o texto quebre a linha */
+  white-space: nowrap;
 }
 
-/* Variação para botões primários (cor verde) */
 .actionButtonPrimary {
   background-color: #27ae60;
   box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
@@ -61,7 +58,6 @@
   transform: translateY(-2px);
 }
 
-/* Variação para botões de perigo (cor vermelha) */
 .actionButtonDanger {
   background-color: #e74c3c;
   box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
@@ -71,7 +67,6 @@
   transform: translateY(-2px);
 }
 
-/* Variação para botões neutros (Voltar) */
 .actionButtonNeutral {
   background-color: #bdc3c7;
   color: #34495e;
@@ -82,11 +77,10 @@
   transform: translateY(-2px);
 }
 
-/* Variação para botões secundários (cor azul) */
 .actionButtonSecondary {
   background-color: #3498db;
   color: white;
-  padding: 8px 16px; /* Ajuste para caber em espaços menores */
+  padding: 8px 16px;
   font-size: 0.9em;
   box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
 }
@@ -244,14 +238,132 @@
   line-height: 1.4;
 }
 
-.resultadoText {
-  margin-top: 8px !important;
-  padding: 8px;
-  font-size: 0.85em;
-  background-color: #eaf6ef;
-  border-radius: 6px;
-  border-left: 4px solid #27ae60;
+/* --- NOVOS ESTILOS PARA A TABELA DE EXAMES --- */
+
+.examGroupCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
 }
+
+.examGroupHeader {
+  background-color: #e9ecef; /* Cinza do cabeçalho */
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+}
+
+.tableContainer {
+  padding: 0;
+  overflow-x: auto;
+}
+
+.examTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.examTable th {
+  background-color: #f8f9fa;
+  text-align: left;
+  padding: 12px 20px;
+  color: #6c757d;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.examTable td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #34495e;
+  vertical-align: top;
+}
+
+.examTable tr:last-child td {
+  border-bottom: none;
+}
+
+.examTable pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 1em;
+  color: #2c3e50;
+}
+
+/* Botões pequenos dentro da tabela */
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btnTableAction {
+  border: 1px solid #ced4da;
+  background-color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  color: #495057;
+}
+
+.btnTableAction:hover {
+  background-color: #f1f3f5;
+  color: #212529;
+}
+
+.btnEditReq {
+  color: #3498db;
+  border-color: #aed6f1;
+}
+.btnEditReq:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.btnResult {
+  color: #27ae60;
+  border-color: #a3e4d7;
+}
+.btnResult:hover {
+  background-color: #27ae60;
+  color: white;
+}
+
+.statusPendente {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.statusConcluido {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+  background-color: #d4edda;
+  color: #155724;
+}
+
+/* --------------------------------------------- */
 
 .noData, .statusMessage {
   padding: 30px 20px;

@@ -1,4 +1,4 @@
-/* GERAL DO MODAL */
+/* GERAL */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -6,418 +6,205 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
+  z-index: 1100;
+  backdrop-filter: blur(4px);
 }
 
 .modalContent {
   background-color: #f4f7fa;
-  border-radius: 16px;
+  border-radius: 12px;
   width: 95%;
-  max-width: 1400px;
-  height: 95vh;
+  max-width: 1200px;
+  height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  animation: scaleIn 0.2s ease-out;
 }
 
-/* --- CABEÇALHO ATUALIZADO COM FICHA RESUMIDA --- */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* HEADER */
 .header {
-  padding: 16px 24px;
-  background-color: #ffffff;
+  padding: 20px 30px;
+  background-color: #fff;
   border-bottom: 1px solid #e0e5eb;
-  flex-shrink: 0;
 }
 
 .headerTopRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .headerTopRow h2 {
   margin: 0;
-  font-size: 1.5rem;
   color: #2c3e50;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .closeButton {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #7f8c8d;
+  color: #95a5a6;
   cursor: pointer;
-  transition: color 0.2s;
 }
+.closeButton:hover { color: #e74c3c; }
 
-.closeButton:hover {
-  color: #e74c3c;
-}
-
+/* INFO ANIMAL NO HEADER */
 .headerAnimalInfo {
+  background-color: #f8faff;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  padding: 15px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  background-color: #f8faff;
-  border-radius: 10px;
-  padding: 12px 16px;
+  gap: 15px;
 }
 
 .animalAvatar {
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: #27ae60;
-  background-color: #eaf4fc;
+  background: #eafaf1;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.animalBrief {
-  flex-grow: 1;
-}
-
-.animalName {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.tutorName {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 0.9rem;
-}
+.animalBrief h3 { margin: 0; font-size: 1.1rem; }
+.tutorName { margin: 0; color: #7f8c8d; font-size: 0.9rem; }
 
 .animalDetails {
   display: flex;
-  gap: 16px;
-  font-size: 0.9rem;
-  color: #34495e;
+  gap: 20px;
+  margin-left: 20px;
+  padding-left: 20px;
+  border-left: 1px solid #ddd;
 }
+.animalDetails span { display: flex; align-items: center; gap: 5px; color: #555; }
 
-.animalDetails span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.prontuarioButton {
-  margin-left: auto;
-  background: none;
-  border: 1px solid #bdc3c7;
-  color: #34495e;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-
-/* --- LAYOUT PRINCIPAL COM GRID --- */
+/* CORPO */
 .mainBody {
   flex: 1;
+  padding: 25px;
   display: grid;
-  grid-template-columns: minmax(320px, 30%) 1fr; 
-  gap: 24px;
-  padding: 24px;
-  overflow: hidden;
-}
-
-.leftColumn {
-  height: 100%;
-  overflow: hidden; 
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* <-- ADICIONE ESTA LINHA */
-  gap: 20px;
-  padding-right: 10px;
-}
-.rightColumn {
-  height: 100%;
+  grid-template-columns: 350px 1fr;
+  gap: 25px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-right: 10px;
 }
 
-/* Estilizando a barra de rolagem */
-.leftColumn::-webkit-scrollbar, .rightColumn::-webkit-scrollbar {
-  width: 8px;
-}
-.leftColumn::-webkit-scrollbar-track, .rightColumn::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-.leftColumn::-webkit-scrollbar-thumb, .rightColumn::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
-}
-.leftColumn::-webkit-scrollbar-thumb:hover, .rightColumn::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
+.cardHeader h3, .cardHeader h4 { margin: 0; color: #34495e; display: flex; align-items: center; gap: 8px; }
+.cardTitle { margin: 0 0 15px 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
 
-/* --- CARDS DE CONTEÚDO --- */
-.anamnesisCard,
-.sectionCard {
-  background-color: #ffffff;
-  border: 1px solid #e0e5eb;
-  border-radius: 12px;
+/* Coluna Esquerda */
+.anamnesisCard, .sectionCard {
+  background: #fff;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  margin-bottom: 20px;
 }
 
-.cardHeader {
+.formGroup { margin-bottom: 15px; }
+.formGroup label { display: block; font-weight: 600; font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px; }
+
+.displayData {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  margin: 0;
+  color: #2c3e50;
+  white-space: pre-wrap;
+}
+
+.formGroupInline {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.cardHeader h3,
-.cardHeader h4,
-.cardTitle {
-  margin: 0;
-  color: #34495e;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.cardTitle {
-  margin-bottom: 16px;
-}
-
-/* --- COLUNA ESQUERDA (ANAMNESE) --- */
-.editToggle {
-  background-color: #ecf0f1;
-  color: #34495e;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s;
-}
-
-.editToggle:hover {
-  background-color: #dde3e4;
-}
-
-.displayData {
-  background-color: #f8f9fa;
-  padding: 12px;
+  background: #f9f9f9;
+  padding: 10px;
   border-radius: 6px;
-  min-height: 45px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  color: #495057;
-  border: 1px solid #dee2e6;
-  font-size: 0.95rem;
+  margin-bottom: 15px;
 }
+.valueBadge { font-weight: bold; color: #2c3e50; }
 
-/* --- COLUNA DIREITA (CONSULTA) --- */
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.formGroup:last-child {
-  margin-bottom: 0;
-}
-
-.formGroup label {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #555;
-}
-
-/* ESTILO PARA TEXTAREA AUTOEXPANSÍVEL */
-.autoResizeTextarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  resize: none;
-  overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box;
-}
-
-.autoResizeTextarea:focus {
-  outline: none;
-  border-color: #27ae60;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
-}
-
-/* CARD DE SINAIS VITAIS COMPACTO */
+/* Grid de Sinais Vitais */
 .vitalsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px 16px;
+  gap: 15px;
 }
-
-.vitalsGrid .formGroup {
-  gap: 3px;
-  margin-bottom: 0;
-}
-
-.vitalsGrid .formGroup label {
-  font-weight: 500;
-  font-size: 0.8rem;
-  color: #6c757d;
-}
-
-.vitalsGrid .formGroup input {
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.vitalsGrid .formGroup input:focus {
-  outline: none;
-  border-color: #27ae60;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
-}
-
-/* MODIFICADO: Renomeado de .formGroupCheck para .formGroupInline */
-.formGroupInline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.vitalsItem {
+  background: #fdfdfd;
+  border: 1px solid #eee;
   padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  border-radius: 6px;
+  text-align: center;
 }
+.vitalsItem label { display: block; font-size: 0.75rem; color: #95a5a6; margin-bottom: 4px; }
+.vitalsItem strong { font-size: 1.1rem; color: #2c3e50; }
 
-.formGroupInline label {
-  margin-bottom: 0;
-  font-weight: 600;
-  color: #555;
-  flex-shrink: 0; /* Impede que o label encolha */
-}
-
-/* ADICIONADO: Estilo para o novo select */
-.selectInput {
-  flex-grow: 12px;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  background-color: #ffffff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.selectInput:focus {
-  outline: none;
-  border-color: #27ae60;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
-}
-
-.selectInput:disabled {
-  background-color: #e9ecef;
-  color: #6c757d;
-  cursor: not-allowed;
-}
-
-/* --- RODAPÉ FIXO --- */
+/* RODAPÉ */
 .footer {
-  padding: 16px 24px;
-  background-color: #ffffff;
+  padding: 20px 30px;
+  background-color: #fff;
   border-top: 1px solid #e0e5eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .footerActions {
   display: flex;
-  gap: 12px;
+  gap: 15px;
 }
 
-.actionButton,
-.prontuarioButton {
-  padding: 10px 20px;
-  background-color: #ecf0f1;
+.btnPrint {
+  background-color: #fff;
+  color: #2c3e50;
   border: 1px solid #bdc3c7;
-  color: #34495e;
-  border-radius: 25px;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
   transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.actionButton:hover {
-  background-color: #dde3e4;
-  border-color: #a5aeb5;
+.btnPrint:hover {
+  background-color: #f0f3f4;
+  border-color: #95a5a6;
+  transform: translateY(-1px);
 }
 
-.footerControls {
-  display: flex;
-  gap: 16px;
-}
-
-.cancelButton,
-.saveButton {
-  padding: 12px 30px;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 25px;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: filter 0.2s;
-}
-
-.cancelButton {
+.btnClose {
   background-color: #95a5a6;
-  color: #fff;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background 0.2s;
 }
 
-.saveButton {
-  background-color: #27ae60;
-  color: #fff;
-}
-
-.cancelButton:hover,
-.saveButton:hover {
-  filter: brightness(0.9);
-}
-
-.saveButton:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-/* No seu arquivo NovaConsultaModal.module.css */
-.errorInput {
-  color: #e53e3e; /* Vermelho forte para destacar */
-  font-size: 0.8rem;
-  margin-top: 5px;
+.btnClose:hover {
+  background-color: #7f8c8d;
 }

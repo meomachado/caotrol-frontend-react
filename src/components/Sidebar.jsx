@@ -4,16 +4,17 @@ import styles from "./Sidebar.module.css";
 import logoImage from "../assets/logo.png";
 
 function Sidebar() {
+  // 1. Recupera o tipo de usuário salvo no login
+  const userType = localStorage.getItem('user_type');
+
   return (
     <div className={styles.sidebarContainer}>
       <div className={styles.sidebarLogo}>
         <a href="/dashboard" target="_self" rel="noopener noreferrer">
-        
-        <img src={logoImage} alt="Lauro Vet Logo"
-        />
+          <img src={logoImage} alt="Lauro Vet Logo" />
         </a>
-        
       </div>
+      
       <nav className={styles.sidebarNav}>
         <ul>
           <li>
@@ -41,11 +42,16 @@ function Sidebar() {
               <i className="fas fa-notes-medical"></i> Consultas
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/usuarios">
-              <i className="fas fa-users-cog"></i> Usuários
-            </NavLink>
-          </li>
+
+          {/* 2. CONDIÇÃO: Apenas 'admin' vê o menu de Usuários */}
+          {userType === 'admin' && (
+            <li>
+              <NavLink to="/usuarios">
+                <i className="fas fa-users-cog"></i> Usuários
+              </NavLink>
+            </li>
+          )}
+          
         </ul>
       </nav>
     </div>

@@ -1,136 +1,312 @@
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1050; /* Maior que o z-index do modal principal */
-  }
-  
-  .modal {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-  
-  .closeButton {
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    cursor: pointer;
-    color: #888;
-  }
-  
-  .content {
-    overflow-y: auto;
-    flex-grow: 1;
-    padding-right: 10px;
-  }
-  
-  .historyItem {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 0.8rem;
-    border: 1px solid #e9ecef;
-  }
-  
-  .historyItem p {
-    margin: 0 0 0.5rem 0;
-  }
-  
-  .historyItem span {
-    font-size: 0.8rem;
-    color: #6c757d;
-  }
-  
-  .footer {
-    border-top: 1px solid #eee;
-    padding-top: 1rem;
-    margin-top: 1rem;
-    text-align: right;
-  }
-  
-  .addButton {
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  
-  .addButton:hover {
-    background-color: #27ae60;
-  }
-  
-  .error {
-    color: #dc3545;
-  }
+/* HistoryModal.module.css */
 
-  /* ... (CSS existente) */
+/* --- ESTRUTURA PRINCIPAL DO MODAL --- */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Z-INDEX ALTO: Garante que fique SOBRE o modal de Nova Consulta (que costuma ser 1050) */
+  z-index: 2000; 
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  background: white;
+  padding: 0; /* Padding removido do container para o header/footer encostarem na borda */
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh; /* Altura máxima para caber na tela */
+  display: flex;
+  flex-direction: column; /* Organiza Header, Content, Footer em coluna */
+  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+  animation: fadeInScale 0.2s ease-out;
+  overflow: hidden; /* Impede que o conteúdo vaze das bordas arredondadas */
+}
+
+/* --- CABEÇALHO --- */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #eee;
+  background-color: #f8f9fa;
+  flex-shrink: 0; /* Impede o header de encolher */
+}
+
+.header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #95a5a6;
+  transition: color 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: #e74c3c;
+}
+
+/* --- ÁREA DE CONTEÚDO (SCROLL) --- */
+
+.content {
+  padding: 20px 25px;
+  overflow-y: auto; /* Apenas esta área terá scroll */
+  flex-grow: 1; 
+  background-color: #fff;
+}
+
+/* --- ESTILOS DO ACCORDION (PRESCRIÇÕES) --- */
+
+.accordionItem {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background-color: #fff;
+  transition: all 0.2s;
+}
+
+.accordionItem:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-color: #bdc3c7;
+}
+
+.accordionHeader {
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px; /* Arredondado quando fechado */
+  transition: background-color 0.2s;
+}
+
+.accordionHeader:hover {
+  background-color: #f8f9fa;
+}
+
+/* Quando aberto, remove arredondamento inferior e muda cor */
+.accordionHeaderActive {
+  background-color: #f0f7fd;
+  border-bottom: 1px solid #e1e8ed;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateBadge {
+  font-weight: 700;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.vetName {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  display: flex;
+  align-items: center;
+}
+
+.chevronIcon {
+  color: #bdc3c7;
+  transition: transform 0.3s ease;
+}
+
+.chevronRotate {
+  transform: rotate(180deg);
+  color: #3498db;
+}
+
+.accordionBody {
+  padding: 20px;
+  background-color: #fff;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Lista interna do Accordion */
+.prescriptionList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prescriptionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+  color: #34495e;
+  line-height: 1.4;
+  font-size: 0.95rem;
+}
+
+.prescriptionItem:last-child {
+  border-bottom: none;
+}
+
+.bullet {
+  color: #3498db;
+  font-size: 0.6rem;
+  margin-top: 6px; /* Alinha bolinha com texto */
+  flex-shrink: 0;
+}
+
+/* --- ESTILOS DE VACINAS E EXAMES (ITEMS PADRÃO) --- */
 
 .historyItem {
-    /* ... (estilo existente) ... */
-    display: flex; /* Adicione para alinhar o botão */
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .itemInfo {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .addDoseButton {
-    background-color: #e9ecef;
-    color: #495057;
-    border: 1px solid #ced4da;
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  
-  .addDoseButton:hover {
-    background-color: #dee2e6;
-  }
+  background: white;
+  border: 1px solid #eee;
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  display: flex; /* Flex para alinhar info e botão */
+  justify-content: space-between;
+  align-items: center;
+  /* Borda esquerda grossa para identidade visual */
+  border-left-width: 4px;
+  border-left-style: solid; 
+  /* A cor da borda é definida inline no JSX dependendo do tipo */
+}
 
-  /* ... */
 .itemInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 4px; /* Adiciona um pequeno espaço entre os textos */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doseInfo {
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #27ae60;
+  background-color: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+/* Botão "Adicionar Dose" pequeno dentro do item */
+.addDoseButton {
+  background-color: #eef2f7;
+  color: #3498db;
+  border: 1px solid #d6e4ff;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.addDoseButton:hover {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+/* --- RODAPÉ (FOOTER) --- */
+
+.footer {
+  padding: 20px 25px;
+  border-top: 1px solid #eee;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* Botão Principal Verde (Gerar Nova...) */
+.addButton {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+}
+
+.addButton:hover {
+  background-color: #219150;
+  transform: translateY(-1px);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+/* --- UTILITÁRIOS --- */
+
+.error {
+  color: #e74c3c;
+  background-color: #fdeaea;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #fadbd8;
+}
+
+@keyframes fadeInScale {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95); 
   }
-  
-  .doseInfo {
-    font-style: italic;
-    font-size: 0.85rem;
-    color: #27ae60; /* Cor de destaque */
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
   }
-  
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 0; 
+    transform: translateY(-5px); 
+    max-height: 0;
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+    max-height: 500px; /* Valor arbitrário seguro para animação CSS pura */
+  }
+}

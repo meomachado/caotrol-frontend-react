@@ -4,6 +4,8 @@ import styles from "./AgendamentoModal.module.css";
 import { FaQuestionCircle } from "react-icons/fa";
 import HelpModal from "../Help/HelpModal";
 import helpButtonStyles from "../Help/HelpButton.module.css"; 
+import toast from 'react-hot-toast'; // Importante para avisar se o horário estiver ocupado
+
 function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   // Estados para listas de dados
   const [animais, setAnimais] = useState([]);
@@ -18,6 +20,9 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   const [horario, setHorario] = useState("");
   const [error, setError] = useState("");
 
+  // NOVO: Armazena o horário que veio do clique no calendário
+  const [horarioPreSelecionado, setHorarioPreSelecionado] = useState(null);
+
   // Estados para a busca de Tutor
   const [tutorSearchTerm, setTutorSearchTerm] = useState("");
   const [searchedTutores, setSearchedTutores] = useState([]);
@@ -25,31 +30,26 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [helpContent, setHelpContent] = useState(null);
   const [helpLoading, setHelpLoading] = useState(false);
-  // ------------------------------------
-
-  // ... (seus 'useEffect' e 'handleSubmit') ...
 
   // --- FUNÇÃO PARA ABRIR A AJUDA ---
   const handleOpenHelp = async () => {
     setHelpLoading(true);
     try {
-      // Usando a "pageKey" correta
       const data = await api.getHelpContent('agendamento-novo'); 
       setHelpContent(data);
       setIsHelpModalOpen(true);
     } catch (err) {
       console.error("Erro ao buscar ajuda:", err);
-      // Podemos usar o 'setError' do próprio modal
       setError("Não foi possível carregar o tópico de ajuda.");
     } finally {
       setHelpLoading(false);
     }
   };
   
-  // Efeito para buscar veterinários e resetar o estado do modal
+  // Efeito para resetar e configurar dados iniciais
   useEffect(() => {
     if (isOpen) {
-      // Limpa estados antigos ao abrir
+      // 1. Limpa estados antigos
       setIdTutor("");
       setIdAnimal("");
       setIdVeterinario("");
@@ -59,9 +59,37 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
       setSearchedTutores([]);
       setAnimais([]);
       setHorarios([]);
+      setHorarioPreSelecionado(null);
       
-      // Define a data e busca a lista de veterinários
-      setDia(selectedDate ? selectedDate.split('T')[0] : new Date().toISOString().split('T')[0]);
+      // 2. Lógica para extrair Data e Hora do clique no calendário
+      if (selectedDate) {
+        // Se tem 'T' (ex: 2026-01-30T14:00:00), é clique na visão semanal (hora específica)
+        if (selectedDate.includes('T')) {
+            const [datePart, timePart] = selectedDate.split('T');
+            setDia(datePart);
+            
+            // Pega as primeiras 5 letras (HH:mm)
+            const horaCapturada = timePart.substring(0, 5);
+            setHorarioPreSelecionado(horaCapturada);
+
+            // TRUQUE VISUAL: Já preenchemos a lista e o valor para o usuário ver "11:00"
+            // mesmo antes de escolher o veterinário.
+            setHorarios([horaCapturada]); 
+            setHorario(horaCapturada); 
+
+        } else {
+            // Visão mensal (só data), reseta hora
+            setDia(selectedDate);
+            setHorario("");
+            setHorarios([]);
+        }
+      } else {
+        // Botão "Novo Agendamento" (sem data)
+        setDia(new Date().toISOString().split('T')[0]);
+        setHorarios([]);
+      }
+
+      // 3. Busca lista de veterinários
       api.get("/veterinarios?limit=1000").then((res) => setVeterinarios(Array.isArray(res.data) ? res.data : []));
     }
   }, [isOpen, selectedDate]);
@@ -75,17 +103,43 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
     }
   }, [idTutor]);
   
-  // Busca horários quando um veterinário e um dia são selecionados
+  // Busca horários REAIS quando Veterinário e Dia mudam
   useEffect(() => {
     if (idVeterinario && dia) {
       api.get(`/agendamentos/horarios-disponiveis?id_veterinario=${idVeterinario}&dia=${dia}`)
-        .then((res) => setHorarios(Array.isArray(res) ? res : []));
-    } else {
-      setHorarios([]);
-    }
-  }, [idVeterinario, dia]);
+        .then((res) => {
+            const slotsDisponiveis = Array.isArray(res) ? res : [];
+            
+            // Verifica se o horário pré-selecionado (ex: 11:00) está realmente livre para este vet
+            if (horarioPreSelecionado) {
+                // Normaliza para garantir comparação (caso a API mande 11:00:00)
+                const horarioExiste = slotsDisponiveis.some(h => h.startsWith(horarioPreSelecionado));
+                
+                if (horarioExiste) {
+                    // Se existe, mantemos ele selecionado e atualizamos a lista completa
+                    setHorarios(slotsDisponiveis);
+                    setHorario(horarioPreSelecionado);
+                } else {
+                    // Se NÃO existe (vet ocupado), limpamos e avisamos
+                    setHorarios(slotsDisponiveis);
+                    setHorario(""); 
+                    toast.error(`O horário ${horarioPreSelecionado} está ocupado para este veterinário.`);
+                }
+            } else {
+                // Se não tinha pré-seleção, apenas carrega a lista
+                setHorarios(slotsDisponiveis);
+            }
+        })
+        .catch(() => {
+            setHorarios([]);
+            setHorario("");
+        });
+    } 
+    // Nota: Se não tiver idVeterinario, não limpamos 'horarios' imediatamente 
+    // para manter o "Truque Visual" (passo 2 do useEffect anterior) ativo até o usuário escolher.
+  }, [idVeterinario, dia, horarioPreSelecionado]);
 
-  // Efeito com debounce para buscar tutores
+  // Busca de tutores (Autocomplete)
   useEffect(() => {
     if (tutorSearchTerm.length < 2) {
       setSearchedTutores([]);
@@ -120,6 +174,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
       };
       await api.createAgendamento(agendamentoData);
       onSave();
+      toast.success("Agendamento criado com sucesso!");
     } catch (err) {
       setError(err.message || "Erro ao criar agendamento.");
     }
@@ -128,8 +183,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
   if (!isOpen) return null;
 
   return (
-    <> {/* Adicionado Fragment */}
-      {/* O Modal de Ajuda fica aqui */}
+    <> 
       <HelpModal 
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
@@ -185,7 +239,7 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
               )}
             </div>
 
-            {/* Campo de seleção para Animal (depende do Tutor) */}
+            {/* Campo de seleção para Animal */}
             <div className={styles.formGroup}>
               <label>Animal</label>
               <select value={idAnimal} onChange={(e) => setIdAnimal(e.target.value)} disabled={!idTutor}>
@@ -219,7 +273,12 @@ function AgendamentoModal({ isOpen, onClose, onSave, selectedDate }) {
                 </div>
                 <div className={styles.formGroup}>
                     <label>Horário</label>
-                    <select value={horario} onChange={(e) => setHorario(e.target.value)} disabled={!idVeterinario || !dia}>
+                    {/* Alterado: Habilitamos o campo se houver horário pré-selecionado para mostrar o valor */}
+                    <select 
+                      value={horario} 
+                      onChange={(e) => setHorario(e.target.value)} 
+                      disabled={(!idVeterinario || !dia) && !horarioPreSelecionado}
+                    >
                         <option value="">Selecione um horário</option>
                         {horarios.map((h) => (<option key={h} value={h}>{h}</option>))}
                     </select>

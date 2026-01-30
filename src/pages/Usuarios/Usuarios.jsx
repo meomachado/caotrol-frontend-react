@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import api from '../../services/api';
 import styles from './Usuarios.module.css';
 import UsuarioModal from './UsuarioModal';
@@ -7,13 +8,19 @@ import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-// --- NOVAS IMPORTAÇÕES ---
 import { FaUserPlus, FaUserMd, FaUsers, FaPencilAlt, FaTrash, FaQuestionCircle } from "react-icons/fa";
 import HelpModal from '../Help/HelpModal';
 import helpButtonStyles from '../Help/HelpButton.module.css';
-// -------------------------
+
 const MySwal = withReactContent(Swal);
+
 function Usuarios() {
+  const navigate = useNavigate();
+  // --- VERIFICAÇÃO DE PERMISSÃO ---
+  const userType = localStorage.getItem('user_type');
+  const isAdmin = userType === 'admin';
+  // -------------------------------
+
   const [usuarios, setUsuarios] = useState([]);
   const [userCurrentPage, setUserCurrentPage] = useState(1);
   const [userTotalPages, setUserTotalPages] = useState(0);
@@ -31,17 +38,26 @@ function Usuarios() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // --- NOVOS ESTADOS DE AJUDA ---
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [helpContent, setHelpContent] = useState(null);
   const [helpLoading, setHelpLoading] = useState(false);
-  // ------------------------------
 
-  // --- NOVA FUNÇÃO DE AJUDA ---
+  // --- BLOQUEIO TOTAL (OPCIONAL) ---
+  // Se você decidir que veterinário NÃO DEVE NEM VER A PÁGINA,
+  // descomente este useEffect:
+  // /*
+  // useEffect(() => {
+  //   if (!isAdmin) {
+  //     toast.error("Acesso não autorizado.");
+  //     navigate("/home"); // ou para onde for a home do vet
+  //   }
+  // }, [isAdmin, navigate]);
+  // */
+  // ---------------------------------
+
   const handleOpenHelp = async () => {
     setHelpLoading(true);
     try {
-      // Usando a "pageKey" 'usuarios-gestao'
       const data = await api.getHelpContent('usuarios-gestao'); 
       setHelpContent(data);
       setIsHelpModalOpen(true);
@@ -52,7 +68,6 @@ function Usuarios() {
       setHelpLoading(false);
     }
   };
-  // ----------------------------
 
   const fetchUsuarios = useCallback(async (page) => {
     setLoading(true);
@@ -87,6 +102,8 @@ function Usuarios() {
   }, []);
 
   useEffect(() => {
+    // Se você optou pelo bloqueio total acima, nem precisa carregar isso aqui.
+    // Mas se for deixar em modo leitura, mantemos o carregamento.
     if (activeTab === 'usuarios') {
       fetchUsuarios(userCurrentPage);
     } else {
@@ -94,7 +111,6 @@ function Usuarios() {
     }
   }, [activeTab, userCurrentPage, vetCurrentPage, fetchUsuarios, fetchVeterinarios]);
 
-  // ... (Suas outras funções: handleEditUser, handleDeleteVet, etc.) ...
   const handleEditUser = (user) => {
     setEditingUser(user);
     setIsUsuarioModalOpen(true);
@@ -195,14 +211,17 @@ function Usuarios() {
               </p>
             </div>
           </div>
-          <div className={styles.actions}>
-            <button onClick={() => handleEditUser(user)} className={styles.iconButton} title="Editar">
-              <FaPencilAlt />
-            </button>
-            <button onClick={() => handleDeleteUser(user.id_usuario, user.login)} className={`${styles.iconButton} ${styles.deleteButton}`} title="Desativar Usuário">
-              <FaTrash />
-            </button>
-          </div>
+          {/* SÓ MOSTRA AÇÕES SE FOR ADMIN */}
+          {isAdmin && (
+            <div className={styles.actions}>
+                <button onClick={() => handleEditUser(user)} className={styles.iconButton} title="Editar">
+                <FaPencilAlt />
+                </button>
+                <button onClick={() => handleDeleteUser(user.id_usuario, user.login)} className={`${styles.iconButton} ${styles.deleteButton}`} title="Desativar Usuário">
+                <FaTrash />
+                </button>
+            </div>
+          )}
         </div>
       ));
     } else {
@@ -218,21 +237,23 @@ function Usuarios() {
               <p>CRMV: {vet.crmv}</p>
             </div>
           </div>
-          <div className={styles.actions}>
-            <button onClick={() => handleEditVet(vet)} className={styles.iconButton} title="Editar">
-              <FaPencilAlt />
-            </button>
-            <button onClick={() => handleDeleteVet(vet.id_veterinario, vet.nome)} className={`${styles.iconButton} ${styles.deleteButton}`} title="Excluir Veterinário">
-              <FaTrash />
-            </button>
-          </div>
+          {/* SÓ MOSTRA AÇÕES SE FOR ADMIN */}
+          {isAdmin && (
+            <div className={styles.actions}>
+                <button onClick={() => handleEditVet(vet)} className={styles.iconButton} title="Editar">
+                <FaPencilAlt />
+                </button>
+                <button onClick={() => handleDeleteVet(vet.id_veterinario, vet.nome)} className={`${styles.iconButton} ${styles.deleteButton}`} title="Excluir Veterinário">
+                <FaTrash />
+                </button>
+            </div>
+          )}
         </div>
       ));
     }
   };
   
   const renderPagination = () => {
-    // ... (Sua função renderPagination existente) ...
     const currentPage = activeTab === 'usuarios' ? userCurrentPage : vetCurrentPage;
     const totalPages = activeTab === 'usuarios' ? userTotalPages : vetTotalPages;
     const setCurrentPage = activeTab === 'usuarios' ? setUserCurrentPage : setVetCurrentPage;
@@ -253,8 +274,7 @@ function Usuarios() {
   };
 
   return (
-    <> {/* Adicionado Fragment */}
-      {/* MODAL DE AJUDA */}
+    <> 
       <HelpModal 
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
@@ -262,27 +282,30 @@ function Usuarios() {
       />
 
       <div className={styles.pageContainer}>
-        <UsuarioModal 
-          isOpen={isUsuarioModalOpen}
-          onClose={handleCloseModals}
-          onSave={handleSave}
-          initialData={editingUser}
-        />
-        <VeterinarioModal
-          isOpen={isVetModalOpen}
-          onClose={handleCloseModals}
-          onSave={handleSave}
-          initialData={editingVet}
-        />
+        {/* MODAIS SÓ SÃO RENDERIZADOS SE FOR ADMIN (Segurança extra) */}
+        {isAdmin && (
+            <>
+                <UsuarioModal 
+                isOpen={isUsuarioModalOpen}
+                onClose={handleCloseModals}
+                onSave={handleSave}
+                initialData={editingUser}
+                />
+                <VeterinarioModal
+                isOpen={isVetModalOpen}
+                onClose={handleCloseModals}
+                onSave={handleSave}
+                initialData={editingVet}
+                />
+            </>
+        )}
 
-        {/* HEADER MODIFICADO */}
         <div className={styles.pageHeader}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div>
               <h1>Gerenciamento de Acessos</h1>
               <p className={styles.pageSubtitle}>Gerencie os usuários e perfis de veterinários do sistema</p>
             </div>
-            {/* BOTÃO DE AJUDA ADICIONADO AQUI */}
             <button 
               className={helpButtonStyles.helpIcon} 
               onClick={handleOpenHelp}
@@ -292,17 +315,20 @@ function Usuarios() {
               <FaQuestionCircle />
             </button>
           </div>
-          <div className={styles.headerActions}>
-            <button className={styles.actionButtonSecondary} onClick={handleNewVet}>
-              <FaUserMd /> Novo Perfil Vet
-            </button>
-            <button className={styles.actionButtonPrimary} onClick={handleNewUser}>
-              <FaUserPlus /> Novo Usuário
-            </button>
-          </div>
+          
+          {/* BOTÕES DE NOVO USUÁRIO SÓ APARECEM SE FOR ADMIN */}
+          {isAdmin && (
+            <div className={styles.headerActions}>
+                <button className={styles.actionButtonSecondary} onClick={handleNewVet}>
+                <FaUserMd /> Novo Perfil Vet
+                </button>
+                <button className={styles.actionButtonPrimary} onClick={handleNewUser}>
+                <FaUserPlus /> Novo Usuário
+                </button>
+            </div>
+          )}
         </div>
 
-        {/* ... (Resto do seu JSX: contentCard, tabs, etc.) ... */}
         <div className={styles.contentCard}>
           <div className={styles.tabs}>
             <button 

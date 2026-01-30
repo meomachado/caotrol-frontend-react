@@ -1,11 +1,19 @@
 import React from "react";
-import styles from "./NovaConsultaModal.module.css"; // Reutilizando o mesmo estilo
+import styles from "./ConsultaDetailModal.module.css";
 import api from "../../services/api";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import {
-  FaPaw, FaVenusMars, FaBirthdayCake, FaTag, FaBookMedical, FaStethoscope,
-  FaTimes, FaFilePrescription, FaVial
-} from 'react-icons/fa'; // Importando ícones
+  FaPaw,
+  FaVenusMars,
+  FaBirthdayCake,
+  FaTag,
+  FaBookMedical,
+  FaStethoscope,
+  FaTimes,
+  FaFilePrescription,
+  FaVial,
+  FaPrint,
+} from "react-icons/fa";
 
 function ConsultaDetailModal({ isOpen, onClose, consulta }) {
   if (!isOpen || !consulta) return null;
@@ -13,7 +21,7 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
   const formatDateOnly = (dateString) => {
     if (!dateString) return "—";
     return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
-      new Date(dateString)
+      new Date(dateString),
     );
   };
 
@@ -53,93 +61,154 @@ function ConsultaDetailModal({ isOpen, onClose, consulta }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        {/* === CABEÇALHO PADRONIZADO === */}
+        {/* === CABEÇALHO === */}
         <header className={styles.header}>
           <div className={styles.headerTopRow}>
-            <h2><FaStethoscope /> Detalhes da Consulta ({formatDateOnly(c.data)})</h2>
-            <button className={styles.closeButton} onClick={onClose}><FaTimes /></button>
+            <h2>
+              <FaStethoscope /> Detalhes da Consulta ({formatDateOnly(c.data)})
+            </h2>
+            <button className={styles.closeButton} onClick={onClose}>
+              <FaTimes />
+            </button>
           </div>
 
           <div className={styles.headerAnimalInfo}>
-            <div className={styles.animalAvatar}><FaPaw /></div>
+            <div className={styles.animalAvatar}>
+              <FaPaw />
+            </div>
             <div className={styles.animalBrief}>
-              <h3 className={styles.animalName}>{c.animal?.nome || "Animal"}</h3>
-              <p className={styles.tutorName}>Tutor: {c.animal?.tutor?.nome || "—"}</p>
+              <h3 className={styles.animalName}>
+                {c.animal?.nome || "Animal"}
+              </h3>
+              <p className={styles.tutorName}>
+                Tutor: {c.animal?.tutor?.nome || "—"}
+              </p>
             </div>
             <div className={styles.animalDetails}>
-              <span><FaTag /> {c.animal?.raca?.especie?.nome || "—"} / {c.animal?.raca?.nome || "—"}</span>
-              <span><FaVenusMars /> {c.animal?.sexo === "F" ? "Fêmea" : "Macho"}</span>
-              <span><FaBirthdayCake /> {calculateAge(c.animal?.data_nasc, c.data)}</span>
+              <span>
+                <FaTag /> {c.animal?.raca?.especie?.nome || "—"} /{" "}
+                {c.animal?.raca?.nome || "—"}
+              </span>
+              <span>
+                <FaVenusMars /> {c.animal?.sexo === "F" ? "Fêmea" : "Macho"}
+              </span>
+              <span>
+                <FaBirthdayCake /> {calculateAge(c.animal?.data_nasc, c.data)}
+              </span>
             </div>
-            <div className={styles.vetInfo} style={{marginLeft: 'auto', color: '#555'}}>
+            <div
+              className={styles.vetInfo}
+              style={{ marginLeft: "auto", color: "#555" }}
+            >
               <strong>Veterinário:</strong> {c.veterinario?.nome || "—"}
             </div>
           </div>
         </header>
 
-        {/* === CORPO PRINCIPAL PADRONIZADO === */}
+        {/* === CORPO PRINCIPAL === */}
         <main className={styles.mainBody}>
-          {/* --- COLUNA ESQUERDA (ANAMNESE) --- */}
           <aside className={styles.leftColumn}>
             <div className={styles.anamnesisCard}>
               <div className={styles.cardHeader}>
-                <h3><FaBookMedical /> Anamnese da Consulta</h3>
+                <h3>
+                  <FaBookMedical /> Anamnese da Consulta
+                </h3>
               </div>
               <div className={styles.formGroupInline}>
-                <label htmlFor="castrado">Castrado?</label>
-                <p className={styles.displayData}>{anamneseDaConsulta?.castrado ? "Sim" : "Não"}</p>
+                <label>Castrado?</label>
+                <span className={styles.valueBadge}>
+                  {anamneseDaConsulta?.castrado ? "Sim" : "Não"}
+                </span>
               </div>
               <div className={styles.formGroup}>
                 <label>Alergias Registradas</label>
-                <p className={styles.displayData}>{anamneseDaConsulta?.alergias || "Nenhuma"}</p>
+                <p className={styles.displayData}>
+                  {anamneseDaConsulta?.alergias || "Nenhuma"}
+                </p>
               </div>
               <div className={styles.formGroup}>
                 <label>Observações</label>
-                <p className={styles.displayData}>{anamneseDaConsulta?.obs || "Nenhuma"}</p>
+                <p className={styles.displayData}>
+                  {anamneseDaConsulta?.obs || "Nenhuma"}
+                </p>
               </div>
             </div>
           </aside>
 
-          {/* --- COLUNA DIREITA (CONSULTA) --- */}
           <section className={styles.rightColumn}>
             <div className={styles.sectionCard}>
               <h4 className={styles.cardTitle}>Sinais Vitais</h4>
               <div className={styles.vitalsGrid}>
-                <div className={styles.formGroup}><label>Peso (Kg)</label><p className={styles.displayData}>{c.peso ?? "—"}</p></div>
-                <div className={styles.formGroup}><label>Temperatura (°C)</label><p className={styles.displayData}>{c.temperatura ?? "—"}</p></div>
-                <div className={styles.formGroup}><label>TPC (seg)</label><p className={styles.displayData}>{c.tpc ?? "—"}</p></div>
-                <div className={styles.formGroup}><label>Mucosas</label><p className={styles.displayData}>{c.mucosas ?? "—"}</p></div>
-                <div className={styles.formGroup}><label>Freq. Cardíaca</label><p className={styles.displayData}>{c.freq ?? "—"}</p></div>
-                <div className={styles.formGroup}><label>Freq. Resp.</label><p className={styles.displayData}>{c.resp ?? "—"}</p></div>
+                <div className={styles.vitalsItem}>
+                  <label>Peso (Kg)</label>
+                  <strong>{c.peso ?? "—"}</strong>
+                </div>
+                <div className={styles.vitalsItem}>
+                  <label>Temp. (°C)</label>
+                  <strong>{c.temperatura ?? "—"}</strong>
+                </div>
+                <div className={styles.vitalsItem}>
+                  <label>TPC (seg)</label>
+                  <strong>{c.tpc ?? "—"}</strong>
+                </div>
+                <div className={styles.vitalsItem}>
+                  <label>Mucosas</label>
+                  <strong>{c.mucosas ?? "—"}</strong>
+                </div>
+                <div className={styles.vitalsItem}>
+                  <label>Freq. Card.</label>
+                  <strong>{c.freq ?? "—"}</strong>
+                </div>
+                <div className={styles.vitalsItem}>
+                  <label>Freq. Resp.</label>
+                  <strong>{c.resp ?? "—"}</strong>
+                </div>
               </div>
             </div>
 
             <div className={styles.sectionCard}>
               <h4 className={styles.cardTitle}>Avaliação Clínica</h4>
-              <div className={styles.formGroup}><label>Queixa Principal</label><p className={styles.displayData}>{c.queixa || "—"}</p></div>
-              <div className={styles.formGroup}><label>Suspeita Clínica</label><p className={styles.displayData}>{c.suspeita || "—"}</p></div>
-              <div className={styles.formGroup}><label>Diagnóstico</label><p className={styles.displayData}>{c.diagnostico || "—"}</p></div>
-              <div className={styles.formGroup}><label>Tratamento</label><p className={styles.displayData}>{c.tratamento || "—"}</p></div>
+              <div className={styles.formGroup}>
+                <label>Queixa Principal</label>
+                <p className={styles.displayData}>{c.queixa || "—"}</p>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Suspeita Clínica</label>
+                <p className={styles.displayData}>{c.suspeita || "—"}</p>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Diagnóstico</label>
+                <p className={styles.displayData}>{c.diagnostico || "—"}</p>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Tratamento</label>
+                <p className={styles.displayData}>{c.tratamento || "—"}</p>
+              </div>
             </div>
           </section>
         </main>
 
-        {/* === RODAPÉ PADRONIZADO === */}
         <footer className={styles.footer}>
           <div className={styles.footerActions}>
             {c.prescricao && c.prescricao.length > 0 && (
-              <button className={styles.actionButton} onClick={() => handleImprimir("prescricao", c.id_consulta)}>
-                <FaFilePrescription /> Imprimir Prescrição
+              <button
+                className={styles.btnPrint}
+                onClick={() => handleImprimir("prescricao", c.id_consulta)}
+              >
+                <FaPrint /> Imprimir Prescrição
               </button>
             )}
             {c.exame && c.exame.length > 0 && (
-              <button className={styles.actionButton} onClick={() => handleImprimir("exame", c.id_consulta)}>
-                <FaVial /> Imprimir Exames
+              <button
+                className={styles.btnPrint}
+                onClick={() => handleImprimir("exame", c.id_consulta)}
+              >
+                <FaPrint /> Imprimir Exames
               </button>
             )}
           </div>
           <div className={styles.footerControls}>
-            <button className={styles.cancelButton} onClick={onClose}>
+            <button className={styles.btnClose} onClick={onClose}>
               Fechar
             </button>
           </div>
